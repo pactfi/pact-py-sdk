@@ -1,0 +1,2 @@
+class PactSdkError(Exception):
+    pass
