@@ -45,16 +45,13 @@ def fetch_app_state(
     algod: AlgodClient,
     app_id: int,
 ) -> AppInternalState:
-    # The method for fetching app info seems to be missing in algosdk. Doing the request manually.
     app_info = algod.application_info(app_id)
     state_dict = parse_global_state(app_info["params"]["global-state"])
     return AppInternalState(**state_dict)
 
 
 def parse_global_state(kv: list) -> dict[str, int]:
-    """
-    Transform algorand key-value schema into python dict with key value pairs
-    """
+    # Transform algorand key-value schema into python dict with key value pairs
     res = {}
     for elem in kv:
         key = str(base64.b64decode(elem["key"]), encoding="ascii")
@@ -221,6 +218,18 @@ class Pool:
 
         return TransactionGroup([txn1, txn2])
 
+    def is_asset_in_the_pool(self, asset: Asset):
+        return asset.index in {self.primary_asset.index, self.secondary_asset.index}
+
+    def parse_internal_state(self, state: AppInternalState) -> PoolState:
+        return PoolState(
+            total_liquidity=state.L,
+            total_primary=state.A,
+            total_secondary=state.B,
+            primary_asset_price=self.calculator.primary_asset_price,
+            secondary_asset_price=self.calculator.secondary_asset_price,
+        )
+
     def _make_deposit_tx(
         self,
         asset: Asset,
@@ -270,16 +279,4 @@ class Pool:
             foreign_assets=foreign_assets,
             app_args=args,
             sp=suggested_params,
-        )
-
-    def is_asset_in_the_pool(self, asset: Asset):
-        return asset.index in {self.primary_asset.index, self.secondary_asset.index}
-
-    def parse_internal_state(self, state: AppInternalState) -> PoolState:
-        return PoolState(
-            total_liquidity=state.L,
-            total_primary=state.A,
-            total_secondary=state.B,
-            primary_asset_price=self.calculator.primary_asset_price,
-            secondary_asset_price=self.calculator.secondary_asset_price,
         )

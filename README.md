@@ -154,7 +154,7 @@ print(swap.effect)
 #     amount_in=146529,
 #     minimum_amount_in=143598,
 #     fee=441,
-#     price=0.73485,
+#     price=Decimal(0.73485),
 #     primary_asset_price_after_swap=Decimal("0.6081680080300244"),
 #     secondary_asset_price_after_swap=Decimal("1.6442824791774173"),
 #     primary_asset_price_change_pct=Decimal("-31.549580645715963"),

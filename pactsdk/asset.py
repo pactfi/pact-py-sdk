@@ -1,3 +1,4 @@
+import copy
 from dataclasses import dataclass
 from typing import Optional
 
@@ -12,7 +13,7 @@ def fetch_asset_by_index(
     index: int,
 ) -> "Asset":
     if index in ASSETS_CACHE:
-        return ASSETS_CACHE[index]
+        return copy.copy(ASSETS_CACHE[index])
 
     if index > 0:
         asset_info = algod.asset_info(index)
