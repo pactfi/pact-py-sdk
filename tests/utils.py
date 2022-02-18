@@ -95,7 +95,9 @@ def deploy_contract(
         "DEPLOYER_MNEMONIC": mnemonic,
     }
 
-    process = subprocess.run(command, cwd="contracts_v1", env=env, capture_output=True)
+    process = subprocess.run(
+        command, cwd="algorand-testbed", env=env, capture_output=True
+    )
     if process.stderr:
         raise RuntimeError(f"Failed to deploy contract: {process.stderr.decode()}")
 
