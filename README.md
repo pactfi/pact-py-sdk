@@ -173,11 +173,10 @@ Look for more [examples](examples).
 
 - `poetry install`
 
-Development requires [Pact contracts V1](https://github.com/pactfi/contracts_v1) to be checked out.
+Development requires [Pact contracts V1](https://github.com/pactfi/algorand-testbed) to be checked out.
 
-- `git clone git@github.com:pactfi/contracts_v1.git`
-- `cd contracts_v1`
-- `git apply ../contracts.patch`
+- `git clone git@github.com:pactfi/algorand-testbed.git`
+- `cd algorand-testbed`
 - `poetry install`
 - `docker compose up -d`
 - `cd ..`
