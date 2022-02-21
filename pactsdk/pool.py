@@ -2,7 +2,7 @@ import base64
 import copy
 from dataclasses import dataclass
 from decimal import Decimal as D
-from typing import Optional
+from typing import Any, Optional
 from urllib.parse import urlencode
 
 import algosdk
@@ -23,6 +23,9 @@ class AppInternalState:
     A: int
     B: int
     LTID: int
+
+    # None to make backward compatible. Old contracts don't have the config.
+    CONFIG: Any = None
 
 
 @dataclass
