@@ -14,7 +14,7 @@ Signing and sending transactions is not covered by the library. The provided exa
 
 # Installation
 
-There's no public PyPI package yet. See [Building](#building) for installing a local build.
+`pip install pactsdk`
 
 # Basic usage
 
