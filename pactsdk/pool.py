@@ -116,7 +116,7 @@ def get_app_id_from_assets(
         secondary_asset__algoid=secondary_asset.index,
     )
     if data["results"]:
-        return data["results"][0]["appid"]
+        return int(data["results"][0]["appid"])
     return 0
 
 
