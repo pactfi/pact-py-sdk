@@ -15,9 +15,9 @@ def test_listing_pools():
     mocked_api_data: dict = {
         "results": [
             {
-                "appid": 2,
-                "primary_asset": 0,
-                "secondary_asset": 1,
+                "appid": "2",
+                "primary_asset": {"algoid": "0"},
+                "secondary_asset": {"algoid": "1"},
             },
         ],
     }
@@ -37,9 +37,13 @@ def test_fetching_pool_from_api(testbed: TestBed):
     mocked_api_data: dict = {
         "results": [
             {
-                "appid": testbed.pool.app_id,
-                "primary_asset": testbed.pool.primary_asset.index,
-                "secondary_asset": testbed.pool.secondary_asset.index,
+                "appid": str(testbed.pool.app_id),
+                "primary_asset": {
+                    "algoid": str(testbed.pool.primary_asset.index),
+                },
+                "secondary_asset": {
+                    "algoid": str(testbed.pool.secondary_asset.index),
+                },
             },
         ],
     }
@@ -65,6 +69,8 @@ def test_fetching_pool_from_api(testbed: TestBed):
     assert pool.liquidity_asset.index == testbed.pool.liquidity_asset.index
     assert pool.liquidity_asset.name == "ALGO/COIN PACT LP Token"
     assert pool.app_id == testbed.pool.app_id
+
+    assert pool.get_escrow_address()
 
 
 @responses.activate
