@@ -72,8 +72,8 @@ def create_asset(
 
 def deploy_contract(
     account: Account,
-    primary_asset: pactsdk.Asset,
-    secondary_asset: pactsdk.Asset,
+    primary_asset_index: int,
+    secondary_asset_index: int,
     fee_bps=30,
 ) -> int:
     mnemonic = algosdk.mnemonic.from_private_key(account.private_key)
@@ -83,8 +83,8 @@ def deploy_contract(
         "run",
         "python",
         "scripts/deploy.py",
-        f"--primary_asset_id={primary_asset.index}",
-        f"--secondary_asset_id={secondary_asset.index}",
+        f"--primary_asset_id={primary_asset_index}",
+        f"--secondary_asset_id={secondary_asset_index}",
         f"--fee_bps={fee_bps}",
     ]
 
@@ -163,22 +163,20 @@ def make_fresh_testbed(fee_bps=30) -> TestBed:
     account = new_account()
     pact = pactsdk.PactClient(algod)
 
-    algo = pact.fetch_asset(0)
-    coinIndex = create_asset(account)
-    coin = pact.fetch_asset(coinIndex)
+    coin_index = create_asset(account)
 
     app_id = deploy_contract(
         account=account,
-        primary_asset=algo,
-        secondary_asset=coin,
+        primary_asset_index=0,
+        secondary_asset_index=coin_index,
         fee_bps=fee_bps,
     )
-    pool = pact.fetch_pool(algo, coin, app_id=app_id, fee_bps=fee_bps)
+    pool = pact.fetch_pool_by_id(app_id=app_id)
 
     return TestBed(
         account=account,
         pact=pact,
-        algo=algo,
-        coin=coin,
+        algo=pool.primary_asset,
+        coin=pool.secondary_asset,
         pool=pool,
     )

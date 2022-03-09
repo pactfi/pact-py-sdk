@@ -17,7 +17,7 @@ opt_in_txn = jamnik.prepare_opt_in_tx(address)
 sent_optin_txid = algod.send_transaction(opt_in_txn.sign(private_key))
 print(f"OptIn transaction {sent_optin_txid}")
 
-pool = pact.fetch_pool(algo, jamnik)
+pool = pact.fetch_pools_by_assets(algo, jamnik)[0]
 
 swap = pool.prepare_swap(
     asset=algo,
