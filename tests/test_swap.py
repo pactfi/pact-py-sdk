@@ -328,13 +328,10 @@ def test_swap_asa_to_asa():
     pact = pactsdk.PactClient(algod)
 
     coin_a_index = create_asset(account, "COIN_A", 3)
-    coin_a = pact.fetch_asset(coin_a_index)
-
     coin_b_index = create_asset(account, "COIN_B", 2)
-    coin_b = pact.fetch_asset(coin_b_index)
 
-    app_id = deploy_contract(account, coin_a, coin_b)
-    pool = pact.fetch_pool(coin_a, coin_b, app_id=app_id)
+    app_id = deploy_contract(account, coin_a_index, coin_b_index)
+    pool = pact.fetch_pool_by_id(app_id=app_id)
 
     add_liqudity(account, pool, 20_000, 20_000)
     pool.update_state()
@@ -351,7 +348,7 @@ def test_swap_asa_to_asa():
 
     swap = pool.prepare_swap(
         amount=1000,
-        asset=coin_a,
+        asset=pool.primary_asset,
         slippage_pct=10,
     )
     _test_swap(swap, 20_000, 20_000, 1000, account)

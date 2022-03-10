@@ -1,8 +1,6 @@
-import base64
 import copy
 from dataclasses import dataclass
-from decimal import Decimal as D
-from typing import Any, Optional
+from typing import Optional, Union
 from urllib.parse import urlencode
 
 import algosdk
@@ -10,31 +8,13 @@ import requests
 from algosdk.future import transaction
 from algosdk.v2client.algod import AlgodClient
 
+from pactsdk.pool_state import AppInternalState, PoolState, parse_global_pool_state
+
 from .asset import Asset, fetch_asset_by_index
 from .exceptions import PactSdkError
 from .pool_calculator import PoolCalculator
 from .swap import Swap
 from .transaction_group import TransactionGroup
-
-
-@dataclass
-class AppInternalState:
-    L: int
-    A: int
-    B: int
-    LTID: int
-
-    # None to make backward compatible. Old contracts don't have the config.
-    CONFIG: Any = None
-
-
-@dataclass
-class PoolState:
-    total_liquidity: int
-    total_primary: int
-    total_secondary: int
-    primary_asset_price: D
-    secondary_asset_price: D
 
 
 def list_pools(pact_api_url: str, **params):
@@ -44,55 +24,20 @@ def list_pools(pact_api_url: str, **params):
     return response.json()
 
 
-def fetch_app_state(
+def fetch_app_global_state(
     algod: AlgodClient,
     app_id: int,
 ) -> AppInternalState:
     app_info = algod.application_info(app_id)
-    state_dict = parse_global_state(app_info["params"]["global-state"])
-    return AppInternalState(**state_dict)
+    return parse_global_pool_state(app_info["params"]["global-state"])
 
 
-def parse_global_state(kv: list) -> dict[str, int]:
-    # Transform algorand key-value schema into python dict with key value pairs
-    res = {}
-    for elem in kv:
-        key = str(base64.b64decode(elem["key"]), encoding="ascii")
-        if elem["value"]["type"] == 1:
-            val = elem["value"]["bytes"]
-        else:
-            val = elem["value"]["uint"]
-        res[key] = val
-    return res
+def fetch_pool_by_id(algod: AlgodClient, app_id: int):
+    app_global_state = fetch_app_global_state(algod, app_id)
 
-
-def fetch_pool(
-    algod: AlgodClient,
-    asset_a: Asset,
-    asset_b: Asset,
-    app_id: int = 0,
-    fee_bps: int = 30,
-    pact_api_url="",
-) -> "Pool":
-    # Make sure that the user didn't mess up assets order.
-    # Primary asset always has lower index.
-    primary_asset, secondary_asset = sorted([asset_a, asset_b], key=lambda a: a.index)
-
-    if not app_id:
-        assert pact_api_url, "Must provide pactifyApiUrl or app_id."
-
-        app_id = get_app_id_from_assets(
-            pact_api_url,
-            primary_asset,
-            secondary_asset,
-        )
-        if not app_id:
-            raise PactSdkError(
-                f"Cannot find pool for assets {primary_asset.index} and {secondary_asset.index}.",
-            )
-
-    app_state = fetch_app_state(algod, app_id)
-    liquidity_asset = fetch_asset_by_index(algod, app_state.LTID)
+    primary_asset = fetch_asset_by_index(algod, app_global_state.ASSET_A)
+    secondary_asset = fetch_asset_by_index(algod, app_global_state.ASSET_B)
+    liquidity_asset = fetch_asset_by_index(algod, app_global_state.LTID)
 
     return Pool(
         algod=algod,
@@ -100,24 +45,44 @@ def fetch_pool(
         primary_asset=primary_asset,
         secondary_asset=secondary_asset,
         liquidity_asset=liquidity_asset,
-        internal_state=app_state,
-        fee_bps=fee_bps,
+        internal_state=app_global_state,
+        fee_bps=app_global_state.FEE_BPS,
     )
 
 
-def get_app_id_from_assets(
+def fetch_pools_by_assets(
+    algod: AlgodClient,
+    asset_a: Union[Asset, int],
+    asset_b: Union[Asset, int],
+    pact_api_url="",
+) -> list["Pool"]:
+    assets = [
+        asset.index if isinstance(asset, Asset) else asset
+        for asset in [asset_a, asset_b]
+    ]
+
+    # Make sure that the user didn't mess up assets order.
+    # Primary asset always has lower index.
+    primary_asset, secondary_asset = sorted(assets)
+
+    assert pact_api_url, "Must provide pact_api_url."
+
+    app_ids = get_app_ids_from_assets(pact_api_url, primary_asset, secondary_asset)
+
+    return [fetch_pool_by_id(algod, app_id) for app_id in app_ids]
+
+
+def get_app_ids_from_assets(
     pact_api_url: str,
-    primary_asset: Asset,
-    secondary_asset: Asset,
-) -> int:
+    primary_asset_index: int,
+    secondary_asset_index: int,
+) -> list[int]:
     data = list_pools(
         pact_api_url,
-        primary_asset__algoid=primary_asset.index,
-        secondary_asset__algoid=secondary_asset.index,
+        primary_asset__algoid=primary_asset_index,
+        secondary_asset__algoid=secondary_asset_index,
     )
-    if data["results"]:
-        return int(data["results"][0]["appid"])
-    return 0
+    return [int(pool["appid"]) for pool in data["results"]]
 
 
 @dataclass
@@ -147,7 +112,7 @@ class Pool:
         raise PactSdkError(f"Asset with index {asset.index} is not a pool asset.")
 
     def update_state(self) -> PoolState:
-        self.internal_state = fetch_app_state(self.algod, self.app_id)
+        self.internal_state = fetch_app_global_state(self.algod, self.app_id)
         self.state = self.parse_internal_state(self.internal_state)
         return self.state
 

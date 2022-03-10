@@ -36,24 +36,25 @@ Optionally you can specify custom Pact API url. By default it directs to product
 pact = pactsdk.PactClient(algod, pact_api_url="https://api.testnet.pact.fi")
 ```
 
-Fetching a pool.
+Fetching pools by assets pair. It uses Pact API to retrieve the pool. Can return multiple pools with differing fee_bps.
 
 ```py
 algo = pact.fetch_asset(0)
 other_coin = pact.fetch_asset(8949213)
 
-pool = pact.fetch_pool(algo, other_coin) # The pool will be fetched regardless of assets order.
+pools = pact.fetch_pools_by_assets(algo, other_coin) # The pool will be fetched regardless of assets order.
 ```
 
-Fetching a pool also accepts optional parameters.
+You can fetch a pool by providing assets ids instead of Asset objects.
 
 ```py
-pool = pact.fetch_pool(
-  algo,
-  other_coin,
-  app_id=456321,  # Use if the pool is not visible in the Pact API.
-  fee_bps=30,  # Use if your custom contract uses non-default fee.
-)
+pools = pact.fetch_pools_by_assets(0, 8949213)
+```
+
+You can also fetch a pool by providing app id. This way the pool is retrieved directly from the chain.
+
+```py
+pool = pact.fetch_pool_by_id(456321)
 ```
 
 You can list all pools from the Pact API.
