@@ -3,6 +3,7 @@ from decimal import Decimal as D
 
 import algosdk
 import pytest
+from algosdk.error import AlgodHTTPError
 
 import pactsdk
 
@@ -147,6 +148,52 @@ def test_swap_primary_with_equal_liquidity(testbed: TestBed):
     assert swap.slippage_pct == 10
 
     _test_swap(swap, primary_liq, secondary_liq, amount, testbed.account)
+
+
+def test_swap_primary_too_high_minimum_amount(testbed: TestBed):
+    primary_liq, secondary_liq, amount = 20_000, 20_000, 1_000
+    add_liqudity(testbed.account, testbed.pool, primary_liq, secondary_liq)
+
+    swap = testbed.pool.prepare_swap(
+        amount=amount,
+        asset=testbed.algo,
+        slippage_pct=0,
+    )
+    swap.effect.minimum_amount_in = 10 * swap.effect.minimum_amount_in
+
+    assert swap.asset_in == testbed.coin
+    assert swap.asset_out == testbed.algo
+    assert swap.slippage_pct == 0
+
+    # Perform the swap.
+    swap_tx = swap.prepare_tx(testbed.account.address)
+    with pytest.raises(
+        AlgodHTTPError, match="logic eval error: - would result negative."
+    ):
+        sign_and_send(swap_tx, testbed.account)
+
+
+def test_swap_secondary_too_high_minimum_amount(testbed: TestBed):
+    primary_liq, secondary_liq, amount = 20_000, 20_000, 1_000
+    add_liqudity(testbed.account, testbed.pool, primary_liq, secondary_liq)
+
+    swap = testbed.pool.prepare_swap(
+        amount=amount,
+        asset=testbed.coin,
+        slippage_pct=0,
+    )
+    swap.effect.minimum_amount_in = 10 * swap.effect.minimum_amount_in
+
+    assert swap.asset_in == testbed.algo
+    assert swap.asset_out == testbed.coin
+    assert swap.slippage_pct == 0
+
+    # Perform the swap.
+    swap_tx = swap.prepare_tx(testbed.account.address)
+    with pytest.raises(
+        AlgodHTTPError, match="logic eval error: - would result negative."
+    ):
+        sign_and_send(swap_tx, testbed.account)
 
 
 def test_swap_primary_with_not_equal_liquidity(testbed: TestBed):
