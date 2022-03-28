@@ -1,6 +1,9 @@
 # Pact Python SDK
 
-Python SDK for Pact smart contracts.
+**pactsdk** is a software development kit for interfacing to [Pact](https://pact.fi), a decentralized automated market maker on the Algorand protocol.
+
+The Python SDK provides a set of modules on top of the Algorand Python SDK for interacting with liquidity pools and trading swaps.
+Clients can use the Python SDK to enhance their trading experience with Pact.
 
 What is covered by the library:
 
@@ -106,8 +109,8 @@ print(pool.state)
 #   total_liquidity=900000,
 #   total_primary=956659,
 #   total_secondary=849972,
-#   primary_asset_price=Decimal(0.8884795940873393),
-#   secondary_asset_price=Decimal(1.1255182523659604),
+#   primary_asset_price=0.8884795940873393,
+#   secondary_asset_price=1.1255182523659604,
 # )
 ```
 
@@ -155,11 +158,11 @@ print(swap.effect)
 #     amount_received=146529,
 #     minimum_amount_received=143598,
 #     fee=441,
-#     price=Decimal(0.73485),
-#     primary_asset_price_after_swap=Decimal("0.6081680080300244"),
-#     secondary_asset_price_after_swap=Decimal("1.6442824791774173"),
-#     primary_asset_price_change_pct=Decimal("-31.549580645715963"),
-#     secondary_asset_price_change_pct=Decimal("46.091142966447585"),
+#     price=0.73485,
+#     primary_asset_price_after_swap=0.6081680080300244,
+#     secondary_asset_price_after_swap=1.6442824791774173,
+#     primary_asset_price_change_pct=-31.549580645715963,
+#     secondary_asset_price_change_pct=46.091142966447585,
 # )
 
 # Let's submit the swap.
@@ -167,6 +170,18 @@ swap_tx_group = swap.prepare_tx_group(address)
 signed_tx_group = swap_tx_group.sign_txn(private_key)
 algod.send_transactions(signed_tx_group)
 ```
+
+## Composability of transactions.
+
+The SDK has two sets of methods for creating transactions:
+
+1. `prepare_..._tx_group` e.g. `pool.prepare_swap_tx_group`
+
+Those methods are convenience methods which ask algod for suggested transaction parameters, builds transactions and creates a transactions group. You can't add you own transactions to the group using those methods.
+
+2. `build_..._txs` e.g. `pool.build_swap_txs`
+
+Those methods return a list of transactions. You can extend that list with your own transactions and create a `TransactionGroup` manually from this list. See [composingTransactions](examples/composingTransactions.py) example for details.
 
 Look for more [examples](examples).
 

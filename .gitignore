@@ -26,3 +26,7 @@ algorand-testbed
 
 # IDEs
 .idea
+
+# Generated documentation
+docs/_build
+gh-pages
