@@ -332,7 +332,7 @@ def test_swap_primary_with_equal_liquidity_reversed(pool_type: pactsdk.pool.Pool
         amount=amount,
         asset=testbed.algo,
         slippage_pct=10,
-        reverse=True,
+        swap_for_exact=True,
     )
 
     assert reversed_swap.asset_received == testbed.coin
@@ -366,7 +366,7 @@ def test_swap_primary_with_not_equal_liquidity_reversed(
         amount=amount,
         asset=testbed.algo,
         slippage_pct=10,
-        reverse=True,
+        swap_for_exact=True,
     )
 
     assert reversed_swap.effect.amount_received == 2000
