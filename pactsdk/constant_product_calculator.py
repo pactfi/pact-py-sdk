@@ -12,6 +12,8 @@ class ConstantProductParams:
 
 
 class ConstantProductCalculator:
+    """An implementation of a math behind constant product pools."""
+
     def __init__(self, pool: "Pool"):
         self.pool = pool
 

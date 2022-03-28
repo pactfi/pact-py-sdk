@@ -1,4 +1,6 @@
-from dataclasses import dataclass
+"""Set of utility classes for managing and performing swaps.
+"""
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from .asset import Asset
@@ -10,6 +12,8 @@ if TYPE_CHECKING:
 
 @dataclass
 class SwapEffect:
+    """Swap Effect are the basic details of the effect on the pool of performing the swap."""
+
     amount_received: int
     amount_deposited: int
     minimum_amount_received: int
@@ -23,21 +27,49 @@ class SwapEffect:
 
 @dataclass
 class Swap:
+    """Swap class represents a swap trade on a particular pool.
+
+    Typically, users don't have to manually instantiate this class. Use :py:meth:`pactsdk.pool.Pool.prepare_swap` instead.
+    """
+
     pool: "Pool"
+    """The pool the swap is going to be performed in."""
+
     asset_deposited: Asset
+    """The asset that will be swapped (deposited in the contract)."""
+
+    asset_received: Asset = field(init=False)
+    """The asset that will be received."""
+
     amount: int
+    """Either the amount to swap (deposit) or the amount to receive depending on the `swap_for_exact` parameter."""
+
     slippage_pct: float
-    is_reversed: bool = False
+    """The maximum amount of slippage allowed in performing the swap."""
+
+    swap_for_exact: bool = False
+    """If `true` then `amount` is what you want to receive from the swap. Otherwise, it's an amount that you want to swap (deposit). Note that the contracts do not support the "swap exact for" swap. It works by calculating the amount to deposit on the client side and doing a normal swap on the exchange."""
+
+    effect: SwapEffect = field(init=False)
+    """The effect of the swap computed at the time of construction."""
 
     def __post_init__(self):
         self.asset_received = self.pool.get_other_asset(self.asset_deposited)
-        self.validate_swap()
+        self._validate_swap()
         self.effect = self._build_effect()
 
     def prepare_tx_group(self, address: str) -> TransactionGroup:
+        """Creates the transactions needed to perform the swap trade and returns them as a transaction group ready to be signed and committed.
+
+        Args:
+            address: The account that will be performing the swap.
+
+        Returns:
+            A transaction group that when executed will perform the swap.
+        """
         return self.pool.prepare_swap_tx_group(self, address)
 
-    def validate_swap(self):
+    def _validate_swap(self):
         if self.slippage_pct < 0 or self.slippage_pct > 100:
             raise ValueError("Splippage must be between 0 and 100")
 
@@ -45,7 +77,7 @@ class Swap:
             raise ValueError("Pool is empty and swaps are impossible.")
 
     def _build_effect(self) -> SwapEffect:
-        if self.is_reversed:
+        if self.swap_for_exact:
             amount_received = self.amount
             amount_deposited = (
                 self.pool.calculator.net_amount_received_to_amount_deposited(
@@ -86,12 +118,12 @@ class Swap:
                 primary_liq_change,
                 secondary_liq_change,
             ),
-            primary_asset_price_change_pct=self.pool.calculator.get_price_change_pct(
+            primary_asset_price_change_pct=self.pool.calculator.get_price_impact_pct(
                 self.pool.primary_asset,
                 primary_liq_change,
                 secondary_liq_change,
             ),
-            secondary_asset_price_change_pct=self.pool.calculator.get_price_change_pct(
+            secondary_asset_price_change_pct=self.pool.calculator.get_price_impact_pct(
                 self.pool.secondary_asset,
                 primary_liq_change,
                 secondary_liq_change,

@@ -22,6 +22,8 @@ class StableswapParams:
 
 
 class StableswapCalculator:
+    """An implementation of a math behind stableswap pools."""
+
     def __init__(self, pool: "Pool"):
         self.pool = pool
 
