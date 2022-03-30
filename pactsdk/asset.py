@@ -1,12 +1,11 @@
-""" Utility functions and class for dealing with Algorand Standard Assets. 
+""" Utility functions and class for dealing with Algorand Standard Assets.
 
-    This module contains an Asset class which encapsulates the basic information about the Algorand Standard Asset. 
-    It also includes utility functions for opting in and querying account information related to the asset. 
-    A factory function allows you to fetch the information by index number. 
+    This module contains an Asset class which encapsulates the basic information about the Algorand Standard Asset.
+    It also includes utility functions for opting in and querying account information related to the asset.
+    A factory function allows you to fetch the information by index number.
 
-    Arguments: 
-        ASSETS_CACHE: Dictionary mapping the asset index number to the Asset class to speed up look up of the asset information. 
-
+    Arguments:
+        ASSETS_CACHE: Dictionary mapping the asset index number to the Asset class to speed up look up of the asset information.
 """
 import copy
 from dataclasses import dataclass
