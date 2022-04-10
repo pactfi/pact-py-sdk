@@ -68,31 +68,29 @@ class Asset:
     Includes basic details about the asset like name and decimals as well utility functions
     around the algorand functionality.
     Note: this is a data class with implicit constructors etc.
-
-    Attributes:
-        algod: Algorand Client that this asset is on.
-        index: The unique index for this asset.
-        decimals: The number of decimal places this asset is quoted to.
-        name: The name of the asset. This attribute is optional and may be none.
-        unit_name: The unit value for the asset. This attribute is optional and may be none.
     """
 
     algod: AlgodClient
+    """Algorand Client used to look up the assets."""
     index: int
+    """The unique index for the asset."""
     decimals: int
+    """The number of decimal places between the asset displayed price and the base units."""
     name: Optional[str] = None
+    """The display name of the asset. Set to None if there is no display name."""
     unit_name: Optional[str] = None
+    """The name of the unit value for the asset. Set to None if there is no unit display name."""
 
     @property
     def ratio(self):
-        """Returns the ratio for convert integer to floats"""
+        """Returns the ratio of base units to asset value"""
         return 10**self.decimals
 
     def prepare_opt_in_tx(self, address: str):
         """Generates an opt_in transaction for this asset.
 
         Args:
-            address: The sender and receiver address for the transaction to opt in.
+            address (str): The sender and receiver address for the transaction to opt in.
 
         Returns:
             A new Asset Transfer Transacion for this asset with
