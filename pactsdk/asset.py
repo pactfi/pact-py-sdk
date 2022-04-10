@@ -4,8 +4,20 @@
     It also includes utility functions for opting in and querying account information related to the asset.
     A factory function allows you to fetch the information by index number.
 
-    Arguments:
-        ASSETS_CACHE: Dictionary mapping the asset index number to the Asset class to speed up look up of the asset information.
+    Typical Usage:
+    ```
+    import algosdk
+    from algosdk.v2client.algod import AlgodClient
+
+    import pactsdk
+
+    algod = AlgodClient("<token>", "<url>")  # provide options
+
+    algo = fetch_asset_by_index(algod, 0)
+
+    print(f"Asset {algo.name} has {algo.ratio} base units to an {algo.unit_name}.")
+    # OUTPUT Asset Algo has 1000000 base units to an ALGO.
+    ```
 """
 import copy
 from dataclasses import dataclass
@@ -15,6 +27,7 @@ from algosdk.future import transaction
 from algosdk.v2client.algod import AlgodClient
 
 ASSETS_CACHE: dict[int, "Asset"] = {}
+"""Dictionary mapping the asset index number to the Asset class to speed up look up of the asset information."""
 
 
 def fetch_asset_by_index(
@@ -27,6 +40,8 @@ def fetch_asset_by_index(
     This function uses a global ASSETS_CACHE to ensure that only one call to the Algod Client
     is made per index asset. A side effect of calling the function is that a new entry is made
     in the ASSET_CACHE if there isn't an entry for the index.
+
+
 
     Args:
         algod: An Algorand Client that is the source of the asset information.
@@ -67,7 +82,10 @@ class Asset:
 
     Includes basic details about the asset like name and decimals as well utility functions
     around the algorand functionality.
-    Note: this is a data class with implicit constructors etc.
+    While this is a data class it is typically constructed from a PactClient function like fetch_asset
+    or via a pool or swap member variable.
+
+
     """
 
     algod: AlgodClient
