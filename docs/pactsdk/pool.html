@@ -1,0 +1,859 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>pactsdk.pool API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>pactsdk.pool</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import copy
+from dataclasses import dataclass
+from typing import Optional, Union
+from urllib.parse import urlencode
+
+import algosdk
+import requests
+from algosdk.future import transaction
+from algosdk.v2client.algod import AlgodClient
+
+from pactsdk.pool_state import AppInternalState, PoolState, parse_global_pool_state
+
+from .asset import Asset, fetch_asset_by_index
+from .exceptions import PactSdkError
+from .pool_calculator import PoolCalculator
+from .swap import Swap
+from .transaction_group import TransactionGroup
+
+
+def list_pools(pact_api_url: str, **params):
+    assert pact_api_url
+    encoded_params = urlencode(params)
+    response = requests.get(f&#34;{pact_api_url}/api/pools?{encoded_params}&#34;)
+    return response.json()
+
+
+def fetch_app_global_state(
+    algod: AlgodClient,
+    app_id: int,
+) -&gt; AppInternalState:
+    app_info = algod.application_info(app_id)
+    return parse_global_pool_state(app_info[&#34;params&#34;][&#34;global-state&#34;])
+
+
+def fetch_pool_by_id(algod: AlgodClient, app_id: int):
+    app_global_state = fetch_app_global_state(algod, app_id)
+
+    primary_asset = fetch_asset_by_index(algod, app_global_state.ASSET_A)
+    secondary_asset = fetch_asset_by_index(algod, app_global_state.ASSET_B)
+    liquidity_asset = fetch_asset_by_index(algod, app_global_state.LTID)
+
+    return Pool(
+        algod=algod,
+        app_id=app_id,
+        primary_asset=primary_asset,
+        secondary_asset=secondary_asset,
+        liquidity_asset=liquidity_asset,
+        internal_state=app_global_state,
+        fee_bps=app_global_state.FEE_BPS,
+    )
+
+
+def fetch_pools_by_assets(
+    algod: AlgodClient,
+    asset_a: Union[Asset, int],
+    asset_b: Union[Asset, int],
+    pact_api_url=&#34;&#34;,
+) -&gt; list[&#34;Pool&#34;]:
+    assets = [
+        asset.index if isinstance(asset, Asset) else asset
+        for asset in [asset_a, asset_b]
+    ]
+
+    # Make sure that the user didn&#39;t mess up assets order.
+    # Primary asset always has lower index.
+    primary_asset, secondary_asset = sorted(assets)
+
+    assert pact_api_url, &#34;Must provide pact_api_url.&#34;
+
+    app_ids = get_app_ids_from_assets(pact_api_url, primary_asset, secondary_asset)
+
+    return [fetch_pool_by_id(algod, app_id) for app_id in app_ids]
+
+
+def get_app_ids_from_assets(
+    pact_api_url: str,
+    primary_asset_index: int,
+    secondary_asset_index: int,
+) -&gt; list[int]:
+    data = list_pools(
+        pact_api_url,
+        primary_asset__algoid=primary_asset_index,
+        secondary_asset__algoid=secondary_asset_index,
+    )
+    return [int(pool[&#34;appid&#34;]) for pool in data[&#34;results&#34;]]
+
+
+@dataclass
+class Pool:
+    algod: AlgodClient
+    app_id: int
+    primary_asset: Asset
+    secondary_asset: Asset
+    liquidity_asset: Asset
+    internal_state: AppInternalState
+    fee_bps: int = 30
+
+    def __post_init__(self):
+        self.calculator = PoolCalculator(self)
+        self.state = self.parse_internal_state(self.internal_state)
+
+    def get_escrow_address(self):
+        return algosdk.logic.get_application_address(self.app_id)
+
+    def get_other_asset(self, asset: Asset) -&gt; Asset:
+        if asset == self.primary_asset:
+            return self.secondary_asset
+
+        if asset == self.secondary_asset:
+            return self.primary_asset
+
+        raise PactSdkError(f&#34;Asset with index {asset.index} is not a pool asset.&#34;)
+
+    def update_state(self) -&gt; PoolState:
+        self.internal_state = fetch_app_global_state(self.algod, self.app_id)
+        self.state = self.parse_internal_state(self.internal_state)
+        return self.state
+
+    def prepare_add_liquidity_tx(
+        self,
+        address: str,
+        primary_asset_amount: int,
+        secondary_asset_amount: int,
+    ):
+        suggested_params = self.algod.suggested_params()
+
+        txn1 = self._make_deposit_tx(
+            address=address,
+            asset=self.primary_asset,
+            amount=primary_asset_amount,
+            suggested_params=suggested_params,
+        )
+        txn2 = self._make_deposit_tx(
+            address=address,
+            asset=self.secondary_asset,
+            amount=secondary_asset_amount,
+            suggested_params=suggested_params,
+        )
+        txn3 = self._make_application_noop_tx(
+            address=address,
+            fee=3000,
+            args=[&#34;ADDLIQ&#34;, 0],
+            extraAsset=self.liquidity_asset,
+            suggested_params=suggested_params,
+        )
+
+        return TransactionGroup([txn1, txn2, txn3])
+
+    def prepare_remove_liquidity_tx(self, address: str, amount: int):
+        suggested_params = self.algod.suggested_params()
+
+        txn1 = self._make_deposit_tx(
+            address=address,
+            amount=amount,
+            asset=self.liquidity_asset,
+            suggested_params=suggested_params,
+        )
+        txn2 = self._make_application_noop_tx(
+            address=address,
+            fee=3000,
+            args=[&#34;REMLIQ&#34;, 0, 0],  # min expected primary, min expected secondary
+            suggested_params=suggested_params,
+        )
+
+        return TransactionGroup([txn1, txn2])
+
+    def prepare_swap(self, asset: Asset, amount: int, slippage_pct: float) -&gt; Swap:
+        assert self.is_asset_in_the_pool(asset), f&#34;Asset {asset.index} not in the pool&#34;
+        return Swap(self, asset_out=asset, amount_out=amount, slippage_pct=slippage_pct)
+
+    def prepare_swap_tx(self, swap: Swap, address: str):
+        suggested_params = self.algod.suggested_params()
+
+        txn1 = self._make_deposit_tx(
+            address=address,
+            amount=swap.amount_out,
+            asset=swap.asset_out,
+            suggested_params=suggested_params,
+        )
+        txn2 = self._make_application_noop_tx(
+            address=address,
+            fee=2000,
+            args=[&#34;SWAP&#34;, swap.effect.minimum_amount_in],
+            suggested_params=suggested_params,
+        )
+
+        return TransactionGroup([txn1, txn2])
+
+    def is_asset_in_the_pool(self, asset: Asset):
+        return asset.index in {self.primary_asset.index, self.secondary_asset.index}
+
+    def parse_internal_state(self, state: AppInternalState) -&gt; PoolState:
+        return PoolState(
+            total_liquidity=state.L,
+            total_primary=state.A,
+            total_secondary=state.B,
+            primary_asset_price=self.calculator.primary_asset_price,
+            secondary_asset_price=self.calculator.secondary_asset_price,
+        )
+
+    def _make_deposit_tx(
+        self,
+        asset: Asset,
+        address: str,
+        amount: int,
+        suggested_params: transaction.SuggestedParams,
+    ):
+        if not asset.index:
+            # ALGO
+            return transaction.PaymentTxn(
+                sender=address,
+                receiver=self.get_escrow_address(),
+                amt=amount,
+                sp=suggested_params,
+            )
+
+        return transaction.AssetTransferTxn(
+            sender=address,
+            receiver=self.get_escrow_address(),
+            amt=amount,
+            sp=suggested_params,
+            index=asset.index,
+        )
+
+    def _make_application_noop_tx(
+        self,
+        address: str,
+        args: list,
+        fee: int,
+        suggested_params: transaction.SuggestedParams,
+        extraAsset: Optional[Asset] = None,
+    ):
+        foreign_assets: list[int] = [
+            self.primary_asset.index,
+            self.secondary_asset.index,
+        ]
+        if extraAsset:
+            foreign_assets.append(extraAsset.index)
+
+        suggested_params = copy.copy(suggested_params)
+        suggested_params.fee = fee
+        suggested_params.flat_fee = True
+
+        return transaction.ApplicationNoOpTxn(
+            sender=address,
+            index=self.app_id,
+            foreign_assets=foreign_assets,
+            app_args=args,
+            sp=suggested_params,
+        )</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="pactsdk.pool.fetch_app_global_state"><code class="name flex">
+<span>def <span class="ident">fetch_app_global_state</span></span>(<span>algod: algosdk.v2client.algod.AlgodClient, app_id: int) ‑> <a title="pactsdk.pool_state.AppInternalState" href="pool_state.html#pactsdk.pool_state.AppInternalState">AppInternalState</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def fetch_app_global_state(
+    algod: AlgodClient,
+    app_id: int,
+) -&gt; AppInternalState:
+    app_info = algod.application_info(app_id)
+    return parse_global_pool_state(app_info[&#34;params&#34;][&#34;global-state&#34;])</code></pre>
+</details>
+</dd>
+<dt id="pactsdk.pool.fetch_pool_by_id"><code class="name flex">
+<span>def <span class="ident">fetch_pool_by_id</span></span>(<span>algod: algosdk.v2client.algod.AlgodClient, app_id: int)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def fetch_pool_by_id(algod: AlgodClient, app_id: int):
+    app_global_state = fetch_app_global_state(algod, app_id)
+
+    primary_asset = fetch_asset_by_index(algod, app_global_state.ASSET_A)
+    secondary_asset = fetch_asset_by_index(algod, app_global_state.ASSET_B)
+    liquidity_asset = fetch_asset_by_index(algod, app_global_state.LTID)
+
+    return Pool(
+        algod=algod,
+        app_id=app_id,
+        primary_asset=primary_asset,
+        secondary_asset=secondary_asset,
+        liquidity_asset=liquidity_asset,
+        internal_state=app_global_state,
+        fee_bps=app_global_state.FEE_BPS,
+    )</code></pre>
+</details>
+</dd>
+<dt id="pactsdk.pool.fetch_pools_by_assets"><code class="name flex">
+<span>def <span class="ident">fetch_pools_by_assets</span></span>(<span>algod: algosdk.v2client.algod.AlgodClient, asset_a: Union[<a title="pactsdk.asset.Asset" href="asset.html#pactsdk.asset.Asset">Asset</a>, int], asset_b: Union[<a title="pactsdk.asset.Asset" href="asset.html#pactsdk.asset.Asset">Asset</a>, int], pact_api_url='') ‑> list['<a title="pactsdk.pool.Pool" href="#pactsdk.pool.Pool">Pool</a>']</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def fetch_pools_by_assets(
+    algod: AlgodClient,
+    asset_a: Union[Asset, int],
+    asset_b: Union[Asset, int],
+    pact_api_url=&#34;&#34;,
+) -&gt; list[&#34;Pool&#34;]:
+    assets = [
+        asset.index if isinstance(asset, Asset) else asset
+        for asset in [asset_a, asset_b]
+    ]
+
+    # Make sure that the user didn&#39;t mess up assets order.
+    # Primary asset always has lower index.
+    primary_asset, secondary_asset = sorted(assets)
+
+    assert pact_api_url, &#34;Must provide pact_api_url.&#34;
+
+    app_ids = get_app_ids_from_assets(pact_api_url, primary_asset, secondary_asset)
+
+    return [fetch_pool_by_id(algod, app_id) for app_id in app_ids]</code></pre>
+</details>
+</dd>
+<dt id="pactsdk.pool.get_app_ids_from_assets"><code class="name flex">
+<span>def <span class="ident">get_app_ids_from_assets</span></span>(<span>pact_api_url: str, primary_asset_index: int, secondary_asset_index: int) ‑> list[int]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_app_ids_from_assets(
+    pact_api_url: str,
+    primary_asset_index: int,
+    secondary_asset_index: int,
+) -&gt; list[int]:
+    data = list_pools(
+        pact_api_url,
+        primary_asset__algoid=primary_asset_index,
+        secondary_asset__algoid=secondary_asset_index,
+    )
+    return [int(pool[&#34;appid&#34;]) for pool in data[&#34;results&#34;]]</code></pre>
+</details>
+</dd>
+<dt id="pactsdk.pool.list_pools"><code class="name flex">
+<span>def <span class="ident">list_pools</span></span>(<span>pact_api_url: str, **params)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def list_pools(pact_api_url: str, **params):
+    assert pact_api_url
+    encoded_params = urlencode(params)
+    response = requests.get(f&#34;{pact_api_url}/api/pools?{encoded_params}&#34;)
+    return response.json()</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="pactsdk.pool.Pool"><code class="flex name class">
+<span>class <span class="ident">Pool</span></span>
+<span>(</span><span>algod: algosdk.v2client.algod.AlgodClient, app_id: int, primary_asset: <a title="pactsdk.asset.Asset" href="asset.html#pactsdk.asset.Asset">Asset</a>, secondary_asset: <a title="pactsdk.asset.Asset" href="asset.html#pactsdk.asset.Asset">Asset</a>, liquidity_asset: <a title="pactsdk.asset.Asset" href="asset.html#pactsdk.asset.Asset">Asset</a>, internal_state: <a title="pactsdk.pool_state.AppInternalState" href="pool_state.html#pactsdk.pool_state.AppInternalState">AppInternalState</a>, fee_bps: int = 30)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Pool(algod: algosdk.v2client.algod.AlgodClient, app_id: int, primary_asset: pactsdk.asset.Asset, secondary_asset: pactsdk.asset.Asset, liquidity_asset: pactsdk.asset.Asset, internal_state: pactsdk.pool_state.AppInternalState, fee_bps: int = 30)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class Pool:
+    algod: AlgodClient
+    app_id: int
+    primary_asset: Asset
+    secondary_asset: Asset
+    liquidity_asset: Asset
+    internal_state: AppInternalState
+    fee_bps: int = 30
+
+    def __post_init__(self):
+        self.calculator = PoolCalculator(self)
+        self.state = self.parse_internal_state(self.internal_state)
+
+    def get_escrow_address(self):
+        return algosdk.logic.get_application_address(self.app_id)
+
+    def get_other_asset(self, asset: Asset) -&gt; Asset:
+        if asset == self.primary_asset:
+            return self.secondary_asset
+
+        if asset == self.secondary_asset:
+            return self.primary_asset
+
+        raise PactSdkError(f&#34;Asset with index {asset.index} is not a pool asset.&#34;)
+
+    def update_state(self) -&gt; PoolState:
+        self.internal_state = fetch_app_global_state(self.algod, self.app_id)
+        self.state = self.parse_internal_state(self.internal_state)
+        return self.state
+
+    def prepare_add_liquidity_tx(
+        self,
+        address: str,
+        primary_asset_amount: int,
+        secondary_asset_amount: int,
+    ):
+        suggested_params = self.algod.suggested_params()
+
+        txn1 = self._make_deposit_tx(
+            address=address,
+            asset=self.primary_asset,
+            amount=primary_asset_amount,
+            suggested_params=suggested_params,
+        )
+        txn2 = self._make_deposit_tx(
+            address=address,
+            asset=self.secondary_asset,
+            amount=secondary_asset_amount,
+            suggested_params=suggested_params,
+        )
+        txn3 = self._make_application_noop_tx(
+            address=address,
+            fee=3000,
+            args=[&#34;ADDLIQ&#34;, 0],
+            extraAsset=self.liquidity_asset,
+            suggested_params=suggested_params,
+        )
+
+        return TransactionGroup([txn1, txn2, txn3])
+
+    def prepare_remove_liquidity_tx(self, address: str, amount: int):
+        suggested_params = self.algod.suggested_params()
+
+        txn1 = self._make_deposit_tx(
+            address=address,
+            amount=amount,
+            asset=self.liquidity_asset,
+            suggested_params=suggested_params,
+        )
+        txn2 = self._make_application_noop_tx(
+            address=address,
+            fee=3000,
+            args=[&#34;REMLIQ&#34;, 0, 0],  # min expected primary, min expected secondary
+            suggested_params=suggested_params,
+        )
+
+        return TransactionGroup([txn1, txn2])
+
+    def prepare_swap(self, asset: Asset, amount: int, slippage_pct: float) -&gt; Swap:
+        assert self.is_asset_in_the_pool(asset), f&#34;Asset {asset.index} not in the pool&#34;
+        return Swap(self, asset_out=asset, amount_out=amount, slippage_pct=slippage_pct)
+
+    def prepare_swap_tx(self, swap: Swap, address: str):
+        suggested_params = self.algod.suggested_params()
+
+        txn1 = self._make_deposit_tx(
+            address=address,
+            amount=swap.amount_out,
+            asset=swap.asset_out,
+            suggested_params=suggested_params,
+        )
+        txn2 = self._make_application_noop_tx(
+            address=address,
+            fee=2000,
+            args=[&#34;SWAP&#34;, swap.effect.minimum_amount_in],
+            suggested_params=suggested_params,
+        )
+
+        return TransactionGroup([txn1, txn2])
+
+    def is_asset_in_the_pool(self, asset: Asset):
+        return asset.index in {self.primary_asset.index, self.secondary_asset.index}
+
+    def parse_internal_state(self, state: AppInternalState) -&gt; PoolState:
+        return PoolState(
+            total_liquidity=state.L,
+            total_primary=state.A,
+            total_secondary=state.B,
+            primary_asset_price=self.calculator.primary_asset_price,
+            secondary_asset_price=self.calculator.secondary_asset_price,
+        )
+
+    def _make_deposit_tx(
+        self,
+        asset: Asset,
+        address: str,
+        amount: int,
+        suggested_params: transaction.SuggestedParams,
+    ):
+        if not asset.index:
+            # ALGO
+            return transaction.PaymentTxn(
+                sender=address,
+                receiver=self.get_escrow_address(),
+                amt=amount,
+                sp=suggested_params,
+            )
+
+        return transaction.AssetTransferTxn(
+            sender=address,
+            receiver=self.get_escrow_address(),
+            amt=amount,
+            sp=suggested_params,
+            index=asset.index,
+        )
+
+    def _make_application_noop_tx(
+        self,
+        address: str,
+        args: list,
+        fee: int,
+        suggested_params: transaction.SuggestedParams,
+        extraAsset: Optional[Asset] = None,
+    ):
+        foreign_assets: list[int] = [
+            self.primary_asset.index,
+            self.secondary_asset.index,
+        ]
+        if extraAsset:
+            foreign_assets.append(extraAsset.index)
+
+        suggested_params = copy.copy(suggested_params)
+        suggested_params.fee = fee
+        suggested_params.flat_fee = True
+
+        return transaction.ApplicationNoOpTxn(
+            sender=address,
+            index=self.app_id,
+            foreign_assets=foreign_assets,
+            app_args=args,
+            sp=suggested_params,
+        )</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="pactsdk.pool.Pool.algod"><code class="name">var <span class="ident">algod</span> : algosdk.v2client.algod.AlgodClient</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="pactsdk.pool.Pool.app_id"><code class="name">var <span class="ident">app_id</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="pactsdk.pool.Pool.fee_bps"><code class="name">var <span class="ident">fee_bps</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="pactsdk.pool.Pool.internal_state"><code class="name">var <span class="ident">internal_state</span> : <a title="pactsdk.pool_state.AppInternalState" href="pool_state.html#pactsdk.pool_state.AppInternalState">AppInternalState</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="pactsdk.pool.Pool.liquidity_asset"><code class="name">var <span class="ident">liquidity_asset</span> : <a title="pactsdk.asset.Asset" href="asset.html#pactsdk.asset.Asset">Asset</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="pactsdk.pool.Pool.primary_asset"><code class="name">var <span class="ident">primary_asset</span> : <a title="pactsdk.asset.Asset" href="asset.html#pactsdk.asset.Asset">Asset</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="pactsdk.pool.Pool.secondary_asset"><code class="name">var <span class="ident">secondary_asset</span> : <a title="pactsdk.asset.Asset" href="asset.html#pactsdk.asset.Asset">Asset</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="pactsdk.pool.Pool.get_escrow_address"><code class="name flex">
+<span>def <span class="ident">get_escrow_address</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_escrow_address(self):
+    return algosdk.logic.get_application_address(self.app_id)</code></pre>
+</details>
+</dd>
+<dt id="pactsdk.pool.Pool.get_other_asset"><code class="name flex">
+<span>def <span class="ident">get_other_asset</span></span>(<span>self, asset: <a title="pactsdk.asset.Asset" href="asset.html#pactsdk.asset.Asset">Asset</a>) ‑> <a title="pactsdk.asset.Asset" href="asset.html#pactsdk.asset.Asset">Asset</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_other_asset(self, asset: Asset) -&gt; Asset:
+    if asset == self.primary_asset:
+        return self.secondary_asset
+
+    if asset == self.secondary_asset:
+        return self.primary_asset
+
+    raise PactSdkError(f&#34;Asset with index {asset.index} is not a pool asset.&#34;)</code></pre>
+</details>
+</dd>
+<dt id="pactsdk.pool.Pool.is_asset_in_the_pool"><code class="name flex">
+<span>def <span class="ident">is_asset_in_the_pool</span></span>(<span>self, asset: <a title="pactsdk.asset.Asset" href="asset.html#pactsdk.asset.Asset">Asset</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_asset_in_the_pool(self, asset: Asset):
+    return asset.index in {self.primary_asset.index, self.secondary_asset.index}</code></pre>
+</details>
+</dd>
+<dt id="pactsdk.pool.Pool.parse_internal_state"><code class="name flex">
+<span>def <span class="ident">parse_internal_state</span></span>(<span>self, state: <a title="pactsdk.pool_state.AppInternalState" href="pool_state.html#pactsdk.pool_state.AppInternalState">AppInternalState</a>) ‑> <a title="pactsdk.pool_state.PoolState" href="pool_state.html#pactsdk.pool_state.PoolState">PoolState</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def parse_internal_state(self, state: AppInternalState) -&gt; PoolState:
+    return PoolState(
+        total_liquidity=state.L,
+        total_primary=state.A,
+        total_secondary=state.B,
+        primary_asset_price=self.calculator.primary_asset_price,
+        secondary_asset_price=self.calculator.secondary_asset_price,
+    )</code></pre>
+</details>
+</dd>
+<dt id="pactsdk.pool.Pool.prepare_add_liquidity_tx"><code class="name flex">
+<span>def <span class="ident">prepare_add_liquidity_tx</span></span>(<span>self, address: str, primary_asset_amount: int, secondary_asset_amount: int)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def prepare_add_liquidity_tx(
+    self,
+    address: str,
+    primary_asset_amount: int,
+    secondary_asset_amount: int,
+):
+    suggested_params = self.algod.suggested_params()
+
+    txn1 = self._make_deposit_tx(
+        address=address,
+        asset=self.primary_asset,
+        amount=primary_asset_amount,
+        suggested_params=suggested_params,
+    )
+    txn2 = self._make_deposit_tx(
+        address=address,
+        asset=self.secondary_asset,
+        amount=secondary_asset_amount,
+        suggested_params=suggested_params,
+    )
+    txn3 = self._make_application_noop_tx(
+        address=address,
+        fee=3000,
+        args=[&#34;ADDLIQ&#34;, 0],
+        extraAsset=self.liquidity_asset,
+        suggested_params=suggested_params,
+    )
+
+    return TransactionGroup([txn1, txn2, txn3])</code></pre>
+</details>
+</dd>
+<dt id="pactsdk.pool.Pool.prepare_remove_liquidity_tx"><code class="name flex">
+<span>def <span class="ident">prepare_remove_liquidity_tx</span></span>(<span>self, address: str, amount: int)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def prepare_remove_liquidity_tx(self, address: str, amount: int):
+    suggested_params = self.algod.suggested_params()
+
+    txn1 = self._make_deposit_tx(
+        address=address,
+        amount=amount,
+        asset=self.liquidity_asset,
+        suggested_params=suggested_params,
+    )
+    txn2 = self._make_application_noop_tx(
+        address=address,
+        fee=3000,
+        args=[&#34;REMLIQ&#34;, 0, 0],  # min expected primary, min expected secondary
+        suggested_params=suggested_params,
+    )
+
+    return TransactionGroup([txn1, txn2])</code></pre>
+</details>
+</dd>
+<dt id="pactsdk.pool.Pool.prepare_swap"><code class="name flex">
+<span>def <span class="ident">prepare_swap</span></span>(<span>self, asset: <a title="pactsdk.asset.Asset" href="asset.html#pactsdk.asset.Asset">Asset</a>, amount: int, slippage_pct: float) ‑> <a title="pactsdk.swap.Swap" href="swap.html#pactsdk.swap.Swap">Swap</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def prepare_swap(self, asset: Asset, amount: int, slippage_pct: float) -&gt; Swap:
+    assert self.is_asset_in_the_pool(asset), f&#34;Asset {asset.index} not in the pool&#34;
+    return Swap(self, asset_out=asset, amount_out=amount, slippage_pct=slippage_pct)</code></pre>
+</details>
+</dd>
+<dt id="pactsdk.pool.Pool.prepare_swap_tx"><code class="name flex">
+<span>def <span class="ident">prepare_swap_tx</span></span>(<span>self, swap: <a title="pactsdk.swap.Swap" href="swap.html#pactsdk.swap.Swap">Swap</a>, address: str)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def prepare_swap_tx(self, swap: Swap, address: str):
+    suggested_params = self.algod.suggested_params()
+
+    txn1 = self._make_deposit_tx(
+        address=address,
+        amount=swap.amount_out,
+        asset=swap.asset_out,
+        suggested_params=suggested_params,
+    )
+    txn2 = self._make_application_noop_tx(
+        address=address,
+        fee=2000,
+        args=[&#34;SWAP&#34;, swap.effect.minimum_amount_in],
+        suggested_params=suggested_params,
+    )
+
+    return TransactionGroup([txn1, txn2])</code></pre>
+</details>
+</dd>
+<dt id="pactsdk.pool.Pool.update_state"><code class="name flex">
+<span>def <span class="ident">update_state</span></span>(<span>self) ‑> <a title="pactsdk.pool_state.PoolState" href="pool_state.html#pactsdk.pool_state.PoolState">PoolState</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def update_state(self) -&gt; PoolState:
+    self.internal_state = fetch_app_global_state(self.algod, self.app_id)
+    self.state = self.parse_internal_state(self.internal_state)
+    return self.state</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="pactsdk" href="index.html">pactsdk</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="pactsdk.pool.fetch_app_global_state" href="#pactsdk.pool.fetch_app_global_state">fetch_app_global_state</a></code></li>
+<li><code><a title="pactsdk.pool.fetch_pool_by_id" href="#pactsdk.pool.fetch_pool_by_id">fetch_pool_by_id</a></code></li>
+<li><code><a title="pactsdk.pool.fetch_pools_by_assets" href="#pactsdk.pool.fetch_pools_by_assets">fetch_pools_by_assets</a></code></li>
+<li><code><a title="pactsdk.pool.get_app_ids_from_assets" href="#pactsdk.pool.get_app_ids_from_assets">get_app_ids_from_assets</a></code></li>
+<li><code><a title="pactsdk.pool.list_pools" href="#pactsdk.pool.list_pools">list_pools</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="pactsdk.pool.Pool" href="#pactsdk.pool.Pool">Pool</a></code></h4>
+<ul class="">
+<li><code><a title="pactsdk.pool.Pool.algod" href="#pactsdk.pool.Pool.algod">algod</a></code></li>
+<li><code><a title="pactsdk.pool.Pool.app_id" href="#pactsdk.pool.Pool.app_id">app_id</a></code></li>
+<li><code><a title="pactsdk.pool.Pool.fee_bps" href="#pactsdk.pool.Pool.fee_bps">fee_bps</a></code></li>
+<li><code><a title="pactsdk.pool.Pool.get_escrow_address" href="#pactsdk.pool.Pool.get_escrow_address">get_escrow_address</a></code></li>
+<li><code><a title="pactsdk.pool.Pool.get_other_asset" href="#pactsdk.pool.Pool.get_other_asset">get_other_asset</a></code></li>
+<li><code><a title="pactsdk.pool.Pool.internal_state" href="#pactsdk.pool.Pool.internal_state">internal_state</a></code></li>
+<li><code><a title="pactsdk.pool.Pool.is_asset_in_the_pool" href="#pactsdk.pool.Pool.is_asset_in_the_pool">is_asset_in_the_pool</a></code></li>
+<li><code><a title="pactsdk.pool.Pool.liquidity_asset" href="#pactsdk.pool.Pool.liquidity_asset">liquidity_asset</a></code></li>
+<li><code><a title="pactsdk.pool.Pool.parse_internal_state" href="#pactsdk.pool.Pool.parse_internal_state">parse_internal_state</a></code></li>
+<li><code><a title="pactsdk.pool.Pool.prepare_add_liquidity_tx" href="#pactsdk.pool.Pool.prepare_add_liquidity_tx">prepare_add_liquidity_tx</a></code></li>
+<li><code><a title="pactsdk.pool.Pool.prepare_remove_liquidity_tx" href="#pactsdk.pool.Pool.prepare_remove_liquidity_tx">prepare_remove_liquidity_tx</a></code></li>
+<li><code><a title="pactsdk.pool.Pool.prepare_swap" href="#pactsdk.pool.Pool.prepare_swap">prepare_swap</a></code></li>
+<li><code><a title="pactsdk.pool.Pool.prepare_swap_tx" href="#pactsdk.pool.Pool.prepare_swap_tx">prepare_swap_tx</a></code></li>
+<li><code><a title="pactsdk.pool.Pool.primary_asset" href="#pactsdk.pool.Pool.primary_asset">primary_asset</a></code></li>
+<li><code><a title="pactsdk.pool.Pool.secondary_asset" href="#pactsdk.pool.Pool.secondary_asset">secondary_asset</a></code></li>
+<li><code><a title="pactsdk.pool.Pool.update_state" href="#pactsdk.pool.Pool.update_state">update_state</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

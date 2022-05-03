@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>pactsdk.swap API documentation</title>
+<meta name="description" content="Set of utility classes for managing performing swaps." />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>pactsdk.swap</code></h1>
+</header>
+<section id="section-intro">
+<p>Set of utility classes for managing performing swaps.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;Set of utility classes for managing performing swaps.
+ 
+
+&#34;&#34;&#34;
+from dataclasses import dataclass
+from decimal import Decimal as D
+from typing import TYPE_CHECKING
+
+from .asset import Asset
+from .transaction_group import TransactionGroup
+
+if TYPE_CHECKING:
+    from .pool import Pool
+
+
+@dataclass
+class SwapEffect:
+    &#34;&#34;&#34;A data class containing the relevant information about the outcome of a swap.
+
+    The swap effect is created from the main `Swap` class, accessible from the effect function.
+    See the build_effect description for how the values are precisely calculated.
+    &#34;&#34;&#34;
+
+    amount_in: int
+    &#34;&#34;&#34;The amount deposited in the swap.&#34;&#34;&#34;
+    amount_out: int
+    &#34;&#34;&#34;The amount received from the swap.&#34;&#34;&#34;
+    minimum_amount_in: int
+    &#34;&#34;&#34;The minimal amount that will be required to be a valid swap.&#34;&#34;&#34;
+    fee: int
+    &#34;&#34;&#34;The fee in micro algo for the transaction.&#34;&#34;&#34;
+    primary_asset_price_after_swap: D
+    &#34;&#34;&#34;The total quantity of primary asset in the pool after the swap has been committed.&#34;&#34;&#34;
+    secondary_asset_price_after_swap: D
+    &#34;&#34;&#34;The total quantity of secondary asset in the pool after the swap has been committed.&#34;&#34;&#34;
+    primary_asset_price_change_pct: D
+    &#34;&#34;&#34;The percentage change of the primary asset.&#34;&#34;&#34;
+    secondary_asset_price_change_pct: D
+    &#34;&#34;&#34;The percentage change of the secondary asset.&#34;&#34;&#34;
+    price: D
+    &#34;&#34;&#34;The implied price for the swap.&#34;&#34;&#34;
+
+
+@dataclass
+class Swap:
+    &#34;&#34;&#34;Represents a swap out of an amount of an asset from a pool with a maximum slippage percentage.
+
+    This is a data class that represents a swap on a give pool.
+    &#34;&#34;&#34;
+
+    pool: &#34;Pool&#34;
+    &#34;&#34;&#34;The pool that the swap is being performed in.&#34;&#34;&#34;
+    asset_out: Asset
+    &#34;&#34;&#34;The asset being received from the swap.&#34;&#34;&#34;
+    amount_out: int
+    &#34;&#34;&#34;The amount of asset to receive&#34;&#34;&#34;
+    slippage_pct: float
+    &#34;&#34;&#34;The maximum amount of slippage in percent terms to tollerate.&#34;&#34;&#34;
+
+    def __post_init__(self):
+        &#34;&#34;&#34;Initialized derived values: the asset in and the effect of the swap.
+
+        The asset_in is set to the opposite asset to the asset_out in the pool.
+        The effect is set to the values implied by the swap. See the validate_swap function for more details.
+
+        The initialize will also validate that the swap and raise a value error.
+        &#34;&#34;&#34;
+        self.asset_in = self.pool.get_other_asset(self.asset_out)
+        self.validate_swap()
+        self.effect = self._build_effect()
+
+    def prepare_tx(self, address: str) -&gt; TransactionGroup:
+        &#34;&#34;&#34;Creates a signed transaction for swapping out the asset.
+
+        Args:
+            address (str): The private key to sign the transactions with.
+
+        Returns:
+            TransactionGroup: Transaction group to produce a swap.
+        &#34;&#34;&#34;
+        return self.pool.prepare_swap_tx(self, address)
+
+    def validate_swap(self):
+        &#34;&#34;&#34;Validates that the swap details are valid.
+
+        Specifically this validates that the slippage percentage is correct between 0 - 100 and the pool
+        is not empty.
+
+        Raises:
+            ValueError: Raised when the slippage is below 0 or above 100.
+            ValueError: Raised when the pool is empty, has no tokens.
+        &#34;&#34;&#34;
+        if self.slippage_pct &lt; 0 or self.slippage_pct &gt; 100:
+            raise ValueError(&#34;Splippage must be between 0 and 100&#34;)
+
+        if self.pool.calculator.is_empty:
+            raise ValueError(&#34;Pool is empty and swaps are impossible.&#34;)
+
+    def _build_effect(self) -&gt; SwapEffect:
+        amount_in = self.pool.calculator.get_net_amount_in(
+            self.asset_out, self.amount_out
+        )
+
+        if self.asset_out == self.pool.primary_asset:
+            primary_liq_change = self.amount_out
+            secondary_liq_change = -amount_in
+        else:
+            primary_liq_change = -amount_in
+            secondary_liq_change = self.amount_out
+
+        return SwapEffect(
+            amount_out=self.amount_out,
+            amount_in=amount_in,
+            minimum_amount_in=self.pool.calculator.get_minimum_amount_in(
+                self.asset_out, self.amount_out, self.slippage_pct
+            ),
+            price=self.pool.calculator.get_swap_price(self.asset_out, self.amount_out),
+            primary_asset_price_after_swap=self.pool.calculator.get_asset_price_after_liq_change(
+                self.pool.primary_asset,
+                primary_liq_change,
+                secondary_liq_change,
+            ),
+            secondary_asset_price_after_swap=self.pool.calculator.get_asset_price_after_liq_change(
+                self.pool.secondary_asset,
+                primary_liq_change,
+                secondary_liq_change,
+            ),
+            primary_asset_price_change_pct=self.pool.calculator.get_price_change_pct(
+                self.pool.primary_asset,
+                primary_liq_change,
+                secondary_liq_change,
+            ),
+            secondary_asset_price_change_pct=self.pool.calculator.get_price_change_pct(
+                self.pool.secondary_asset,
+                primary_liq_change,
+                secondary_liq_change,
+            ),
+            fee=self.pool.calculator.get_fee(self.asset_out, self.amount_out),
+        )</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="pactsdk.swap.Swap"><code class="flex name class">
+<span>class <span class="ident">Swap</span></span>
+<span>(</span><span>pool: Pool, asset_out: <a title="pactsdk.asset.Asset" href="asset.html#pactsdk.asset.Asset">Asset</a>, amount_out: int, slippage_pct: float)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Represents a swap out of an amount of an asset from a pool with a maximum slippage percentage.</p>
+<p>This is a data class that represents a swap on a give pool.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class Swap:
+    &#34;&#34;&#34;Represents a swap out of an amount of an asset from a pool with a maximum slippage percentage.
+
+    This is a data class that represents a swap on a give pool.
+    &#34;&#34;&#34;
+
+    pool: &#34;Pool&#34;
+    &#34;&#34;&#34;The pool that the swap is being performed in.&#34;&#34;&#34;
+    asset_out: Asset
+    &#34;&#34;&#34;The asset being received from the swap.&#34;&#34;&#34;
+    amount_out: int
+    &#34;&#34;&#34;The amount of asset to receive&#34;&#34;&#34;
+    slippage_pct: float
+    &#34;&#34;&#34;The maximum amount of slippage in percent terms to tollerate.&#34;&#34;&#34;
+
+    def __post_init__(self):
+        &#34;&#34;&#34;Initialized derived values: the asset in and the effect of the swap.
+
+        The asset_in is set to the opposite asset to the asset_out in the pool.
+        The effect is set to the values implied by the swap. See the validate_swap function for more details.
+
+        The initialize will also validate that the swap and raise a value error.
+        &#34;&#34;&#34;
+        self.asset_in = self.pool.get_other_asset(self.asset_out)
+        self.validate_swap()
+        self.effect = self._build_effect()
+
+    def prepare_tx(self, address: str) -&gt; TransactionGroup:
+        &#34;&#34;&#34;Creates a signed transaction for swapping out the asset.
+
+        Args:
+            address (str): The private key to sign the transactions with.
+
+        Returns:
+            TransactionGroup: Transaction group to produce a swap.
+        &#34;&#34;&#34;
+        return self.pool.prepare_swap_tx(self, address)
+
+    def validate_swap(self):
+        &#34;&#34;&#34;Validates that the swap details are valid.
+
+        Specifically this validates that the slippage percentage is correct between 0 - 100 and the pool
+        is not empty.
+
+        Raises:
+            ValueError: Raised when the slippage is below 0 or above 100.
+            ValueError: Raised when the pool is empty, has no tokens.
+        &#34;&#34;&#34;
+        if self.slippage_pct &lt; 0 or self.slippage_pct &gt; 100:
+            raise ValueError(&#34;Splippage must be between 0 and 100&#34;)
+
+        if self.pool.calculator.is_empty:
+            raise ValueError(&#34;Pool is empty and swaps are impossible.&#34;)
+
+    def _build_effect(self) -&gt; SwapEffect:
+        amount_in = self.pool.calculator.get_net_amount_in(
+            self.asset_out, self.amount_out
+        )
+
+        if self.asset_out == self.pool.primary_asset:
+            primary_liq_change = self.amount_out
+            secondary_liq_change = -amount_in
+        else:
+            primary_liq_change = -amount_in
+            secondary_liq_change = self.amount_out
+
+        return SwapEffect(
+            amount_out=self.amount_out,
+            amount_in=amount_in,
+            minimum_amount_in=self.pool.calculator.get_minimum_amount_in(
+                self.asset_out, self.amount_out, self.slippage_pct
+            ),
+            price=self.pool.calculator.get_swap_price(self.asset_out, self.amount_out),
+            primary_asset_price_after_swap=self.pool.calculator.get_asset_price_after_liq_change(
+                self.pool.primary_asset,
+                primary_liq_change,
+                secondary_liq_change,
+            ),
+            secondary_asset_price_after_swap=self.pool.calculator.get_asset_price_after_liq_change(
+                self.pool.secondary_asset,
+                primary_liq_change,
+                secondary_liq_change,
+            ),
+            primary_asset_price_change_pct=self.pool.calculator.get_price_change_pct(
+                self.pool.primary_asset,
+                primary_liq_change,
+                secondary_liq_change,
+            ),
+            secondary_asset_price_change_pct=self.pool.calculator.get_price_change_pct(
+                self.pool.secondary_asset,
+                primary_liq_change,
+                secondary_liq_change,
+            ),
+            fee=self.pool.calculator.get_fee(self.asset_out, self.amount_out),
+        )</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="pactsdk.swap.Swap.amount_out"><code class="name">var <span class="ident">amount_out</span> : int</code></dt>
+<dd>
+<div class="desc"><p>The amount of asset to receive</p></div>
+</dd>
+<dt id="pactsdk.swap.Swap.asset_out"><code class="name">var <span class="ident">asset_out</span> : <a title="pactsdk.asset.Asset" href="asset.html#pactsdk.asset.Asset">Asset</a></code></dt>
+<dd>
+<div class="desc"><p>The asset being received from the swap.</p></div>
+</dd>
+<dt id="pactsdk.swap.Swap.pool"><code class="name">var <span class="ident">pool</span> : Pool</code></dt>
+<dd>
+<div class="desc"><p>The pool that the swap is being performed in.</p></div>
+</dd>
+<dt id="pactsdk.swap.Swap.slippage_pct"><code class="name">var <span class="ident">slippage_pct</span> : float</code></dt>
+<dd>
+<div class="desc"><p>The maximum amount of slippage in percent terms to tollerate.</p></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="pactsdk.swap.Swap.prepare_tx"><code class="name flex">
+<span>def <span class="ident">prepare_tx</span></span>(<span>self, address: str) ‑> <a title="pactsdk.transaction_group.TransactionGroup" href="transaction_group.html#pactsdk.transaction_group.TransactionGroup">TransactionGroup</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Creates a signed transaction for swapping out the asset.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>address</code></strong> :&ensp;<code>str</code></dt>
+<dd>The private key to sign the transactions with.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>TransactionGroup</code></dt>
+<dd>Transaction group to produce a swap.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def prepare_tx(self, address: str) -&gt; TransactionGroup:
+    &#34;&#34;&#34;Creates a signed transaction for swapping out the asset.
+
+    Args:
+        address (str): The private key to sign the transactions with.
+
+    Returns:
+        TransactionGroup: Transaction group to produce a swap.
+    &#34;&#34;&#34;
+    return self.pool.prepare_swap_tx(self, address)</code></pre>
+</details>
+</dd>
+<dt id="pactsdk.swap.Swap.validate_swap"><code class="name flex">
+<span>def <span class="ident">validate_swap</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Validates that the swap details are valid.</p>
+<p>Specifically this validates that the slippage percentage is correct between 0 - 100 and the pool
+is not empty.</p>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>Raised when the slippage is below 0 or above 100.</dd>
+<dt><code>ValueError</code></dt>
+<dd>Raised when the pool is empty, has no tokens.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def validate_swap(self):
+    &#34;&#34;&#34;Validates that the swap details are valid.
+
+    Specifically this validates that the slippage percentage is correct between 0 - 100 and the pool
+    is not empty.
+
+    Raises:
+        ValueError: Raised when the slippage is below 0 or above 100.
+        ValueError: Raised when the pool is empty, has no tokens.
+    &#34;&#34;&#34;
+    if self.slippage_pct &lt; 0 or self.slippage_pct &gt; 100:
+        raise ValueError(&#34;Splippage must be between 0 and 100&#34;)
+
+    if self.pool.calculator.is_empty:
+        raise ValueError(&#34;Pool is empty and swaps are impossible.&#34;)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="pactsdk.swap.SwapEffect"><code class="flex name class">
+<span>class <span class="ident">SwapEffect</span></span>
+<span>(</span><span>amount_in: int, amount_out: int, minimum_amount_in: int, fee: int, primary_asset_price_after_swap: decimal.Decimal, secondary_asset_price_after_swap: decimal.Decimal, primary_asset_price_change_pct: decimal.Decimal, secondary_asset_price_change_pct: decimal.Decimal, price: decimal.Decimal)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A data class containing the relevant information about the outcome of a swap.</p>
+<p>The swap effect is created from the main <code><a title="pactsdk.swap.Swap" href="#pactsdk.swap.Swap">Swap</a></code> class, accessible from the effect function.
+See the build_effect description for how the values are precisely calculated.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class SwapEffect:
+    &#34;&#34;&#34;A data class containing the relevant information about the outcome of a swap.
+
+    The swap effect is created from the main `Swap` class, accessible from the effect function.
+    See the build_effect description for how the values are precisely calculated.
+    &#34;&#34;&#34;
+
+    amount_in: int
+    &#34;&#34;&#34;The amount deposited in the swap.&#34;&#34;&#34;
+    amount_out: int
+    &#34;&#34;&#34;The amount received from the swap.&#34;&#34;&#34;
+    minimum_amount_in: int
+    &#34;&#34;&#34;The minimal amount that will be required to be a valid swap.&#34;&#34;&#34;
+    fee: int
+    &#34;&#34;&#34;The fee in micro algo for the transaction.&#34;&#34;&#34;
+    primary_asset_price_after_swap: D
+    &#34;&#34;&#34;The total quantity of primary asset in the pool after the swap has been committed.&#34;&#34;&#34;
+    secondary_asset_price_after_swap: D
+    &#34;&#34;&#34;The total quantity of secondary asset in the pool after the swap has been committed.&#34;&#34;&#34;
+    primary_asset_price_change_pct: D
+    &#34;&#34;&#34;The percentage change of the primary asset.&#34;&#34;&#34;
+    secondary_asset_price_change_pct: D
+    &#34;&#34;&#34;The percentage change of the secondary asset.&#34;&#34;&#34;
+    price: D
+    &#34;&#34;&#34;The implied price for the swap.&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="pactsdk.swap.SwapEffect.amount_in"><code class="name">var <span class="ident">amount_in</span> : int</code></dt>
+<dd>
+<div class="desc"><p>The amount deposited in the swap.</p></div>
+</dd>
+<dt id="pactsdk.swap.SwapEffect.amount_out"><code class="name">var <span class="ident">amount_out</span> : int</code></dt>
+<dd>
+<div class="desc"><p>The amount received from the swap.</p></div>
+</dd>
+<dt id="pactsdk.swap.SwapEffect.fee"><code class="name">var <span class="ident">fee</span> : int</code></dt>
+<dd>
+<div class="desc"><p>The fee in micro algo for the transaction.</p></div>
+</dd>
+<dt id="pactsdk.swap.SwapEffect.minimum_amount_in"><code class="name">var <span class="ident">minimum_amount_in</span> : int</code></dt>
+<dd>
+<div class="desc"><p>The minimal amount that will be required to be a valid swap.</p></div>
+</dd>
+<dt id="pactsdk.swap.SwapEffect.price"><code class="name">var <span class="ident">price</span> : decimal.Decimal</code></dt>
+<dd>
+<div class="desc"><p>The implied price for the swap.</p></div>
+</dd>
+<dt id="pactsdk.swap.SwapEffect.primary_asset_price_after_swap"><code class="name">var <span class="ident">primary_asset_price_after_swap</span> : decimal.Decimal</code></dt>
+<dd>
+<div class="desc"><p>The total quantity of primary asset in the pool after the swap has been committed.</p></div>
+</dd>
+<dt id="pactsdk.swap.SwapEffect.primary_asset_price_change_pct"><code class="name">var <span class="ident">primary_asset_price_change_pct</span> : decimal.Decimal</code></dt>
+<dd>
+<div class="desc"><p>The percentage change of the primary asset.</p></div>
+</dd>
+<dt id="pactsdk.swap.SwapEffect.secondary_asset_price_after_swap"><code class="name">var <span class="ident">secondary_asset_price_after_swap</span> : decimal.Decimal</code></dt>
+<dd>
+<div class="desc"><p>The total quantity of secondary asset in the pool after the swap has been committed.</p></div>
+</dd>
+<dt id="pactsdk.swap.SwapEffect.secondary_asset_price_change_pct"><code class="name">var <span class="ident">secondary_asset_price_change_pct</span> : decimal.Decimal</code></dt>
+<dd>
+<div class="desc"><p>The percentage change of the secondary asset.</p></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="pactsdk" href="index.html">pactsdk</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="pactsdk.swap.Swap" href="#pactsdk.swap.Swap">Swap</a></code></h4>
+<ul class="two-column">
+<li><code><a title="pactsdk.swap.Swap.amount_out" href="#pactsdk.swap.Swap.amount_out">amount_out</a></code></li>
+<li><code><a title="pactsdk.swap.Swap.asset_out" href="#pactsdk.swap.Swap.asset_out">asset_out</a></code></li>
+<li><code><a title="pactsdk.swap.Swap.pool" href="#pactsdk.swap.Swap.pool">pool</a></code></li>
+<li><code><a title="pactsdk.swap.Swap.prepare_tx" href="#pactsdk.swap.Swap.prepare_tx">prepare_tx</a></code></li>
+<li><code><a title="pactsdk.swap.Swap.slippage_pct" href="#pactsdk.swap.Swap.slippage_pct">slippage_pct</a></code></li>
+<li><code><a title="pactsdk.swap.Swap.validate_swap" href="#pactsdk.swap.Swap.validate_swap">validate_swap</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pactsdk.swap.SwapEffect" href="#pactsdk.swap.SwapEffect">SwapEffect</a></code></h4>
+<ul class="">
+<li><code><a title="pactsdk.swap.SwapEffect.amount_in" href="#pactsdk.swap.SwapEffect.amount_in">amount_in</a></code></li>
+<li><code><a title="pactsdk.swap.SwapEffect.amount_out" href="#pactsdk.swap.SwapEffect.amount_out">amount_out</a></code></li>
+<li><code><a title="pactsdk.swap.SwapEffect.fee" href="#pactsdk.swap.SwapEffect.fee">fee</a></code></li>
+<li><code><a title="pactsdk.swap.SwapEffect.minimum_amount_in" href="#pactsdk.swap.SwapEffect.minimum_amount_in">minimum_amount_in</a></code></li>
+<li><code><a title="pactsdk.swap.SwapEffect.price" href="#pactsdk.swap.SwapEffect.price">price</a></code></li>
+<li><code><a title="pactsdk.swap.SwapEffect.primary_asset_price_after_swap" href="#pactsdk.swap.SwapEffect.primary_asset_price_after_swap">primary_asset_price_after_swap</a></code></li>
+<li><code><a title="pactsdk.swap.SwapEffect.primary_asset_price_change_pct" href="#pactsdk.swap.SwapEffect.primary_asset_price_change_pct">primary_asset_price_change_pct</a></code></li>
+<li><code><a title="pactsdk.swap.SwapEffect.secondary_asset_price_after_swap" href="#pactsdk.swap.SwapEffect.secondary_asset_price_after_swap">secondary_asset_price_after_swap</a></code></li>
+<li><code><a title="pactsdk.swap.SwapEffect.secondary_asset_price_change_pct" href="#pactsdk.swap.SwapEffect.secondary_asset_price_change_pct">secondary_asset_price_change_pct</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

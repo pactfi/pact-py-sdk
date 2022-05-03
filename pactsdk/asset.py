@@ -4,7 +4,7 @@
     It also includes utility functions for opting in and querying account information related to the asset.
     A factory function allows you to fetch the information by index number.
 
-    Typical Usage:
+    Typical usage example:
     ```
     import algosdk
     from algosdk.v2client.algod import AlgodClient
