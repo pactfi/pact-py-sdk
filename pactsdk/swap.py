@@ -1,6 +1,4 @@
 """Set of utility classes for managing performing swaps.
- 
-
 """
 from dataclasses import dataclass
 from decimal import Decimal as D

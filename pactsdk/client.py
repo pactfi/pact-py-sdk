@@ -4,7 +4,7 @@
     pools, either by asset, by id or overall.
 
     Typical usage example:
-    ``` 
+    ```
     import algosdk
     from algosdk.v2client.algod import AlgodClient
 
@@ -16,8 +16,6 @@
     algo = pact.fetch_asset(0) #return the algo asset
 
     ```
-
-
 """
 from typing import Union
 
