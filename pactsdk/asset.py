@@ -5,15 +5,16 @@ from typing import Optional
 from algosdk.future import transaction
 from algosdk.v2client.algod import AlgodClient
 
-ASSETS_CACHE: dict[int, "Asset"] = {}
+ASSETS_CACHE: dict[tuple[int, AlgodClient], "Asset"] = {}
 
 
 def fetch_asset_by_index(
     algod: AlgodClient,
     index: int,
 ) -> "Asset":
-    if index in ASSETS_CACHE:
-        return copy.copy(ASSETS_CACHE[index])
+    cache_key = (algod, index)
+    if cache_key in ASSETS_CACHE:
+        return copy.copy(ASSETS_CACHE[cache_key])
 
     if index > 0:
         asset_info = algod.asset_info(index)
@@ -33,7 +34,7 @@ def fetch_asset_by_index(
         unit_name=params.get("unit-name"),
     )
 
-    ASSETS_CACHE[index] = asset
+    ASSETS_CACHE[cache_key] = asset
 
     return asset
 
