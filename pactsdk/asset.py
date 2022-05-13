@@ -52,12 +52,18 @@ class Asset:
         return 10**self.decimals
 
     def prepare_opt_in_tx(self, address: str):
+        suggested_params = self.algod.suggested_params()
+        return self.build_opt_in_tx(address, suggested_params)
+
+    def build_opt_in_tx(
+        self, address: str, suggested_params: transaction.SuggestedParams
+    ):
         return transaction.AssetTransferTxn(
             sender=address,
             receiver=address,
             amt=0,
             index=self.index,
-            sp=self.algod.suggested_params(),
+            sp=suggested_params,
         )
 
     def is_opted_in(self, address: str) -> bool:

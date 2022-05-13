@@ -122,7 +122,7 @@ Managing the liquidity.
 
 ```py
 # Add liquidity.
-add_liq_tx_group = pool.prepare_add_liquidity_tx(
+add_liq_tx_group = pool.prepare_add_liquidity_tx_group(
   address=address,
   primary_asset_amount=100_000,
   secondary_asset_amount=50_000,
@@ -131,7 +131,7 @@ signed_add_liq_tx_group = add_liq_tx_group.sign(private_key)
 algod.send_transactions(signed_add_liq_tx_group)
 
 # Remove liquidity.
-remove_liq_tx_group = pool.prepare_remove_liquidity_tx(
+remove_liq_tx_group = pool.prepare_remove_liquidity_tx_group(
   address=address,
   amount=100_000,
 )
@@ -163,7 +163,7 @@ print(swap.effect)
 # )
 
 # Let's submit the swap.
-swap_tx_group = swap.prepare_tx(address)
+swap_tx_group = swap.prepare_tx_group(address)
 signed_tx_group = swap_tx_group.sign_txn(private_key)
 algod.send_transactions(signed_tx_group)
 ```

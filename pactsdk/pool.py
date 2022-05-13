@@ -116,53 +116,93 @@ class Pool:
         self.state = self.parse_internal_state(self.internal_state)
         return self.state
 
-    def prepare_add_liquidity_tx(
+    def prepare_add_liquidity_tx_group(
         self,
         address: str,
         primary_asset_amount: int,
         secondary_asset_amount: int,
     ):
         suggested_params = self.algod.suggested_params()
+        txs = self.build_add_liquidity_txs(
+            address, primary_asset_amount, secondary_asset_amount, suggested_params
+        )
+        return TransactionGroup(txs)
 
-        txn1 = self._make_deposit_tx(
+    def build_add_liquidity_txs(
+        self,
+        address: str,
+        primary_asset_amount: int,
+        secondary_asset_amount: int,
+        suggested_params: transaction.SuggestedParams,
+        note=b"",
+    ):
+        txs: list[transaction.Transaction] = []
+        if self.calculator.is_empty:
+            # Adding initial liquidity has a limitation that the product of 2 assets must be lower then 2**64. Let's check if we can fit below the limit.
+            max_product = 2**64
+            product = primary_asset_amount * secondary_asset_amount
+            if product >= max_product:
+                # Need to split the liquidity into two chunks.
+                divisor = int((product / max_product) ** 0.5 + 1)
+                primary_small_amount = primary_asset_amount // divisor
+                secondary_small_amount = secondary_asset_amount // divisor
+
+                primary_asset_amount -= primary_small_amount
+                secondary_asset_amount -= secondary_small_amount
+
+                txs = self.build_add_liquidity_txs(
+                    address=address,
+                    primary_asset_amount=primary_small_amount,
+                    secondary_asset_amount=secondary_small_amount,
+                    suggested_params=suggested_params,
+                    note=b"Initial add liquidity",
+                )
+
+        tx1 = self._make_deposit_tx(
             address=address,
             asset=self.primary_asset,
             amount=primary_asset_amount,
             suggested_params=suggested_params,
         )
-        txn2 = self._make_deposit_tx(
+        tx2 = self._make_deposit_tx(
             address=address,
             asset=self.secondary_asset,
             amount=secondary_asset_amount,
             suggested_params=suggested_params,
         )
-        txn3 = self._make_application_noop_tx(
+        tx3 = self._make_application_noop_tx(
             address=address,
             fee=3000,
             args=["ADDLIQ", 0],
             extraAsset=self.liquidity_asset,
             suggested_params=suggested_params,
+            note=note,
         )
 
-        return TransactionGroup([txn1, txn2, txn3])
+        return [*txs, tx1, tx2, tx3]
 
-    def prepare_remove_liquidity_tx(self, address: str, amount: int):
+    def prepare_remove_liquidity_tx_group(self, address: str, amount: int):
         suggested_params = self.algod.suggested_params()
+        txs = self.build_remove_liquidity_txs(address, amount, suggested_params)
+        return TransactionGroup(txs)
 
-        txn1 = self._make_deposit_tx(
+    def build_remove_liquidity_txs(
+        self, address: str, amount: int, suggested_params: transaction.SuggestedParams
+    ):
+        tx1 = self._make_deposit_tx(
             address=address,
             amount=amount,
             asset=self.liquidity_asset,
             suggested_params=suggested_params,
         )
-        txn2 = self._make_application_noop_tx(
+        tx2 = self._make_application_noop_tx(
             address=address,
             fee=3000,
             args=["REMLIQ", 0, 0],  # min expected primary, min expected secondary
             suggested_params=suggested_params,
         )
 
-        return TransactionGroup([txn1, txn2])
+        return [tx1, tx2]
 
     def prepare_swap(self, asset: Asset, amount: int, slippage_pct: float) -> Swap:
         assert self.is_asset_in_the_pool(asset), f"Asset {asset.index} not in the pool"
@@ -173,23 +213,28 @@ class Pool:
             slippage_pct=slippage_pct,
         )
 
-    def prepare_swap_tx(self, swap: Swap, address: str):
+    def prepare_swap_tx_group(self, swap: Swap, address: str):
         suggested_params = self.algod.suggested_params()
+        txs = self.build_swap_txs(swap, address, suggested_params)
+        return TransactionGroup(txs)
 
-        txn1 = self._make_deposit_tx(
+    def build_swap_txs(
+        self, swap: Swap, address: str, suggested_params: transaction.SuggestedParams
+    ):
+        tx1 = self._make_deposit_tx(
             address=address,
             amount=swap.amount_deposited,
             asset=swap.asset_deposited,
             suggested_params=suggested_params,
         )
-        txn2 = self._make_application_noop_tx(
+        tx2 = self._make_application_noop_tx(
             address=address,
             fee=2000,
             args=["SWAP", swap.effect.minimum_amount_received],
             suggested_params=suggested_params,
         )
 
-        return TransactionGroup([txn1, txn2])
+        return [tx1, tx2]
 
     def is_asset_in_the_pool(self, asset: Asset):
         return asset.index in {self.primary_asset.index, self.secondary_asset.index}
@@ -234,6 +279,7 @@ class Pool:
         fee: int,
         suggested_params: transaction.SuggestedParams,
         extraAsset: Optional[Asset] = None,
+        note=b"",
     ):
         foreign_assets: list[int] = [
             self.primary_asset.index,
@@ -252,4 +298,5 @@ class Pool:
             foreign_assets=foreign_assets,
             app_args=args,
             sp=suggested_params,
+            note=note,
         )

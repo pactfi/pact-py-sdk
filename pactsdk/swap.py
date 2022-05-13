@@ -34,8 +34,8 @@ class Swap:
         self.validate_swap()
         self.effect = self._build_effect()
 
-    def prepare_tx(self, address: str) -> TransactionGroup:
-        return self.pool.prepare_swap_tx(self, address)
+    def prepare_tx_group(self, address: str) -> TransactionGroup:
+        return self.pool.prepare_swap_tx_group(self, address)
 
     def validate_swap(self):
         if self.slippage_pct < 0 or self.slippage_pct > 100:

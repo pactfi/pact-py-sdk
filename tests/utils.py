@@ -127,12 +127,12 @@ def add_liqudity(
     opt_in_tx = pool.liquidity_asset.prepare_opt_in_tx(account.address)
     sign_and_send(opt_in_tx, account)
 
-    add_liq_tx = pool.prepare_add_liquidity_tx(
+    add_liq_tx_group = pool.prepare_add_liquidity_tx_group(
         address=account.address,
         primary_asset_amount=primary_asset_amount,
         secondary_asset_amount=secondary_asset_amount,
     )
-    sign_and_send(add_liq_tx, account)
+    sign_and_send(add_liq_tx_group, account)
     pool.update_state()
 
 

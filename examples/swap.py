@@ -24,7 +24,7 @@ swap = pool.prepare_swap(
     amount=100_000,
     slippage_pct=2,
 )
-swap_tx_group = swap.prepare_tx(address)
+swap_tx_group = swap.prepare_tx_group(address)
 signed_txs_group = swap_tx_group.sign(private_key)
 sent_txid = algod.send_transactions(signed_txs_group)
 

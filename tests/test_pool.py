@@ -6,7 +6,7 @@ import responses
 
 import pactsdk
 
-from .utils import TestBed, algod, deploy_contract, sign_and_send
+from .utils import TestBed, algod, create_asset, deploy_contract, sign_and_send
 
 
 @responses.activate
@@ -243,6 +243,40 @@ def test_pool_get_other_other(testbed: TestBed):
         testbed.pool.get_other_asset(shitcoin)
 
 
+def test_adding_big_liquidity_to_an_empty_pool_using_split(testbed: TestBed):
+    coin_a_index = create_asset(testbed.account, "coinA", 0, 2**50 - 1)
+    coin_b_index = create_asset(testbed.account, "coinB", 0, 2**50 - 1)
+
+    app_id = deploy_contract(
+        testbed.account, "CONSTANT_PRODUCT", coin_a_index, coin_b_index
+    )
+    pool = testbed.pact.fetch_pool_by_id(app_id)
+
+    assert pool.calculator.is_empty
+
+    liq_opt_in_tx = pool.liquidity_asset.prepare_opt_in_tx(testbed.account.address)
+    sign_and_send(liq_opt_in_tx, testbed.account)
+
+    # Adding initial liquidity has a limitation that the product of 2 assets must be lower then 2**64.
+    # Let's go beyond that limit and check what happens.
+    [primary_asset_amount, secondary_asset_amount] = [2**40, 2**30]
+
+    tx_group = pool.prepare_add_liquidity_tx_group(
+        address=testbed.account.address,
+        primary_asset_amount=primary_asset_amount,
+        secondary_asset_amount=secondary_asset_amount,
+    )
+
+    # liquidity is split into two chunks, so 6 txs instead of 3.
+    assert len(tx_group.transactions) == 6
+
+    sign_and_send(tx_group, testbed.account)
+
+    pool.update_state()
+    assert pool.state.total_primary == primary_asset_amount
+    assert pool.state.total_secondary == secondary_asset_amount
+
+
 def test_pool_e2e_scenario(testbed: TestBed):
     assert testbed.pool.state == pactsdk.PoolState(
         total_liquidity=0,
@@ -259,12 +293,14 @@ def test_pool_e2e_scenario(testbed: TestBed):
     sign_and_send(liq_opt_in_tx, testbed.account)
 
     # Add liquidity.
-    add_liq_tx = testbed.pool.prepare_add_liquidity_tx(
+    add_liq_tx_group = testbed.pool.prepare_add_liquidity_tx_group(
         address=testbed.account.address,
         primary_asset_amount=100_000,
         secondary_asset_amount=100_000,
     )
-    sign_and_send(add_liq_tx, testbed.account)
+    assert add_liq_tx_group.group_id
+    assert len(add_liq_tx_group.transactions) == 3
+    sign_and_send(add_liq_tx_group, testbed.account)
     testbed.pool.update_state()
     assert testbed.pool.state == pactsdk.PoolState(
         total_liquidity=100_000,
@@ -275,11 +311,12 @@ def test_pool_e2e_scenario(testbed: TestBed):
     )
 
     # Remove liquidity.
-    remove_liq_tx = testbed.pool.prepare_remove_liquidity_tx(
+    remove_liq_tx_group = testbed.pool.prepare_remove_liquidity_tx_group(
         address=testbed.account.address,
         amount=10_000,
     )
-    sign_and_send(remove_liq_tx, testbed.account)
+    assert len(remove_liq_tx_group.transactions) == 2
+    sign_and_send(remove_liq_tx_group, testbed.account)
     testbed.pool.update_state()
     assert testbed.pool.state == pactsdk.PoolState(
         total_liquidity=90_000,
@@ -295,8 +332,9 @@ def test_pool_e2e_scenario(testbed: TestBed):
         amount=20_000,
         slippage_pct=2,
     )
-    algo_swap_tx = algo_swap.prepare_tx(testbed.account.address)
-    sign_and_send(algo_swap_tx, testbed.account)
+    algo_swap_tx_group = algo_swap.prepare_tx_group(testbed.account.address)
+    assert len(algo_swap_tx_group.transactions) == 2
+    sign_and_send(algo_swap_tx_group, testbed.account)
     testbed.pool.update_state()
     assert testbed.pool.state.total_liquidity == 90_000
     assert testbed.pool.state.total_primary > 100_000
@@ -310,7 +348,7 @@ def test_pool_e2e_scenario(testbed: TestBed):
         amount=50_000,
         slippage_pct=2,
     )
-    coin_swap_tx = coin_swap.prepare_tx(testbed.account.address)
+    coin_swap_tx = coin_swap.prepare_tx_group(testbed.account.address)
     sign_and_send(coin_swap_tx, testbed.account)
     testbed.pool.update_state()
     assert testbed.pool.state.total_liquidity == 90_000

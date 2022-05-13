@@ -6,6 +6,7 @@ import pytest
 from algosdk.error import AlgodHTTPError
 
 import pactsdk
+from pactsdk.transaction_group import TransactionGroup
 
 from .matchers import Any
 from .utils import (
@@ -32,8 +33,8 @@ def _test_swap(
 
     # Perform the swap.
     old_state = swap.pool.state
-    swap_tx = swap.prepare_tx(account.address)
-    sign_and_send(swap_tx, account)
+    swap_tx_group = swap.prepare_tx_group(account.address)
+    sign_and_send(swap_tx_group, account)
     swap.pool.update_state()
 
     # Compare the simulated effect with what really happened on the blockchain.
@@ -171,11 +172,11 @@ def test_swap_primary_too_high_minimum_amount(testbed: TestBed):
     assert swap.slippage_pct == 0
 
     # Perform the swap.
-    swap_tx = swap.prepare_tx(testbed.account.address)
+    swap_tx_group = swap.prepare_tx_group(testbed.account.address)
     with pytest.raises(
         AlgodHTTPError, match="logic eval error: - would result negative."
     ):
-        sign_and_send(swap_tx, testbed.account)
+        sign_and_send(swap_tx_group, testbed.account)
 
 
 def test_swap_secondary_too_high_minimum_amount(testbed: TestBed):
@@ -194,11 +195,11 @@ def test_swap_secondary_too_high_minimum_amount(testbed: TestBed):
     assert swap.slippage_pct == 0
 
     # Perform the swap.
-    swap_tx = swap.prepare_tx(testbed.account.address)
+    swap_tx_group = swap.prepare_tx_group(testbed.account.address)
     with pytest.raises(
         AlgodHTTPError, match="logic eval error: - would result negative."
     ):
-        sign_and_send(swap_tx, testbed.account)
+        sign_and_send(swap_tx_group, testbed.account)
 
 
 def test_swap_primary_with_not_equal_liquidity(testbed: TestBed):
@@ -267,11 +268,11 @@ def test_swap_with_custom_fee_bps():
 
     # Perform the swaps and check if the simulated effect matches what really happened in the blockchain.
 
-    swap_a_tx = swap_a.prepare_tx(testbed_a.account.address)
+    swap_a_tx = swap_a.prepare_tx_group(testbed_a.account.address)
     sign_and_send(swap_a_tx, testbed_a.account)
     testbed_a.pool.update_state()
 
-    swap_b_tx = swap_b.prepare_tx(testbed_b.account.address)
+    swap_b_tx = swap_b.prepare_tx_group(testbed_b.account.address)
     sign_and_send(swap_b_tx, testbed_b.account)
     testbed_b.pool.update_state()
 
@@ -338,18 +339,18 @@ def test_swap_with_different_slippage(testbed: TestBed):
         asset=testbed.algo,
         slippage_pct=0,
     )
-    swap_tx = swap.prepare_tx(testbed.account.address)
-    sign_and_send(swap_tx, testbed.account)
+    swap_tx_group = swap.prepare_tx_group(testbed.account.address)
+    sign_and_send(swap_tx_group, testbed.account)
 
     # Swap A and B should fail because slippage is too low.
 
-    swap_a_tx = swap_a.prepare_tx(testbed.account.address)
+    swap_a_tx_group = swap_a.prepare_tx_group(testbed.account.address)
     with pytest.raises(algosdk.error.AlgodHTTPError):
-        sign_and_send(swap_a_tx, testbed.account)
+        sign_and_send(swap_a_tx_group, testbed.account)
 
-    swap_b_tx = swap_b.prepare_tx(testbed.account.address)
+    swap_b_tx_group = swap_b.prepare_tx_group(testbed.account.address)
     with pytest.raises(algosdk.error.AlgodHTTPError):
-        sign_and_send(swap_b_tx, testbed.account)
+        sign_and_send(swap_b_tx_group, testbed.account)
 
     testbed.pool.update_state()
     assert (
@@ -357,8 +358,8 @@ def test_swap_with_different_slippage(testbed: TestBed):
     )  # no change yet
 
     # Swap C and D should pass;
-    swap_c_tx = swap_c.prepare_tx(testbed.account.address)
-    sign_and_send(swap_c_tx, testbed.account)
+    swap_c_tx_group = swap_c.prepare_tx_group(testbed.account.address)
+    sign_and_send(swap_c_tx_group, testbed.account)
     testbed.pool.update_state()
     swapped_c_amount = (
         20_000 - swap.effect.amount_received - testbed.pool.state.total_secondary
@@ -366,8 +367,8 @@ def test_swap_with_different_slippage(testbed: TestBed):
     assert swapped_c_amount < swap_c.effect.amount_received
     assert swapped_c_amount > swap_c.effect.minimum_amount_received
 
-    swap_d_tx = swap_d.prepare_tx(testbed.account.address)
-    sign_and_send(swap_d_tx, testbed.account)
+    swap_d_tx_group = swap_d.prepare_tx_group(testbed.account.address)
+    sign_and_send(swap_d_tx_group, testbed.account)
     testbed.pool.update_state()
     swapped_d_amount = (
         20_000
@@ -408,3 +409,27 @@ def test_swap_asa_to_asa():
         slippage_pct=10,
     )
     _test_swap(swap, 20_000, 20_000, 1000, account)
+
+
+def test_swap_and_optin_in_a_single_group(testbed: TestBed):
+    other_account = new_account()
+    primaryLiq, secondaryLiq, amount = [20_000, 20_000, 1_000]
+    add_liqudity(testbed.account, testbed.pool, primaryLiq, secondaryLiq)
+
+    swap = testbed.pool.prepare_swap(
+        amount=amount,
+        asset=testbed.algo,
+        slippage_pct=10,
+    )
+
+    suggested_params = testbed.pact.algod.suggested_params()
+    opt_in_tx = testbed.coin.build_opt_in_tx(other_account.address, suggested_params)
+    swap_txs = testbed.pool.build_swap_txs(
+        swap=swap,
+        address=other_account.address,
+        suggested_params=suggested_params,
+    )
+    txs = [opt_in_tx, *swap_txs]
+
+    group = TransactionGroup(txs)
+    sign_and_send(group, other_account)
