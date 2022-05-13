@@ -124,7 +124,11 @@ def test_fetching_pools_by_assets_with_reversed_assets(testbed: TestBed):
 @responses.activate
 def test_fetching_pools_by_assets_multiple_results(testbed: TestBed):
     second_app_id = deploy_contract(
-        testbed.account, testbed.algo.index, testbed.coin.index, fee_bps=100
+        testbed.account,
+        "CONSTANT_PRODUCT",
+        testbed.algo.index,
+        testbed.coin.index,
+        fee_bps=100,
     )
     mocked_api_data: dict = {
         "results": [

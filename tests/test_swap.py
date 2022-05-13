@@ -25,10 +25,10 @@ def _test_swap(
     swap: pactsdk.Swap,
     primary_liq: int,
     secondary_liq: int,
-    amount_out: int,
+    amount_deposited: int,
     account: Account,
 ):
-    assert_swap_effect(swap, primary_liq, secondary_liq, amount_out)
+    assert_swap_effect(swap, primary_liq, secondary_liq, amount_deposited)
 
     # Perform the swap.
     old_state = swap.pool.state
@@ -44,39 +44,42 @@ def assert_swap_effect(
     swap: pactsdk.Swap,
     primary_liq: int,
     secondary_liq: int,
-    amount_out: int,
+    amount_deposited: int,
 ):
     fee_bps = swap.pool.fee_bps
-    if swap.asset_out == swap.pool.primary_asset:
-        gross_amount_in = int(
-            D(amount_out * secondary_liq) / D(primary_liq + amount_out)
+    if swap.asset_deposited == swap.pool.primary_asset:
+        gross_amount_received = int(
+            D(amount_deposited * secondary_liq) / D(primary_liq + amount_deposited)
         )
     else:
-        gross_amount_in = int(
-            D(amount_out * primary_liq) / D(secondary_liq + amount_out)
+        gross_amount_received = int(
+            D(amount_deposited * primary_liq) / D(secondary_liq + amount_deposited)
         )
 
-    amount_in = gross_amount_in * (10_000 - D(fee_bps)) / 10_000
+    amount_received = gross_amount_received * (10_000 - D(fee_bps)) / 10_000
 
     assert swap.effect == pactsdk.SwapEffect(
-        amount_out=amount_out,
-        amount_in=math.floor(amount_in),
-        minimum_amount_in=math.floor(
-            amount_in - amount_in * D(swap.slippage_pct / 100)
+        amount_deposited=amount_deposited,
+        amount_received=math.floor(amount_received),
+        minimum_amount_received=math.floor(
+            amount_received - amount_received * D(swap.slippage_pct / 100)
         ),
-        fee=round(gross_amount_in - amount_in),
-        price=(gross_amount_in / D(swap.asset_in.ratio))
-        / (amount_out / D(swap.asset_out.ratio)),
+        fee=round(gross_amount_received - amount_received),
+        price=(gross_amount_received / D(swap.asset_in.ratio))
+        / (amount_deposited / D(swap.asset_deposited.ratio)),
         primary_asset_price_after_swap=Any(D),
         primary_asset_price_change_pct=Any(D),
         secondary_asset_price_after_swap=Any(D),
         secondary_asset_price_change_pct=Any(D),
     )
 
-    diff_ratio = D(10 ** (swap.asset_in.decimals - swap.asset_out.decimals))
+    diff_ratio = D(10 ** (swap.asset_in.decimals - swap.asset_deposited.decimals))
     assert (
-        int(swap.effect.amount_out * swap.effect.price * diff_ratio - swap.effect.fee)
-        == swap.effect.amount_in
+        int(
+            swap.effect.amount_deposited * swap.effect.price * diff_ratio
+            - swap.effect.fee
+        )
+        == swap.effect.amount_received
     )
 
 
@@ -95,21 +98,23 @@ def assert_pool_state(
         (new_state.secondary_asset_price / old_state.secondary_asset_price) * 100 - 100
     )
 
-    if swap.asset_out == swap.pool.primary_asset:
+    if swap.asset_deposited == swap.pool.primary_asset:
         assert (
-            new_state.total_primary - old_state.total_primary == swap.effect.amount_out
+            new_state.total_primary - old_state.total_primary
+            == swap.effect.amount_deposited
         )
         assert (
             old_state.total_secondary - new_state.total_secondary
-            == swap.effect.amount_in
+            == swap.effect.amount_received
         )
     else:
         assert (
-            old_state.total_primary - new_state.total_primary == swap.effect.amount_in
+            old_state.total_primary - new_state.total_primary
+            == swap.effect.amount_received
         )
         assert (
             new_state.total_secondary - old_state.total_secondary
-            == swap.effect.amount_out
+            == swap.effect.amount_deposited
         )
 
 
@@ -144,7 +149,7 @@ def test_swap_primary_with_equal_liquidity(testbed: TestBed):
     )
 
     assert swap.asset_in == testbed.coin
-    assert swap.asset_out == testbed.algo
+    assert swap.asset_deposited == testbed.algo
     assert swap.slippage_pct == 10
 
     _test_swap(swap, primary_liq, secondary_liq, amount, testbed.account)
@@ -159,10 +164,10 @@ def test_swap_primary_too_high_minimum_amount(testbed: TestBed):
         asset=testbed.algo,
         slippage_pct=0,
     )
-    swap.effect.minimum_amount_in = 10 * swap.effect.minimum_amount_in
+    swap.effect.minimum_amount_received = 10 * swap.effect.minimum_amount_received
 
     assert swap.asset_in == testbed.coin
-    assert swap.asset_out == testbed.algo
+    assert swap.asset_deposited == testbed.algo
     assert swap.slippage_pct == 0
 
     # Perform the swap.
@@ -182,10 +187,10 @@ def test_swap_secondary_too_high_minimum_amount(testbed: TestBed):
         asset=testbed.coin,
         slippage_pct=0,
     )
-    swap.effect.minimum_amount_in = 10 * swap.effect.minimum_amount_in
+    swap.effect.minimum_amount_received = 10 * swap.effect.minimum_amount_received
 
     assert swap.asset_in == testbed.algo
-    assert swap.asset_out == testbed.coin
+    assert swap.asset_deposited == testbed.coin
     assert swap.slippage_pct == 0
 
     # Perform the swap.
@@ -258,7 +263,7 @@ def test_swap_with_custom_fee_bps():
 
     assert swap_b.effect.price == swap_a.effect.price
     assert swap_b.effect.fee > swap_a.effect.fee
-    assert swap_b.effect.amount_in < swap_a.effect.amount_in
+    assert swap_b.effect.amount_received < swap_a.effect.amount_received
 
     # Perform the swaps and check if the simulated effect matches what really happened in the blockchain.
 
@@ -270,8 +275,12 @@ def test_swap_with_custom_fee_bps():
     sign_and_send(swap_b_tx, testbed_b.account)
     testbed_b.pool.update_state()
 
-    assert testbed_a.pool.state.total_secondary == 20_000 - swap_a.effect.amount_in
-    assert testbed_b.pool.state.total_secondary == 20_000 - swap_b.effect.amount_in
+    assert (
+        testbed_a.pool.state.total_secondary == 20_000 - swap_a.effect.amount_received
+    )
+    assert (
+        testbed_b.pool.state.total_secondary == 20_000 - swap_b.effect.amount_received
+    )
 
 
 def test_swap_with_different_slippage(testbed: TestBed):
@@ -312,16 +321,16 @@ def test_swap_with_different_slippage(testbed: TestBed):
         slippage_pct=100,
     )
 
-    assert swap_a.effect.minimum_amount_in == swap_a.effect.amount_in
+    assert swap_a.effect.minimum_amount_received == swap_a.effect.amount_received
 
-    assert swap_b.effect.minimum_amount_in < swap_b.effect.amount_in
-    assert swap_b.effect.minimum_amount_in > 0
+    assert swap_b.effect.minimum_amount_received < swap_b.effect.amount_received
+    assert swap_b.effect.minimum_amount_received > 0
 
-    assert swap_c.effect.minimum_amount_in < swap_c.effect.amount_in
-    assert swap_c.effect.minimum_amount_in < swap_b.effect.minimum_amount_in
-    assert swap_c.effect.minimum_amount_in > 0
+    assert swap_c.effect.minimum_amount_received < swap_c.effect.amount_received
+    assert swap_c.effect.minimum_amount_received < swap_b.effect.minimum_amount_received
+    assert swap_c.effect.minimum_amount_received > 0
 
-    assert swap_d.effect.minimum_amount_in == 0
+    assert swap_d.effect.minimum_amount_received == 0
 
     # Now let's do a swap that change the price.
     swap = testbed.pool.prepare_swap(
@@ -344,7 +353,7 @@ def test_swap_with_different_slippage(testbed: TestBed):
 
     testbed.pool.update_state()
     assert (
-        testbed.pool.state.total_secondary == 20_000 - swap.effect.amount_in
+        testbed.pool.state.total_secondary == 20_000 - swap.effect.amount_received
     )  # no change yet
 
     # Swap C and D should pass;
@@ -352,22 +361,22 @@ def test_swap_with_different_slippage(testbed: TestBed):
     sign_and_send(swap_c_tx, testbed.account)
     testbed.pool.update_state()
     swapped_c_amount = (
-        20_000 - swap.effect.amount_in - testbed.pool.state.total_secondary
+        20_000 - swap.effect.amount_received - testbed.pool.state.total_secondary
     )
-    assert swapped_c_amount < swap_c.effect.amount_in
-    assert swapped_c_amount > swap_c.effect.minimum_amount_in
+    assert swapped_c_amount < swap_c.effect.amount_received
+    assert swapped_c_amount > swap_c.effect.minimum_amount_received
 
     swap_d_tx = swap_d.prepare_tx(testbed.account.address)
     sign_and_send(swap_d_tx, testbed.account)
     testbed.pool.update_state()
     swapped_d_amount = (
         20_000
-        - swap.effect.amount_in
+        - swap.effect.amount_received
         - swapped_c_amount
         - testbed.pool.state.total_secondary
     )
-    assert swapped_d_amount < swap_d.effect.amount_in
-    assert swapped_d_amount > swap_d.effect.minimum_amount_in
+    assert swapped_d_amount < swap_d.effect.amount_received
+    assert swapped_d_amount > swap_d.effect.minimum_amount_received
 
 
 def test_swap_asa_to_asa():
@@ -377,7 +386,7 @@ def test_swap_asa_to_asa():
     coin_a_index = create_asset(account, "COIN_A", 3)
     coin_b_index = create_asset(account, "COIN_B", 2)
 
-    app_id = deploy_contract(account, coin_a_index, coin_b_index)
+    app_id = deploy_contract(account, "CONSTANT_PRODUCT", coin_a_index, coin_b_index)
     pool = pact.fetch_pool_by_id(app_id=app_id)
 
     add_liqudity(account, pool, 20_000, 20_000)

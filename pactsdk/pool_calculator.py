@@ -68,25 +68,25 @@ class PoolCalculator:
             secondary_liq_amount / self.pool.secondary_asset.ratio
         )
 
-    def get_minimum_amount_in(
+    def get_minimum_amount_received(
         self, asset: Asset, amount: int, slippage_pct: float
     ) -> int:
-        amount_in = self.get_net_amount_in(asset, amount)
-        return math.floor(amount_in - (amount_in * (D(slippage_pct) / 100)))
+        amount_received = self.get_net_amount_received(asset, amount)
+        return math.floor(amount_received - (amount_received * (D(slippage_pct) / 100)))
 
-    def get_gross_amount_in(self, asset: Asset, amount: int) -> int:
+    def get_gross_amount_received(self, asset: Asset, amount: int) -> int:
         if asset == self.pool.primary_asset:
             return self._swap_primary_gross_amount(amount)
 
         return self._swap_secondary_gross_amount(amount)
 
-    def get_net_amount_in(self, asset: Asset, amount: int) -> int:
-        gross_amount = self.get_gross_amount_in(asset, amount)
+    def get_net_amount_received(self, asset: Asset, amount: int) -> int:
+        gross_amount = self.get_gross_amount_received(asset, amount)
         return self._subtract_fee(gross_amount)
 
     def get_fee(self, asset: Asset, amount: int) -> int:
-        return self.get_gross_amount_in(asset, amount) - (
-            self.get_net_amount_in(asset, amount)
+        return self.get_gross_amount_received(asset, amount) - (
+            self.get_net_amount_received(asset, amount)
         )
 
     def get_asset_price_after_liq_change(
@@ -119,11 +119,13 @@ class PoolCalculator:
         )
         return new_price / old_price * 100 - 100
 
-    def get_swap_price(self, asset_out: Asset, amount_out: int) -> D:
-        asset_in = self.pool.get_other_asset(asset_out)
-        amount_in = self.get_gross_amount_in(asset_out, amount_out)
-        diff_ratio = D(asset_out.ratio / asset_in.ratio)
-        return amount_in / D(amount_out) * diff_ratio
+    def get_swap_price(self, asset_deposited: Asset, amount_deposited: int) -> D:
+        asset_in = self.pool.get_other_asset(asset_deposited)
+        amount_received = self.get_gross_amount_received(
+            asset_deposited, amount_deposited
+        )
+        diff_ratio = D(asset_deposited.ratio / asset_in.ratio)
+        return amount_received / D(amount_deposited) * diff_ratio
 
     def _subtract_fee(self, asset_gross_amount: int) -> int:
         return int(asset_gross_amount * (10000 - self.pool.fee_bps) / D(10000))

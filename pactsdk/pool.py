@@ -166,21 +166,26 @@ class Pool:
 
     def prepare_swap(self, asset: Asset, amount: int, slippage_pct: float) -> Swap:
         assert self.is_asset_in_the_pool(asset), f"Asset {asset.index} not in the pool"
-        return Swap(self, asset_out=asset, amount_out=amount, slippage_pct=slippage_pct)
+        return Swap(
+            self,
+            asset_deposited=asset,
+            amount_deposited=amount,
+            slippage_pct=slippage_pct,
+        )
 
     def prepare_swap_tx(self, swap: Swap, address: str):
         suggested_params = self.algod.suggested_params()
 
         txn1 = self._make_deposit_tx(
             address=address,
-            amount=swap.amount_out,
-            asset=swap.asset_out,
+            amount=swap.amount_deposited,
+            asset=swap.asset_deposited,
             suggested_params=suggested_params,
         )
         txn2 = self._make_application_noop_tx(
             address=address,
             fee=2000,
-            args=["SWAP", swap.effect.minimum_amount_in],
+            args=["SWAP", swap.effect.minimum_amount_received],
             suggested_params=suggested_params,
         )
 

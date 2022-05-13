@@ -151,9 +151,9 @@ swap = pool.prepare_swap(
 # You can inspect swap effect before submitting the transaction.
 print(swap.effect)
 # SwapEffect(
-#     amount_out=200000,
-#     amount_in=146529,
-#     minimum_amount_in=143598,
+#     amount_deposited=200000,
+#     amount_received=146529,
+#     minimum_amount_received=143598,
 #     fee=441,
 #     price=Decimal(0.73485),
 #     primary_asset_price_after_swap=Decimal("0.6081680080300244"),

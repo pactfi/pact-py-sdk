@@ -2,7 +2,7 @@ import os
 import re
 import subprocess
 from dataclasses import dataclass
-from typing import Optional, Union
+from typing import Literal, Optional, Union
 
 import algosdk
 from algosdk.future import transaction
@@ -70,11 +70,17 @@ def create_asset(
     return ptx["asset-index"]
 
 
+PoolType = Literal["CONSTANT_PRODUCT", "STABLESWAP"]
+
+
 def deploy_contract(
     account: Account,
+    pool_type: PoolType,
     primary_asset_index: int,
     secondary_asset_index: int,
     fee_bps=30,
+    pact_fee_bps=30,
+    amplifier=80,
 ) -> int:
     mnemonic = algosdk.mnemonic.from_private_key(account.private_key)
 
@@ -83,9 +89,13 @@ def deploy_contract(
         "run",
         "python",
         "scripts/deploy.py",
+        f"--contract-type={pool_type.lower()}",
         f"--primary_asset_id={primary_asset_index}",
         f"--secondary_asset_id={secondary_asset_index}",
         f"--fee_bps={fee_bps}",
+        f"--pact_fee_bps={pact_fee_bps}",
+        f"--amplifier={amplifier}",
+        f"--admin_and_treasury_address={account.address}",
     ]
 
     env = {
@@ -166,6 +176,7 @@ def make_fresh_testbed(fee_bps=30) -> TestBed:
     coin_index = create_asset(account)
 
     app_id = deploy_contract(
+        pool_type="CONSTANT_PRODUCT",
         account=account,
         primary_asset_index=0,
         secondary_asset_index=coin_index,

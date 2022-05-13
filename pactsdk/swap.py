@@ -11,9 +11,9 @@ if TYPE_CHECKING:
 
 @dataclass
 class SwapEffect:
-    amount_in: int
-    amount_out: int
-    minimum_amount_in: int
+    amount_received: int
+    amount_deposited: int
+    minimum_amount_received: int
     fee: int
     primary_asset_price_after_swap: D
     secondary_asset_price_after_swap: D
@@ -25,12 +25,12 @@ class SwapEffect:
 @dataclass
 class Swap:
     pool: "Pool"
-    asset_out: Asset
-    amount_out: int
+    asset_deposited: Asset
+    amount_deposited: int
     slippage_pct: float
 
     def __post_init__(self):
-        self.asset_in = self.pool.get_other_asset(self.asset_out)
+        self.asset_in = self.pool.get_other_asset(self.asset_deposited)
         self.validate_swap()
         self.effect = self._build_effect()
 
@@ -45,24 +45,26 @@ class Swap:
             raise ValueError("Pool is empty and swaps are impossible.")
 
     def _build_effect(self) -> SwapEffect:
-        amount_in = self.pool.calculator.get_net_amount_in(
-            self.asset_out, self.amount_out
+        amount_received = self.pool.calculator.get_net_amount_received(
+            self.asset_deposited, self.amount_deposited
         )
 
-        if self.asset_out == self.pool.primary_asset:
-            primary_liq_change = self.amount_out
-            secondary_liq_change = -amount_in
+        if self.asset_deposited == self.pool.primary_asset:
+            primary_liq_change = self.amount_deposited
+            secondary_liq_change = -amount_received
         else:
-            primary_liq_change = -amount_in
-            secondary_liq_change = self.amount_out
+            primary_liq_change = -amount_received
+            secondary_liq_change = self.amount_deposited
 
         return SwapEffect(
-            amount_out=self.amount_out,
-            amount_in=amount_in,
-            minimum_amount_in=self.pool.calculator.get_minimum_amount_in(
-                self.asset_out, self.amount_out, self.slippage_pct
+            amount_deposited=self.amount_deposited,
+            amount_received=amount_received,
+            minimum_amount_received=self.pool.calculator.get_minimum_amount_received(
+                self.asset_deposited, self.amount_deposited, self.slippage_pct
             ),
-            price=self.pool.calculator.get_swap_price(self.asset_out, self.amount_out),
+            price=self.pool.calculator.get_swap_price(
+                self.asset_deposited, self.amount_deposited
+            ),
             primary_asset_price_after_swap=self.pool.calculator.get_asset_price_after_liq_change(
                 self.pool.primary_asset,
                 primary_liq_change,
@@ -83,5 +85,7 @@ class Swap:
                 primary_liq_change,
                 secondary_liq_change,
             ),
-            fee=self.pool.calculator.get_fee(self.asset_out, self.amount_out),
+            fee=self.pool.calculator.get_fee(
+                self.asset_deposited, self.amount_deposited
+            ),
         )
