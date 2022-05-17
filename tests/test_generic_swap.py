@@ -1,6 +1,3 @@
-import math
-from decimal import Decimal as D
-
 import algosdk
 import pytest
 from algosdk.error import AlgodHTTPError
@@ -8,118 +5,20 @@ from algosdk.error import AlgodHTTPError
 import pactsdk
 from pactsdk.transaction_group import TransactionGroup
 
-from .matchers import Any
 from .utils import (
-    Account,
-    TestBed,
-    add_liqudity,
-    algod,
+    POOL_TYPES,
+    add_liquidity,
+    assert_swap,
     create_asset,
-    deploy_contract,
     make_fresh_testbed,
     new_account,
     sign_and_send,
 )
 
 
-def _test_swap(
-    swap: pactsdk.Swap,
-    primary_liq: int,
-    secondary_liq: int,
-    amount_deposited: int,
-    account: Account,
-):
-    assert_swap_effect(swap, primary_liq, secondary_liq, amount_deposited)
-
-    # Perform the swap.
-    old_state = swap.pool.state
-    swap_tx_group = swap.prepare_tx_group(account.address)
-    sign_and_send(swap_tx_group, account)
-    swap.pool.update_state()
-
-    # Compare the simulated effect with what really happened on the blockchain.
-    assert_pool_state(swap, old_state, swap.pool.state)
-
-
-def assert_swap_effect(
-    swap: pactsdk.Swap,
-    primary_liq: int,
-    secondary_liq: int,
-    amount_deposited: int,
-):
-    fee_bps = swap.pool.fee_bps
-    if swap.asset_deposited == swap.pool.primary_asset:
-        gross_amount_received = int(
-            D(amount_deposited * secondary_liq) / D(primary_liq + amount_deposited)
-        )
-    else:
-        gross_amount_received = int(
-            D(amount_deposited * primary_liq) / D(secondary_liq + amount_deposited)
-        )
-
-    amount_received = gross_amount_received * (10_000 - D(fee_bps)) / 10_000
-
-    assert swap.effect == pactsdk.SwapEffect(
-        amount_deposited=amount_deposited,
-        amount_received=math.floor(amount_received),
-        minimum_amount_received=math.floor(
-            amount_received - amount_received * D(swap.slippage_pct / 100)
-        ),
-        fee=round(gross_amount_received - amount_received),
-        price=(gross_amount_received / D(swap.asset_in.ratio))
-        / (amount_deposited / D(swap.asset_deposited.ratio)),
-        primary_asset_price_after_swap=Any(D),
-        primary_asset_price_change_pct=Any(D),
-        secondary_asset_price_after_swap=Any(D),
-        secondary_asset_price_change_pct=Any(D),
-    )
-
-    diff_ratio = D(10 ** (swap.asset_in.decimals - swap.asset_deposited.decimals))
-    assert (
-        int(
-            swap.effect.amount_deposited * swap.effect.price * diff_ratio
-            - swap.effect.fee
-        )
-        == swap.effect.amount_received
-    )
-
-
-def assert_pool_state(
-    swap: pactsdk.Swap, old_state: pactsdk.PoolState, new_state: pactsdk.PoolState
-):
-    assert new_state.primary_asset_price == swap.effect.primary_asset_price_after_swap
-    assert (
-        new_state.secondary_asset_price == swap.effect.secondary_asset_price_after_swap
-    )
-
-    assert swap.effect.primary_asset_price_change_pct == (
-        (new_state.primary_asset_price / old_state.primary_asset_price) * 100 - 100
-    )
-    assert swap.effect.secondary_asset_price_change_pct == (
-        (new_state.secondary_asset_price / old_state.secondary_asset_price) * 100 - 100
-    )
-
-    if swap.asset_deposited == swap.pool.primary_asset:
-        assert (
-            new_state.total_primary - old_state.total_primary
-            == swap.effect.amount_deposited
-        )
-        assert (
-            old_state.total_secondary - new_state.total_secondary
-            == swap.effect.amount_received
-        )
-    else:
-        assert (
-            old_state.total_primary - new_state.total_primary
-            == swap.effect.amount_received
-        )
-        assert (
-            new_state.total_secondary - old_state.total_secondary
-            == swap.effect.amount_deposited
-        )
-
-
-def test_swap_with_empty_liquidity(testbed: TestBed):
+@pytest.mark.parametrize("pool_type", POOL_TYPES)
+def test_swap_with_empty_liquidity(pool_type: pactsdk.pool.PoolType):
+    testbed = make_fresh_testbed(pool_type)
     with pytest.raises(ValueError, match="Pool is empty and swaps are impossible."):
         testbed.pool.prepare_swap(
             amount=1000,
@@ -128,7 +27,9 @@ def test_swap_with_empty_liquidity(testbed: TestBed):
         )
 
 
-def test_swap_asset_not_in_the_pool(testbed: TestBed):
+@pytest.mark.parametrize("pool_type", POOL_TYPES)
+def test_swap_asset_not_in_the_pool(pool_type: pactsdk.pool.PoolType):
+    testbed = make_fresh_testbed(pool_type)
     shitcoin_index = create_asset(testbed.account)
     shitcoin = testbed.pact.fetch_asset(shitcoin_index)
     with pytest.raises(AssertionError, match=f"Asset {shitcoin.index} not in the pool"):
@@ -139,9 +40,11 @@ def test_swap_asset_not_in_the_pool(testbed: TestBed):
         )
 
 
-def test_swap_primary_with_equal_liquidity(testbed: TestBed):
+@pytest.mark.parametrize("pool_type", POOL_TYPES)
+def test_swap_primary_with_equal_liquidity(pool_type: pactsdk.pool.PoolType):
+    testbed = make_fresh_testbed(pool_type)
     primary_liq, secondary_liq, amount = 20_000, 20_000, 1_000
-    add_liqudity(testbed.account, testbed.pool, primary_liq, secondary_liq)
+    add_liquidity(testbed.account, testbed.pool, primary_liq, secondary_liq)
 
     swap = testbed.pool.prepare_swap(
         amount=amount,
@@ -149,16 +52,18 @@ def test_swap_primary_with_equal_liquidity(testbed: TestBed):
         slippage_pct=10,
     )
 
-    assert swap.asset_in == testbed.coin
+    assert swap.asset_received == testbed.coin
     assert swap.asset_deposited == testbed.algo
     assert swap.slippage_pct == 10
 
-    _test_swap(swap, primary_liq, secondary_liq, amount, testbed.account)
+    assert_swap(swap, testbed.account)
 
 
-def test_swap_primary_too_high_minimum_amount(testbed: TestBed):
+@pytest.mark.parametrize("pool_type", POOL_TYPES)
+def test_swap_primary_too_high_minimum_amount(pool_type: pactsdk.pool.PoolType):
+    testbed = make_fresh_testbed(pool_type)
     primary_liq, secondary_liq, amount = 20_000, 20_000, 1_000
-    add_liqudity(testbed.account, testbed.pool, primary_liq, secondary_liq)
+    add_liquidity(testbed.account, testbed.pool, primary_liq, secondary_liq)
 
     swap = testbed.pool.prepare_swap(
         amount=amount,
@@ -167,7 +72,7 @@ def test_swap_primary_too_high_minimum_amount(testbed: TestBed):
     )
     swap.effect.minimum_amount_received = 10 * swap.effect.minimum_amount_received
 
-    assert swap.asset_in == testbed.coin
+    assert swap.asset_received == testbed.coin
     assert swap.asset_deposited == testbed.algo
     assert swap.slippage_pct == 0
 
@@ -179,9 +84,11 @@ def test_swap_primary_too_high_minimum_amount(testbed: TestBed):
         sign_and_send(swap_tx_group, testbed.account)
 
 
-def test_swap_secondary_too_high_minimum_amount(testbed: TestBed):
+@pytest.mark.parametrize("pool_type", POOL_TYPES)
+def test_swap_secondary_too_high_minimum_amount(pool_type: pactsdk.pool.PoolType):
+    testbed = make_fresh_testbed(pool_type)
     primary_liq, secondary_liq, amount = 20_000, 20_000, 1_000
-    add_liqudity(testbed.account, testbed.pool, primary_liq, secondary_liq)
+    add_liquidity(testbed.account, testbed.pool, primary_liq, secondary_liq)
 
     swap = testbed.pool.prepare_swap(
         amount=amount,
@@ -190,7 +97,7 @@ def test_swap_secondary_too_high_minimum_amount(testbed: TestBed):
     )
     swap.effect.minimum_amount_received = 10 * swap.effect.minimum_amount_received
 
-    assert swap.asset_in == testbed.algo
+    assert swap.asset_received == testbed.algo
     assert swap.asset_deposited == testbed.coin
     assert swap.slippage_pct == 0
 
@@ -202,9 +109,11 @@ def test_swap_secondary_too_high_minimum_amount(testbed: TestBed):
         sign_and_send(swap_tx_group, testbed.account)
 
 
-def test_swap_primary_with_not_equal_liquidity(testbed: TestBed):
+@pytest.mark.parametrize("pool_type", POOL_TYPES)
+def test_swap_primary_with_not_equal_liquidity(pool_type: pactsdk.pool.PoolType):
+    testbed = make_fresh_testbed(pool_type)
     primary_liq, secondary_liq, amount = 20_000, 25_000, 1_000
-    add_liqudity(testbed.account, testbed.pool, primary_liq, secondary_liq)
+    add_liquidity(testbed.account, testbed.pool, primary_liq, secondary_liq)
 
     swap = testbed.pool.prepare_swap(
         amount=amount,
@@ -212,12 +121,14 @@ def test_swap_primary_with_not_equal_liquidity(testbed: TestBed):
         slippage_pct=10,
     )
 
-    _test_swap(swap, primary_liq, secondary_liq, amount, testbed.account)
+    assert_swap(swap, testbed.account)
 
 
-def test_swap_secondary_with_equal_liquidity(testbed: TestBed):
+@pytest.mark.parametrize("pool_type", POOL_TYPES)
+def test_swap_secondary_with_equal_liquidity(pool_type: pactsdk.pool.PoolType):
+    testbed = make_fresh_testbed(pool_type)
     primary_liq, secondary_liq, amount = 20_000, 20_000, 1_000
-    add_liqudity(testbed.account, testbed.pool, primary_liq, secondary_liq)
+    add_liquidity(testbed.account, testbed.pool, primary_liq, secondary_liq)
 
     swap = testbed.pool.prepare_swap(
         amount=amount,
@@ -225,12 +136,14 @@ def test_swap_secondary_with_equal_liquidity(testbed: TestBed):
         slippage_pct=10,
     )
 
-    _test_swap(swap, primary_liq, secondary_liq, amount, testbed.account)
+    assert_swap(swap, testbed.account)
 
 
-def test_swap_secondary_with_not_equal_liquidity(testbed: TestBed):
+@pytest.mark.parametrize("pool_type", POOL_TYPES)
+def test_swap_secondary_with_not_equal_liquidity(pool_type: pactsdk.pool.PoolType):
+    testbed = make_fresh_testbed(pool_type)
     primary_liq, secondary_liq, amount = 25_000, 20_000, 1_000
-    add_liqudity(testbed.account, testbed.pool, primary_liq, secondary_liq)
+    add_liquidity(testbed.account, testbed.pool, primary_liq, secondary_liq)
 
     swap = testbed.pool.prepare_swap(
         amount=amount,
@@ -238,18 +151,19 @@ def test_swap_secondary_with_not_equal_liquidity(testbed: TestBed):
         slippage_pct=10,
     )
 
-    _test_swap(swap, primary_liq, secondary_liq, amount, testbed.account)
+    assert_swap(swap, testbed.account)
 
 
-def test_swap_with_custom_fee_bps():
-    testbed_a = make_fresh_testbed(fee_bps=10)
-    testbed_b = make_fresh_testbed(fee_bps=2000)
+@pytest.mark.parametrize("pool_type", POOL_TYPES)
+def test_swap_with_custom_fee_bps(pool_type: pactsdk.pool.PoolType):
+    testbed_a = make_fresh_testbed(pool_type, fee_bps=10)
+    testbed_b = make_fresh_testbed(pool_type, fee_bps=2000)
 
-    assert testbed_a.pool.fee_bps == 10
-    assert testbed_b.pool.fee_bps == 2000
+    assert testbed_a.pool.params.fee_bps == 10
+    assert testbed_b.pool.params.fee_bps == 2000
 
-    add_liqudity(testbed_a.account, testbed_a.pool, 20_000, 20_000)
-    add_liqudity(testbed_b.account, testbed_b.pool, 20_000, 20_000)
+    add_liquidity(testbed_a.account, testbed_a.pool, 20_000, 20_000)
+    add_liquidity(testbed_b.account, testbed_b.pool, 20_000, 20_000)
 
     swap_a = testbed_a.pool.prepare_swap(
         amount=10_000,
@@ -284,8 +198,10 @@ def test_swap_with_custom_fee_bps():
     )
 
 
-def test_swap_with_different_slippage(testbed: TestBed):
-    add_liqudity(testbed.account, testbed.pool, 20_000, 20_000)
+@pytest.mark.parametrize("pool_type", POOL_TYPES)
+def test_swap_with_different_slippage(pool_type: pactsdk.pool.PoolType):
+    testbed = make_fresh_testbed(pool_type)
+    add_liquidity(testbed.account, testbed.pool, 20_000, 20_000)
 
     with pytest.raises(ValueError, match="Splippage must be between 0 and 100"):
         testbed.pool.prepare_swap(
@@ -309,7 +225,7 @@ def test_swap_with_different_slippage(testbed: TestBed):
     swap_b = testbed.pool.prepare_swap(
         amount=10_000,
         asset=testbed.algo,
-        slippage_pct=20,
+        slippage_pct=2,
     )
     swap_c = testbed.pool.prepare_swap(
         amount=10_000,
@@ -380,41 +296,12 @@ def test_swap_with_different_slippage(testbed: TestBed):
     assert swapped_d_amount > swap_d.effect.minimum_amount_received
 
 
-def test_swap_asa_to_asa():
-    account = new_account()
-    pact = pactsdk.PactClient(algod)
-
-    coin_a_index = create_asset(account, "COIN_A", 3)
-    coin_b_index = create_asset(account, "COIN_B", 2)
-
-    app_id = deploy_contract(account, "CONSTANT_PRODUCT", coin_a_index, coin_b_index)
-    pool = pact.fetch_pool_by_id(app_id=app_id)
-
-    add_liqudity(account, pool, 20_000, 20_000)
-    pool.update_state()
-
-    assert pool.state == pactsdk.PoolState(
-        total_liquidity=20_000,
-        total_primary=20_000,
-        total_secondary=20_000,
-        primary_asset_price=D(
-            "10"
-        ),  # because different decimal places for both assets.
-        secondary_asset_price=D("0.1"),
-    )
-
-    swap = pool.prepare_swap(
-        amount=1000,
-        asset=pool.primary_asset,
-        slippage_pct=10,
-    )
-    _test_swap(swap, 20_000, 20_000, 1000, account)
-
-
-def test_swap_and_optin_in_a_single_group(testbed: TestBed):
+@pytest.mark.parametrize("pool_type", POOL_TYPES)
+def test_swap_and_optin_in_a_single_group(pool_type: pactsdk.pool.PoolType):
+    testbed = make_fresh_testbed(pool_type)
     other_account = new_account()
     primaryLiq, secondaryLiq, amount = [20_000, 20_000, 1_000]
-    add_liqudity(testbed.account, testbed.pool, primaryLiq, secondaryLiq)
+    add_liquidity(testbed.account, testbed.pool, primaryLiq, secondaryLiq)
 
     swap = testbed.pool.prepare_swap(
         amount=amount,
@@ -433,3 +320,65 @@ def test_swap_and_optin_in_a_single_group(testbed: TestBed):
 
     group = TransactionGroup(txs)
     sign_and_send(group, other_account)
+
+
+@pytest.mark.parametrize("pool_type", POOL_TYPES)
+def test_swap_primary_with_equal_liquidity_reversed(pool_type: pactsdk.pool.PoolType):
+    testbed = make_fresh_testbed(pool_type)
+    primary_liq, secondary_liq, amount = 20_000, 20_000, 1_000
+    add_liquidity(testbed.account, testbed.pool, primary_liq, secondary_liq)
+
+    reversed_swap = testbed.pool.prepare_swap(
+        amount=amount,
+        asset=testbed.algo,
+        slippage_pct=10,
+        reverse=True,
+    )
+
+    assert reversed_swap.asset_received == testbed.coin
+    assert reversed_swap.asset_deposited == testbed.algo
+    assert reversed_swap.slippage_pct == 10
+    assert reversed_swap.effect.amount_received == 1000
+    assert reversed_swap.effect.amount_deposited > 1000
+
+    swap = testbed.pool.prepare_swap(
+        amount=reversed_swap.effect.amount_deposited,
+        asset=testbed.algo,
+        slippage_pct=10,
+    )
+
+    assert swap.effect.fee == reversed_swap.effect.fee
+    assert swap.effect.amount_deposited == reversed_swap.effect.amount_deposited
+    assert swap.effect.amount_received == reversed_swap.effect.amount_received
+
+    assert_swap(reversed_swap, testbed.account)
+
+
+@pytest.mark.parametrize("pool_type", POOL_TYPES)
+def test_swap_primary_with_not_equal_liquidity_reversed(
+    pool_type: pactsdk.pool.PoolType,
+):
+    testbed = make_fresh_testbed(pool_type)
+    primary_liq, secondary_liq, amount = 15_000, 25_000, 2_000
+    add_liquidity(testbed.account, testbed.pool, primary_liq, secondary_liq)
+
+    reversed_swap = testbed.pool.prepare_swap(
+        amount=amount,
+        asset=testbed.algo,
+        slippage_pct=10,
+        reverse=True,
+    )
+
+    assert reversed_swap.effect.amount_received == 2000
+
+    swap = testbed.pool.prepare_swap(
+        amount=reversed_swap.effect.amount_deposited,
+        asset=testbed.algo,
+        slippage_pct=10,
+    )
+
+    assert swap.effect.fee == reversed_swap.effect.fee
+    assert swap.effect.amount_deposited == reversed_swap.effect.amount_deposited
+    assert swap.effect.amount_received == reversed_swap.effect.amount_received
+
+    assert_swap(reversed_swap, testbed.account)

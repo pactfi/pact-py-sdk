@@ -1,6 +1,6 @@
 import copy
 from dataclasses import dataclass
-from typing import Optional, Union
+from typing import Literal, Optional, Union
 from urllib.parse import urlencode
 
 import algosdk
@@ -8,13 +8,17 @@ import requests
 from algosdk.future import transaction
 from algosdk.v2client.algod import AlgodClient
 
+from pactsdk.constant_product_calculator import ConstantProductParams
 from pactsdk.pool_state import AppInternalState, PoolState, parse_global_pool_state
+from pactsdk.stableswap_calculator import StableswapParams
 
 from .asset import Asset, fetch_asset_by_index
 from .exceptions import PactSdkError
 from .pool_calculator import PoolCalculator
 from .swap import Swap
 from .transaction_group import TransactionGroup
+
+PoolType = Literal["CONSTANT_PRODUCT", "STABLESWAP"]
 
 
 def list_pools(pact_api_url: str, **params):
@@ -46,7 +50,6 @@ def fetch_pool_by_id(algod: AlgodClient, app_id: int):
         secondary_asset=secondary_asset,
         liquidity_asset=liquidity_asset,
         internal_state=app_global_state,
-        fee_bps=app_global_state.FEE_BPS,
     )
 
 
@@ -93,9 +96,30 @@ class Pool:
     secondary_asset: Asset
     liquidity_asset: Asset
     internal_state: AppInternalState
-    fee_bps: int = 30
 
     def __post_init__(self):
+        self.params: StableswapParams | ConstantProductParams
+
+        if self.internal_state.INITIAL_A is not None:
+            self.pool_type = "STABLESWAP"
+            self.params = StableswapParams(
+                fee_bps=self.internal_state.FEE_BPS,
+                pact_fee_bps=self.internal_state.PACT_FEE_BPS or 0,
+                initial_a=self.internal_state.INITIAL_A,
+                initial_a_time=self.internal_state.INITIAL_A_TIME or 0,
+                future_a=self.internal_state.FUTURE_A or 0,
+                future_a_time=self.internal_state.FUTURE_A_TIME or 0,
+            )
+        else:
+            self.pool_type = "CONSTANT_PRODUCT"
+            self.params = ConstantProductParams(
+                fee_bps=self.internal_state.FEE_BPS,
+            )
+
+        self.fee_bps = self.internal_state.FEE_BPS + (
+            self.internal_state.PACT_FEE_BPS or 0
+        )
+
         self.calculator = PoolCalculator(self)
         self.state = self.parse_internal_state(self.internal_state)
 
@@ -172,7 +196,7 @@ class Pool:
         )
         tx3 = self._make_application_noop_tx(
             address=address,
-            fee=3000,
+            fee=3000 if self.pool_type == "CONSTANT_PRODUCT" else 7000,
             args=["ADDLIQ", 0],
             extraAsset=self.liquidity_asset,
             suggested_params=suggested_params,
@@ -204,13 +228,16 @@ class Pool:
 
         return [tx1, tx2]
 
-    def prepare_swap(self, asset: Asset, amount: int, slippage_pct: float) -> Swap:
+    def prepare_swap(
+        self, asset: Asset, amount: int, slippage_pct: float, reverse=False
+    ) -> Swap:
         assert self.is_asset_in_the_pool(asset), f"Asset {asset.index} not in the pool"
         return Swap(
             self,
             asset_deposited=asset,
-            amount_deposited=amount,
+            amount=amount,
             slippage_pct=slippage_pct,
+            is_reversed=reverse,
         )
 
     def prepare_swap_tx_group(self, swap: Swap, address: str):
@@ -223,13 +250,13 @@ class Pool:
     ):
         tx1 = self._make_deposit_tx(
             address=address,
-            amount=swap.amount_deposited,
+            amount=swap.effect.amount_deposited,
             asset=swap.asset_deposited,
             suggested_params=suggested_params,
         )
         tx2 = self._make_application_noop_tx(
             address=address,
-            fee=2000,
+            fee=2000 if self.pool_type == "CONSTANT_PRODUCT" else 8000,
             args=["SWAP", swap.effect.minimum_amount_received],
             suggested_params=suggested_params,
         )

@@ -1,7 +1,6 @@
 import base64
 from dataclasses import dataclass
-from decimal import Decimal as D
-from typing import Any, Sequence
+from typing import Any, Optional, Sequence
 
 
 @dataclass
@@ -14,14 +13,27 @@ class AppInternalState:
     L: int
     FEE_BPS: int
 
+    # Stableswaps only below.
+    PACT_FEE_BPS: Optional[int] = None
+    INITIAL_A: Optional[int] = None
+    INITIAL_A_TIME: Optional[int] = None
+    FUTURE_A: Optional[int] = None
+    FUTURE_A_TIME: Optional[int] = None
+    ADMIN: Optional[str] = None
+    FUTURE_ADMIN: Optional[str] = None
+    ADMIN_TRANSFER_DEADLINE: Optional[int] = None
+    TREASURY: Optional[str] = None
+    PRIMARY_FEES: Optional[int] = None
+    SECONDARY_FEES: Optional[int] = None
+
 
 @dataclass
 class PoolState:
     total_liquidity: int
     total_primary: int
     total_secondary: int
-    primary_asset_price: D
-    secondary_asset_price: D
+    primary_asset_price: float
+    secondary_asset_price: float
 
 
 def parse_global_pool_state(raw_state: list) -> AppInternalState:

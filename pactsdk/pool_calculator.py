@@ -1,6 +1,9 @@
 import math
-from decimal import Decimal as D
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
+
+from pactsdk.constant_product_calculator import ConstantProductCalculator
+from pactsdk.exceptions import PactSdkError
+from pactsdk.stableswap_calculator import StableswapCalculator
 
 from .asset import Asset
 
@@ -8,105 +11,167 @@ if TYPE_CHECKING:
     from .pool import Pool
 
 
+class SwapCalculator(Protocol):
+    pool: "Pool"
+
+    def get_price(self, liq_a: float, liq_b: float) -> float:
+        ...
+
+    # For the following two methods:
+    # liq_a - primary liquidity if swapping primary asset, secondary otherwise
+    # liq_b - vice versa
+    def get_swap_gross_amount_received(
+        self,
+        liq_a: int,
+        liq_b: int,
+        amount_deposited: int,
+    ) -> int:
+        ...
+
+    def get_swap_amount_deposited(
+        self,
+        liq_a: int,
+        liq_b: int,
+        amount_received: int,
+    ) -> int:
+        ...
+
+
 class PoolCalculator:
     def __init__(self, pool: "Pool"):
         self.pool = pool
 
+        self.swap_calculator: SwapCalculator
+        if pool.pool_type == "CONSTANT_PRODUCT":
+            self.swap_calculator = ConstantProductCalculator(pool)
+        elif pool.pool_type == "STABLESWAP":
+            self.swap_calculator = StableswapCalculator(pool)
+        else:
+            raise PactSdkError(f"Unknown pool type: ${pool.pool_type}")
+
     @property
     def primary_asset_amount(self):
-        return D(self.pool.internal_state.A)
+        return self.pool.internal_state.A
 
     @property
     def secondary_asset_amount(self):
-        return D(self.pool.internal_state.B)
+        return self.pool.internal_state.B
+
+    @property
+    def primary_asset_amount_decimal(self):
+        return self.pool.internal_state.A / self.pool.primary_asset.ratio
+
+    @property
+    def secondary_asset_amount_decimal(self):
+        return self.pool.internal_state.B / self.pool.secondary_asset.ratio
 
     @property
     def is_empty(self):
-        return (
-            self.primary_asset_amount.is_zero() or self.secondary_asset_amount.is_zero()
-        )
+        return self.primary_asset_amount == 0 or self.secondary_asset_amount == 0
 
     @property
     def primary_asset_price(self):
-        if self.is_empty:
-            return D(0)
-
-        return self.get_primary_asset_price(
-            self.primary_asset_amount,
-            self.secondary_asset_amount,
+        return self.swap_calculator.get_price(
+            self.primary_asset_amount_decimal, self.secondary_asset_amount_decimal
         )
 
     @property
     def secondary_asset_price(self):
-        if self.is_empty:
-            return D(0)
-
-        return self.get_secondary_asset_price(
-            self.primary_asset_amount,
-            self.secondary_asset_amount,
+        return self.swap_calculator.get_price(
+            self.secondary_asset_amount_decimal,
+            self.primary_asset_amount_decimal,
         )
 
-    def get_primary_asset_price(
-        self, primary_liq_amount: D, secondary_liq_amount: D
-    ) -> D:
-        if primary_liq_amount.is_zero() or secondary_liq_amount.is_zero():
-            return D(0)
+    def amount_deposited_to_net_amount_received(
+        self, asset: Asset, amount_deposited: int
+    ) -> int:
+        gross_amount_received = self.amount_deposited_to_gross_amount_received(
+            asset, amount_deposited
+        )
+        fee = self.get_fee_from_gross_amount(gross_amount_received)
+        return gross_amount_received - fee
 
-        return (secondary_liq_amount / self.pool.secondary_asset.ratio) / (
-            primary_liq_amount / self.pool.primary_asset.ratio
+    def net_amount_received_to_amount_deposited(
+        self, asset: Asset, net_amount_received: int
+    ) -> int:
+        fee = self.get_fee_from_net_amount(net_amount_received)
+        net_amount_received += fee
+        return self.gross_amount_received_to_amount_deposited(
+            asset, net_amount_received
         )
 
-    def get_secondary_asset_price(
+    def get_fee_from_gross_amount(self, gross_amount: int) -> int:
+        return gross_amount - (gross_amount * (10_000 - self.pool.fee_bps)) // 10_000
+
+    def get_fee_from_net_amount(self, net_amount: int) -> int:
+        return math.ceil(
+            net_amount / ((10_000 - self.pool.fee_bps) / 10_000) - net_amount
+        )
+
+    def gross_amount_received_to_amount_deposited(
         self,
-        primary_liq_amount: D,
-        secondary_liq_amount: D,
-    ) -> D:
-        if primary_liq_amount.is_zero() or secondary_liq_amount.is_zero():
-            return D(0)
-
-        return (primary_liq_amount / self.pool.primary_asset.ratio) / (
-            secondary_liq_amount / self.pool.secondary_asset.ratio
+        asset: Asset,
+        int_gross_amount_received: int,
+    ) -> int:
+        A, B = self.get_liquidities(asset)
+        return self.swap_calculator.get_swap_amount_deposited(
+            A,
+            B,
+            int_gross_amount_received,
         )
+
+    def amount_deposited_to_gross_amount_received(
+        self,
+        asset: Asset,
+        amount_deposited: int,
+    ) -> int:
+        A, B = self.get_liquidities(asset)
+        return self.swap_calculator.get_swap_gross_amount_received(
+            A,
+            B,
+            amount_deposited,
+        )
+
+    def get_liquidities(self, asset: Asset) -> tuple[int, int]:
+        A, B = [self.primary_asset_amount, self.secondary_asset_amount]
+        if asset != self.pool.primary_asset:
+            A, B = B, A
+        return A, B
 
     def get_minimum_amount_received(
         self, asset: Asset, amount: int, slippage_pct: float
     ) -> int:
-        amount_received = self.get_net_amount_received(asset, amount)
-        return math.floor(amount_received - (amount_received * (D(slippage_pct) / 100)))
+        amount_received = self.amount_deposited_to_net_amount_received(asset, amount)
+        return math.floor(amount_received - (amount_received * (slippage_pct / 100)))
 
-    def get_gross_amount_received(self, asset: Asset, amount: int) -> int:
-        if asset == self.pool.primary_asset:
-            return self._swap_primary_gross_amount(amount)
-
-        return self._swap_secondary_gross_amount(amount)
-
-    def get_net_amount_received(self, asset: Asset, amount: int) -> int:
-        gross_amount = self.get_gross_amount_received(asset, amount)
-        return self._subtract_fee(gross_amount)
-
-    def get_fee(self, asset: Asset, amount: int) -> int:
-        return self.get_gross_amount_received(asset, amount) - (
-            self.get_net_amount_received(asset, amount)
-        )
+    def get_fee(self, asset: Asset, amount_deposited: int) -> int:
+        return self.amount_deposited_to_gross_amount_received(
+            asset, amount_deposited
+        ) - (self.amount_deposited_to_net_amount_received(asset, amount_deposited))
 
     def get_asset_price_after_liq_change(
         self,
         asset: Asset,
         primary_liq_change: int,
         secondary_liq_change: int,
-    ) -> D:
-        new_primary_liq = self.primary_asset_amount + primary_liq_change
-        new_secondary_liq = self.secondary_asset_amount + secondary_liq_change
+    ) -> float:
+        new_primary_liq = (
+            self.primary_asset_amount + primary_liq_change
+        ) / self.pool.primary_asset.ratio
+        new_secondary_liq = (
+            self.secondary_asset_amount + secondary_liq_change
+        ) / self.pool.secondary_asset.ratio
+
         if asset == self.pool.primary_asset:
-            return self.get_primary_asset_price(new_primary_liq, new_secondary_liq)
-        return self.get_secondary_asset_price(new_primary_liq, new_secondary_liq)
+            return self.swap_calculator.get_price(new_primary_liq, new_secondary_liq)
+        return self.swap_calculator.get_price(new_secondary_liq, new_primary_liq)
 
     def get_price_change_pct(
         self,
         asset: Asset,
         primary_liq_change: int,
         secondary_liq_change: int,
-    ) -> D:
+    ) -> float:
         old_price = (
             self.primary_asset_price
             if asset == self.pool.primary_asset
@@ -119,27 +184,10 @@ class PoolCalculator:
         )
         return new_price / old_price * 100 - 100
 
-    def get_swap_price(self, asset_deposited: Asset, amount_deposited: int) -> D:
-        asset_in = self.pool.get_other_asset(asset_deposited)
-        amount_received = self.get_gross_amount_received(
+    def get_swap_price(self, asset_deposited: Asset, amount_deposited: int) -> float:
+        asset_received = self.pool.get_other_asset(asset_deposited)
+        amount_received = self.amount_deposited_to_gross_amount_received(
             asset_deposited, amount_deposited
         )
-        diff_ratio = D(asset_deposited.ratio / asset_in.ratio)
-        return amount_received / D(amount_deposited) * diff_ratio
-
-    def _subtract_fee(self, asset_gross_amount: int) -> int:
-        return int(asset_gross_amount * (10000 - self.pool.fee_bps) / D(10000))
-
-    def _swap_primary_gross_amount(self, amount: int) -> int:
-        return int(
-            amount
-            * (self.secondary_asset_amount)
-            / D(self.primary_asset_amount + amount)
-        )
-
-    def _swap_secondary_gross_amount(self, amount: int) -> int:
-        return int(
-            amount
-            * (self.primary_asset_amount)
-            / D(self.secondary_asset_amount + amount)
-        )
+        diff_ratio = asset_deposited.ratio / asset_received.ratio
+        return amount_received / amount_deposited * diff_ratio

@@ -48,7 +48,7 @@ class Asset:
     unit_name: Optional[str] = None
 
     @property
-    def ratio(self):
+    def ratio(self) -> int:
         return 10**self.decimals
 
     def prepare_opt_in_tx(self, address: str):
