@@ -30,6 +30,7 @@ class AppInternalState:
     TREASURY: Optional[str] = None
     PRIMARY_FEES: Optional[int] = None
     SECONDARY_FEES: Optional[int] = None
+    PRECISION: Optional[int] = None
 
 
 @dataclass
@@ -49,6 +50,16 @@ def parse_global_pool_state(raw_state: list) -> AppInternalState:
         raw_state: The contract's global state retrieved from algosdk.
     """
     state = parse_state(raw_state)
+    if "INITIAL_A" in state:
+        asset_a, asset_b, fee_bps, precision = deserialize_uint64(state.pop("CONFIG"))
+        return AppInternalState(
+            ASSET_A=asset_a,
+            ASSET_B=asset_b,
+            FEE_BPS=fee_bps,
+            PRECISION=precision,
+            **state,
+        )
+
     asset_a, asset_b, fee_bps = deserialize_uint64(state.pop("CONFIG"))
     return AppInternalState(ASSET_A=asset_a, ASSET_B=asset_b, FEE_BPS=fee_bps, **state)
 

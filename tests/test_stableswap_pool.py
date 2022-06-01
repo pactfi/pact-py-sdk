@@ -122,22 +122,34 @@ def test_stableswap_pool_e2e_scenario():
     assert pool.state.total_liquidity == 99_000_000
     assert pool.state.total_primary < 99_000_000
     assert pool.state.total_secondary > 99_000_000
-    assert f"{pool.state.primary_asset_price:.2f}" == "0.57"
-    assert f"{pool.state.secondary_asset_price:.2f}" == "1.76"
+    assert f"{pool.state.primary_asset_price:.2f}" == "0.62"
+    assert f"{pool.state.secondary_asset_price:.2f}" == "1.61"
+
+    a_precision = 1000
 
     # Check different amplifiers.
     pool_params = cast(StableswapParams, pool.params)
     pool_params.future_a = 1
     pool.state = pool.parse_internal_state(pool.internal_state)
-    assert f"{pool.state.primary_asset_price:.2f}" == "0.19"
-    assert f"{pool.state.secondary_asset_price:.2f}" == "5.24"
+    assert f"{pool.state.primary_asset_price:.2f}" == "0.07"
+    assert f"{pool.state.secondary_asset_price:.2f}" == "13.97"
 
-    pool_params.future_a = 1000
+    pool_params.future_a = a_precision
     pool.state = pool.parse_internal_state(pool.internal_state)
-    assert f"{pool.state.primary_asset_price:.2f}" == "0.98"
-    assert f"{pool.state.secondary_asset_price:.2f}" == "1.02"
+    assert f"{pool.state.primary_asset_price:.2f}" == "0.20"
+    assert f"{pool.state.secondary_asset_price:.2f}" == "5.15"
 
-    pool_params.future_a = 5000
+    pool_params.future_a = 5 * a_precision
     pool.state = pool.parse_internal_state(pool.internal_state)
-    assert f"{pool.state.primary_asset_price:.2f}" == "1.00"
-    assert f"{pool.state.secondary_asset_price:.2f}" == "1.00"
+    assert f"{pool.state.primary_asset_price:.2f}" == "0.36"
+    assert f"{pool.state.secondary_asset_price:.2f}" == "2.78"
+
+    pool_params.future_a = 100 * a_precision
+    pool.state = pool.parse_internal_state(pool.internal_state)
+    assert f"{pool.state.primary_asset_price:.2f}" == "0.88"
+    assert f"{pool.state.secondary_asset_price:.2f}" == "1.14"
+
+    pool_params.future_a = 1000 * a_precision
+    pool.state = pool.parse_internal_state(pool.internal_state)
+    assert f"{pool.state.primary_asset_price:.2f}" == "0.99"
+    assert f"{pool.state.secondary_asset_price:.2f}" == "1.01"

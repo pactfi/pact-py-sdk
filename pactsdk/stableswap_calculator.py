@@ -19,6 +19,7 @@ class StableswapParams:
     initial_a_time: int
     future_a: int
     future_a_time: int
+    precision: int
 
 
 class StableswapCalculator:
@@ -105,14 +106,17 @@ class StableswapCalculator:
         )
         return new_liq_a - liq_a
 
-    @staticmethod
-    def get_invariant(liq_a: int, liq_b: int, amp: int) -> int:
+    def get_invariant(self, liq_a: int, liq_b: int, amp: int) -> int:
+
         tokens_total = liq_a + liq_b
         S = tokens_total
         if S == 0:
             return S
+
+        precision = self.stableswap_params.precision
+
         D = S
-        Ann = amp * 2
+        Ann = amp * 4
         i = 0
         while i < 255:
             i += 1
@@ -120,8 +124,8 @@ class StableswapCalculator:
             for _x in (liq_a, liq_b):
                 D_P = D_P * D // (_x * 2)
             Dprev = D
-            numerator = D * (Ann * S + D_P * 2)
-            divisor = (Ann - 1) * D + (2 + 1) * D_P
+            numerator = D * ((Ann * S) // precision + D_P * 2)
+            divisor = ((Ann - precision) * D) // precision + (2 + 1) * D_P
             D = numerator // divisor
             if D > Dprev:
                 if D - Dprev <= 1:
@@ -132,16 +136,16 @@ class StableswapCalculator:
             raise Exception(f"Didn't converge {Dprev=}, {D=}")
         return D
 
-    @staticmethod
-    def get_new_liq(liq_other: int, amplifier: int, inv: int) -> int:
+    def get_new_liq(self, liq_other: int, amplifier: int, inv: int) -> int:
+        precision = self.stableswap_params.precision
         S = liq_other
         D = inv
         A = amplifier
         P = liq_other
-        Ann = A * 2
+        Ann = A * 4
 
-        b = S + D // Ann
-        c = (D**3) // (4 * P * Ann)
+        b = S + (D * precision) // Ann
+        c = (precision * (D**3)) // (4 * P * Ann)
 
         a_q = 1
         b_q = b - D

@@ -177,6 +177,7 @@ class Pool:
                 initial_a_time=self.internal_state.INITIAL_A_TIME or 0,
                 future_a=self.internal_state.FUTURE_A or 0,
                 future_a_time=self.internal_state.FUTURE_A_TIME or 0,
+                precision=self.internal_state.PRECISION or 1,
             )
         else:
             self.pool_type = "CONSTANT_PRODUCT"

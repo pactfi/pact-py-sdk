@@ -31,7 +31,7 @@ class TransactionGroup:
             raise PactSdkError("Cannot retrieve group id from transaction.")
         self.group_id_buffer = first_tx.group
 
-    def sign(self, private_key: str) -> list[str]:
+    def sign(self, private_key: str) -> list[transaction.SignedTransaction]:
         """Signs all the transactions in the group with the private key.
 
         Using the private_key passed in assigns all the transactions stored internally for the transaction group.

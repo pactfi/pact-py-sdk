@@ -124,7 +124,7 @@ def deploy_contract(
         f"--secondary_asset_id={secondary_asset_index}",
         f"--fee_bps={fee_bps}",
         f"--pact_fee_bps={pact_fee_bps}",
-        f"--amplifier={amplifier}",
+        f"--amplifier={amplifier * 1000}",
         f"--admin_and_treasury_address={account.address}",
     ]
 

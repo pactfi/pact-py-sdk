@@ -46,7 +46,9 @@ def test_stableswap_asa_to_asa():
 
 
 def test_stableswap_with_changing_amplifier(time):
-    testbed = make_fresh_testbed("STABLESWAP", amplifier=100)
+    testbed = make_fresh_testbed("STABLESWAP", amplifier=10)
+
+    a_precision = 1000
 
     params = cast(StableswapParams, testbed.pool.params)
     swap_calculator = cast(
@@ -57,73 +59,73 @@ def test_stableswap_with_changing_amplifier(time):
 
     time.move_to(datetime.fromtimestamp(initial_time))
 
-    assert swap_calculator.get_amplifier() == 100
+    assert swap_calculator.get_amplifier() == 10 * a_precision
 
     # Let's increase the amplifier.
-    params.future_a = 200
+    params.future_a = 20 * a_precision
     params.future_a_time += 1000
 
     swap_args = [2000, 1500, 1000]
 
-    assert swap_calculator.get_amplifier() == 100
-    assert swap_calculator.get_swap_gross_amount_received(*swap_args) == 984
-    assert swap_calculator.get_swap_amount_deposited(*swap_args) == 1017
+    assert swap_calculator.get_amplifier() == 10 * a_precision
+    assert swap_calculator.get_swap_gross_amount_received(*swap_args) == 933
+    assert swap_calculator.get_swap_amount_deposited(*swap_args) == 1084
 
     time.tick(100)
-    assert swap_calculator.get_amplifier() == 110
-    assert swap_calculator.get_swap_gross_amount_received(*swap_args) == 985
-    assert swap_calculator.get_swap_amount_deposited(*swap_args) == 1016
+    assert swap_calculator.get_amplifier() == 11 * a_precision
+    assert swap_calculator.get_swap_gross_amount_received(*swap_args) == 938
+    assert swap_calculator.get_swap_amount_deposited(*swap_args) == 1077
 
     time.tick(400)
-    assert swap_calculator.get_amplifier() == 150
-    assert swap_calculator.get_swap_gross_amount_received(*swap_args) == 989
-    assert swap_calculator.get_swap_amount_deposited(*swap_args) == 1011
+    assert swap_calculator.get_amplifier() == 15 * a_precision
+    assert swap_calculator.get_swap_gross_amount_received(*swap_args) == 952
+    assert swap_calculator.get_swap_amount_deposited(*swap_args) == 1056
 
     time.tick(600)
-    assert swap_calculator.get_amplifier() == 200
-    assert swap_calculator.get_swap_gross_amount_received(*swap_args) == 992
-    assert swap_calculator.get_swap_amount_deposited(*swap_args) == 1008
+    assert swap_calculator.get_amplifier() == 20 * a_precision
+    assert swap_calculator.get_swap_gross_amount_received(*swap_args) == 962
+    assert swap_calculator.get_swap_amount_deposited(*swap_args) == 1043
 
     time.tick(1400)
-    assert swap_calculator.get_amplifier() == 200
+    assert swap_calculator.get_amplifier() == 20 * a_precision
 
     # Let's decrease the amplifier.
     params.initial_a = params.future_a
     params.initial_a_time = int(datetime.now().timestamp())
-    params.future_a = 150
+    params.future_a = 15 * a_precision
     params.future_a_time = params.initial_a_time + 2000
     initial_time = params.initial_a_time
 
-    assert swap_calculator.get_amplifier() == 200
-    assert swap_calculator.get_swap_gross_amount_received(*swap_args) == 992
-    assert swap_calculator.get_swap_amount_deposited(*swap_args) == 1008
+    assert swap_calculator.get_amplifier() == 20 * a_precision
+    assert swap_calculator.get_swap_gross_amount_received(*swap_args) == 962
+    assert swap_calculator.get_swap_amount_deposited(*swap_args) == 1043
 
     time.tick(100)
-    assert swap_calculator.get_amplifier() == 198
-    assert swap_calculator.get_swap_gross_amount_received(*swap_args) == 992
-    assert swap_calculator.get_swap_amount_deposited(*swap_args) == 1008
+    assert swap_calculator.get_amplifier() == 19750
+    assert swap_calculator.get_swap_gross_amount_received(*swap_args) == 962
+    assert swap_calculator.get_swap_amount_deposited(*swap_args) == 1044
 
     time.tick(900)
-    assert swap_calculator.get_amplifier() == 175
-    assert swap_calculator.get_swap_gross_amount_received(*swap_args) == 991
-    assert swap_calculator.get_swap_amount_deposited(*swap_args) == 1010
+    assert swap_calculator.get_amplifier() == 17500
+    assert swap_calculator.get_swap_gross_amount_received(*swap_args) == 957
+    assert swap_calculator.get_swap_amount_deposited(*swap_args) == 1050
 
     time.tick(1000)
-    assert swap_calculator.get_amplifier() == 150
-    assert swap_calculator.get_swap_gross_amount_received(*swap_args) == 989
-    assert swap_calculator.get_swap_amount_deposited(*swap_args) == 1011
+    assert swap_calculator.get_amplifier() == 15 * a_precision
+    assert swap_calculator.get_swap_gross_amount_received(*swap_args) == 952
+    assert swap_calculator.get_swap_amount_deposited(*swap_args) == 1056
 
     time.tick(1000)
-    assert swap_calculator.get_amplifier() == 150
+    assert swap_calculator.get_amplifier() == 15 * a_precision
 
-    params.future_a = 5000
-    assert swap_calculator.get_amplifier() == 5000
-    assert swap_calculator.get_swap_gross_amount_received(*swap_args) == 1001
-    assert swap_calculator.get_swap_amount_deposited(*swap_args) == 999
+    params.future_a = 100 * a_precision
+    assert swap_calculator.get_amplifier() == 100 * a_precision
+    assert swap_calculator.get_swap_gross_amount_received(*swap_args) == 992
+    assert swap_calculator.get_swap_amount_deposited(*swap_args) == 1008
 
 
 def test_stableswap_with_big_amplifier():
-    testbed = make_fresh_testbed("STABLESWAP", amplifier=5000)
+    testbed = make_fresh_testbed("STABLESWAP", amplifier=200)
 
     add_liquidity(testbed.account, testbed.pool, 20000, 15000)
 
@@ -133,6 +135,6 @@ def test_stableswap_with_big_amplifier():
         slippage_pct=0,
     )
 
-    assert (swap.effect.amount_received + swap.effect.fee) == 1001
+    assert (swap.effect.amount_received + swap.effect.fee) == 999
 
     assert_swap(swap, testbed.account)
