@@ -70,8 +70,8 @@ class StableswapCalculator:
         # The division helps minimize price impact of simulated swap.
         amount_deposited = min(ratio, liq_a // 100, liq_b // 100)
         amount_received = self.get_swap_gross_amount_received(
-            int(liq_a),
             int(liq_b),
+            int(liq_a),
             int(amount_deposited),
         )
         return amount_deposited / amount_received
