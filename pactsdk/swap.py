@@ -45,7 +45,7 @@ class Swap:
     """Either the amount to swap (deposit) or the amount to receive depending on the `swap_for_exact` parameter."""
 
     slippage_pct: float
-    """The maximum amount of slippage allowed in performing the swap."""
+    """The maximum percentage of slippage allowed in performing the swap."""
 
     swap_for_exact: bool = False
     """If `true` then `amount` is what you want to receive from the swap. Otherwise, it's an amount that you want to swap (deposit). Note that the contracts do not support the "swap exact for" swap. It works by calculating the amount to deposit on the client side and doing a normal swap on the exchange."""

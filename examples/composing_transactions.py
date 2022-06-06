@@ -1,4 +1,4 @@
-"""This example performs asset opt-in and a swap in a single atomic group."""
+"""This example performs asset opt-in and add liquidity in a single atomic group."""
 
 import algosdk
 from algosdk.v2client.algod import AlgodClient
@@ -17,14 +17,14 @@ suggested_params = algod.suggested_params()
 
 opt_in_tx = pool.liquidity_asset.prepare_opt_in_tx(address)
 
-swap = pool.prepare_swap(
-    asset=pool.primary_asset,
-    amount=100_000,
-    slippage_pct=2,
+add_liquidity_txs = pool.build_add_liquidity_txs(
+    address="<address>",
+    primary_asset_amount=100_000,
+    secondary_asset_amount=200_000,
+    suggested_params=suggested_params,
 )
-swap_txs = pool.build_swap_txs(swap, address, suggested_params)
 
-txs = [opt_in_tx, *swap_txs]
+txs = [opt_in_tx, *add_liquidity_txs]
 
 group = pactsdk.TransactionGroup(txs)
 signed_group = group.sign(private_key)

@@ -62,13 +62,13 @@ class StableswapCalculator:
                 "Number of decimals differs between primary and secondary asset. Stableswap does not support this scenario correctly.",
             )
 
-        # Price is calculated by simulating a swap for 1 token.
+        # Price is calculated by simulating a swap for 10**6 of micro values.
         # This price is highly inaccurate for low liquidity pools.
         liq_a *= ratio
         liq_b *= ratio
 
         # The division helps minimize price impact of simulated swap.
-        amount_deposited = min(ratio, liq_a // 100, liq_b // 100)
+        amount_deposited = min(10**6, liq_a // 100, liq_b // 100)
         amount_received = self.get_swap_gross_amount_received(
             int(liq_b),
             int(liq_a),

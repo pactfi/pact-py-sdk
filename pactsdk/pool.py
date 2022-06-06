@@ -272,7 +272,7 @@ class Pool:
 
         If the pool is empty and the product of both assets is larger then 2**64 then an additional set of 3 transactions is built.
 
-        The initial liquidity must satisfy the expression `sqrt(a * b) - 1000 < 0`.
+        The initial liquidity must satisfy the expression `sqrt(a * b) - 1000 > 0`.
 
         Args:
             address: Account address that will deposit the primary and secondary assets and receive the LP token.
@@ -291,7 +291,7 @@ class Pool:
         if self.calculator.is_empty:
             assert (
                 math.isqrt(primary_asset_amount * secondary_asset_amount) - 1000 > 0
-            ), "Initial liquidity must satisfy the expression `sqrt(a * b) - 1000 < 0`"
+            ), "Initial liquidity must satisfy the expression `sqrt(a * b) - 1000 > 0`"
 
             # Adding initial liquidity has a limitation that the product of 2 assets must be lower then 2**64. Let's check if we can fit below the limit.
             max_product = 2**64
