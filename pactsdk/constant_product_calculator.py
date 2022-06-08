@@ -33,6 +33,5 @@ class ConstantProductCalculator:
         liq_b: int,
         gross_amount_received: int,
     ) -> int:
-        # TODO D?
         deposited = liq_a * gross_amount_received / (liq_b - (gross_amount_received))
-        return int(math.ceil(deposited))
+        return math.ceil(deposited)

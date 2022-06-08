@@ -5,10 +5,18 @@ from dataclasses import dataclass
 from math import isqrt
 from typing import TYPE_CHECKING, cast
 
+from .exceptions import PactSdkError
+
 if TYPE_CHECKING:
     from .pool import Pool
 
 logger = logging.getLogger(__name__)
+
+MAX_GET_PRICE_RETRIES = 5
+
+
+class ConvergeError(PactSdkError):
+    pass
 
 
 @dataclass
@@ -53,6 +61,7 @@ class StableswapCalculator:
         return max(min_a, min(max_a, math.ceil(current_a)))
 
     def get_price(self, liq_a: float, liq_b: float) -> float:
+        """May return zero for highly unbalanced pools."""
         if not liq_a or not liq_b:
             return 0
 
@@ -62,19 +71,36 @@ class StableswapCalculator:
                 "Number of decimals differs between primary and secondary asset. Stableswap does not support this scenario correctly.",
             )
 
-        # Price is calculated by simulating a swap for 10**6 of micro values.
-        # This price is highly inaccurate for low liquidity pools.
+        return self._get_price(liq_a, liq_b, MAX_GET_PRICE_RETRIES)
+
+    def _get_price(self, liq_a: float, liq_b: float, retries: int) -> float:
+        """
+        Price is calculated by simulating a swap for 10**6 of micro values.
+        This price is highly inaccurate for low liquidity pools.
+        In case of "didn't converge" error we try to simulate a swap using a different swap amount.
+        Returns zero if all retries will fail.
+        """
+        if retries <= 0:
+            return 0.0
+
+        ratio = self.pool.primary_asset.ratio
+
         liq_a *= ratio
         liq_b *= ratio
 
         # The division helps minimize price impact of simulated swap.
-        amount_deposited = min(10**6, liq_a // 100, liq_b // 100)
-        amount_received = self.get_swap_gross_amount_received(
-            int(liq_b),
-            int(liq_a),
-            int(amount_deposited),
-        )
-        return amount_deposited / amount_received
+        amount_deposited = 10**6 * (MAX_GET_PRICE_RETRIES - retries + 1)
+        amount_deposited = min(amount_deposited, int(liq_a // 100), int(liq_b // 100))
+
+        try:
+            amount_received = self.get_swap_gross_amount_received(
+                int(liq_b),
+                int(liq_a),
+                int(amount_deposited),
+            )
+            return amount_deposited / amount_received
+        except ConvergeError:
+            return self._get_price(liq_a, liq_b, retries - 1)
 
     def get_swap_gross_amount_received(
         self,
@@ -133,7 +159,7 @@ class StableswapCalculator:
             elif Dprev - D <= 1:
                 break
         if i == 255:
-            raise Exception(f"Didn't converge {Dprev=}, {D=}")
+            raise ConvergeError(f"Didn't converge {Dprev=}, {D=}")
         return D
 
     def get_new_liq(self, liq_other: int, amplifier: int, inv: int) -> int:

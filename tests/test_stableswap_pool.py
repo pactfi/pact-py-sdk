@@ -6,6 +6,7 @@ from pactsdk.stableswap_calculator import StableswapParams
 
 from .matchers import Any
 from .utils import (
+    add_liquidity,
     algod,
     create_asset,
     deploy_stableswap_contract,
@@ -153,3 +154,28 @@ def test_stableswap_pool_e2e_scenario():
     pool.state = pool.parse_internal_state(pool.internal_state)
     assert f"{pool.state.primary_asset_price:.2f}" == "1.01"
     assert f"{pool.state.secondary_asset_price:.2f}" == "0.99"
+
+
+def test_pool_with_convergence_issues():
+    account = new_account()
+    pact = PactClient(algod)
+
+    coinAIndex = create_asset(account, "COIN_A", 0, 10**15)
+    coinBIndex = create_asset(account, "COIN_B", 0, 10**15)
+
+    appId = deploy_stableswap_contract(
+        account,
+        coinAIndex,
+        coinBIndex,
+        fee_bps=5,
+        pact_fee_bps=5,
+        amplifier=5,
+    )
+    pool = pact.fetch_pool_by_id(appId)
+
+    # Pool highly out of balance.
+    add_liquidity(account, pool, 20692785, 227709222785)
+
+    pool.update_state()
+    assert pool.state.primary_asset_price == 0  # Because of convergence issues.
+    assert pool.state.secondary_asset_price > 0  # This is calculated normally.
