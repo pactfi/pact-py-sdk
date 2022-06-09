@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pact Python SDK &mdash; pactsdk  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="pactsdk" href="pactsdk/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="#" class="icon icon-home"> pactsdk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="pactsdk/index.html">pactsdk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">pactsdk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
+      <li>Pact Python SDK</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pact-python-sdk">
+<h1>Pact Python SDK<a class="headerlink" href="#pact-python-sdk" title="Permalink to this headline"></a></h1>
+<p><strong>pactsdk</strong> is a software development kit for interfacing to <a class="reference external" href="https://pact.fi">Pact</a>, a decentralized automated market maker on the Algorand protocol.</p>
+<p>The Python SDK provides a set of modules on top of the Algorand Python SDK for interacting with liquidity pools and making swaps.
+Clients can use the Python SDK to enhance their trading experience with Pact.</p>
+<p>What is covered by the library:</p>
+<ul class="simple">
+<li><p>Fetching pools</p></li>
+<li><p>Opt-in for assets</p></li>
+<li><p>Managing liquidity</p></li>
+<li><p>Inspecting pools state</p></li>
+<li><p>Making swaps</p></li>
+</ul>
+<p>Signing and sending transactions is not covered by the library. The provided examples use algosdk directly to send the transactions.</p>
+</section>
+<section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pactsdk</span></code></p>
+</section>
+<section id="basic-usage">
+<h1>Basic usage<a class="headerlink" href="#basic-usage" title="Permalink to this headline"></a></h1>
+<p><strong>CAUTION</strong> - The library uses integers for asset amounts e.g. microalgos instead of algos so if you want to send 1 algo, you need to specify it as 1_000_000.</p>
+<p>Create a Pact client.</p>
+<div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">algosdk.v2client.algod</span> <span class="kn">import</span> <span class="n">AlgodClient</span>
+<span class="kn">import</span> <span class="nn">pactsdk</span>
+
+<span class="n">algod</span> <span class="o">=</span> <span class="n">AlgodClient</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+<span class="n">pact</span> <span class="o">=</span> <span class="n">pactsdk</span><span class="o">.</span><span class="n">PactClient</span><span class="p">(</span><span class="n">algod</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Optionally you can specify custom Pact API url. By default it directs to production API.</p>
+<div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">pact</span> <span class="o">=</span> <span class="n">pactsdk</span><span class="o">.</span><span class="n">PactClient</span><span class="p">(</span><span class="n">algod</span><span class="p">,</span> <span class="n">pact_api_url</span><span class="o">=</span><span class="s2">&quot;https://api.testnet.pact.fi&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Fetching pools by assets pair. It uses Pact API to retrieve the pool. Can return multiple pools with differing fee_bps.</p>
+<div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">algo</span> <span class="o">=</span> <span class="n">pact</span><span class="o">.</span><span class="n">fetch_asset</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">other_coin</span> <span class="o">=</span> <span class="n">pact</span><span class="o">.</span><span class="n">fetch_asset</span><span class="p">(</span><span class="mi">8949213</span><span class="p">)</span>
+
+<span class="n">pools</span> <span class="o">=</span> <span class="n">pact</span><span class="o">.</span><span class="n">fetch_pools_by_assets</span><span class="p">(</span><span class="n">algo</span><span class="p">,</span> <span class="n">other_coin</span><span class="p">)</span> <span class="c1"># The pool will be fetched regardless of assets order.</span>
+</pre></div>
+</div>
+<p>You can fetch a pool by providing assets ids instead of Asset objects.</p>
+<div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">pools</span> <span class="o">=</span> <span class="n">pact</span><span class="o">.</span><span class="n">fetch_pools_by_assets</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">8949213</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can also fetch a pool by providing app id. This way the pool is retrieved directly from the chain.</p>
+<div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">pool</span> <span class="o">=</span> <span class="n">pact</span><span class="o">.</span><span class="n">fetch_pool_by_id</span><span class="p">(</span><span class="mi">456321</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can list all pools from the Pact API.</p>
+<div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">pools</span> <span class="o">=</span> <span class="n">pact</span><span class="o">.</span><span class="n">list_pools</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">pools</span><span class="p">)</span>
+<span class="c1"># {</span>
+<span class="c1">#   &quot;count&quot;: 19,</span>
+<span class="c1">#   &quot;offset&quot;: 0,</span>
+<span class="c1">#   &quot;limit&quot;: 10,</span>
+<span class="c1">#   &quot;results&quot;: [...],</span>
+<span class="c1"># }</span>
+
+<span class="c1"># The listing uses pagination and filtering.</span>
+<span class="n">pools</span> <span class="o">=</span> <span class="n">pact</span><span class="o">.</span><span class="n">list_pools</span><span class="p">(</span>
+  <span class="n">offset</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+  <span class="n">primary_asset__algoid</span><span class="o">=</span><span class="mi">9843123</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Before making the transactions you need to opt-in for the assets. There’s no need to opt-in for algo.</p>
+<div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">algosdk</span>
+
+<span class="n">private_key</span> <span class="o">=</span> <span class="n">algosdk</span><span class="o">.</span><span class="n">mnemonic</span><span class="o">.</span><span class="n">to_private_key</span><span class="p">(</span><span class="s1">&#39;&lt;mnemonic&gt;&#39;</span><span class="p">)</span>
+<span class="n">address</span> <span class="o">=</span> <span class="n">algosdk</span><span class="o">.</span><span class="n">account</span><span class="o">.</span><span class="n">address_from_private_key</span><span class="p">(</span><span class="n">private_key</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">opt_in</span><span class="p">(</span><span class="n">asset</span><span class="p">):</span>
+    <span class="n">is_opted_in</span> <span class="o">=</span> <span class="n">asset</span><span class="o">.</span><span class="n">is_opted_in</span><span class="p">(</span><span class="n">address</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_opted_in</span><span class="p">:</span>
+        <span class="n">opt_in_tx</span> <span class="o">=</span> <span class="n">asset</span><span class="o">.</span><span class="n">prepare_opt_in_tx</span><span class="p">(</span><span class="n">address</span><span class="p">)</span>
+        <span class="n">signed_tx</span> <span class="o">=</span> <span class="n">opt_in_tx</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">private_key</span><span class="p">)</span>
+        <span class="n">algod</span><span class="o">.</span><span class="n">send_transaction</span><span class="p">(</span><span class="n">signed_tx</span><span class="p">)</span>
+
+<span class="n">opt_in</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">primary_asset</span><span class="p">)</span>
+<span class="n">opt_in</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">secondary_asset</span><span class="p">)</span>
+<span class="n">opt_in</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">liquidity_asset</span><span class="p">)</span> <span class="c1"># Needed if you want to manage the liquidity.</span>
+</pre></div>
+</div>
+<p>Check the current pool state.</p>
+<div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+<span class="c1"># PoolState(</span>
+<span class="c1">#   total_liquidity=900000,</span>
+<span class="c1">#   total_primary=956659,</span>
+<span class="c1">#   total_secondary=849972,</span>
+<span class="c1">#   primary_asset_price=0.8884795940873393,</span>
+<span class="c1">#   secondary_asset_price=1.1255182523659604,</span>
+<span class="c1"># )</span>
+</pre></div>
+</div>
+<p>Explicit pool state update is necessary periodically and after each pool operation.</p>
+<div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">pool</span><span class="o">.</span><span class="n">update_state</span><span class="p">()</span>
+<span class="n">pool</span><span class="o">.</span><span class="n">state</span>  <span class="c1"># Now holds fresh values.</span>
+</pre></div>
+</div>
+<p>Managing the liquidity.</p>
+<div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="c1"># Add liquidity.</span>
+<span class="n">add_liq_tx_group</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">prepare_add_liquidity_tx_group</span><span class="p">(</span>
+  <span class="n">address</span><span class="o">=</span><span class="n">address</span><span class="p">,</span>
+  <span class="n">primary_asset_amount</span><span class="o">=</span><span class="mi">100_000</span><span class="p">,</span>
+  <span class="n">secondary_asset_amount</span><span class="o">=</span><span class="mi">50_000</span><span class="p">,</span>
+<span class="p">);</span>
+<span class="n">signed_add_liq_tx_group</span> <span class="o">=</span> <span class="n">add_liq_tx_group</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">private_key</span><span class="p">)</span>
+<span class="n">algod</span><span class="o">.</span><span class="n">send_transactions</span><span class="p">(</span><span class="n">signed_add_liq_tx_group</span><span class="p">)</span>
+
+<span class="c1"># Remove liquidity.</span>
+<span class="n">remove_liq_tx_group</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">prepare_remove_liquidity_tx_group</span><span class="p">(</span>
+  <span class="n">address</span><span class="o">=</span><span class="n">address</span><span class="p">,</span>
+  <span class="n">amount</span><span class="o">=</span><span class="mi">100_000</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">signed_remove_liq_tx_group</span> <span class="o">=</span> <span class="n">remove_liq_tx_group</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">private_key</span><span class="p">)</span>
+<span class="n">algod</span><span class="o">.</span><span class="n">send_transactions</span><span class="p">(</span><span class="n">signed_remove_liq_tx_group</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Making a swap.</p>
+<div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">swap</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">prepare_swap</span><span class="p">(</span>
+  <span class="n">asset</span><span class="o">=</span><span class="n">algo</span><span class="p">,</span>
+  <span class="n">amount</span><span class="o">=</span><span class="mi">200_000</span><span class="p">,</span>
+  <span class="n">slippage_pct</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># You can inspect swap effect before submitting the transaction.</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">swap</span><span class="o">.</span><span class="n">effect</span><span class="p">)</span>
+<span class="c1"># SwapEffect(</span>
+<span class="c1">#     amount_deposited=200000,</span>
+<span class="c1">#     amount_received=146529,</span>
+<span class="c1">#     minimum_amount_received=143598,</span>
+<span class="c1">#     fee=441,</span>
+<span class="c1">#     price=0.73485,</span>
+<span class="c1">#     primary_asset_price_after_swap=0.6081680080300244,</span>
+<span class="c1">#     secondary_asset_price_after_swap=1.6442824791774173,</span>
+<span class="c1">#     primary_asset_price_change_pct=-31.549580645715963,</span>
+<span class="c1">#     secondary_asset_price_change_pct=46.091142966447585,</span>
+<span class="c1"># )</span>
+
+<span class="c1"># Let&#39;s submit the swap.</span>
+<span class="n">swap_tx_group</span> <span class="o">=</span> <span class="n">swap</span><span class="o">.</span><span class="n">prepare_tx_group</span><span class="p">(</span><span class="n">address</span><span class="p">)</span>
+<span class="n">signed_tx_group</span> <span class="o">=</span> <span class="n">swap_tx_group</span><span class="o">.</span><span class="n">sign_txn</span><span class="p">(</span><span class="n">private_key</span><span class="p">)</span>
+<span class="n">algod</span><span class="o">.</span><span class="n">send_transactions</span><span class="p">(</span><span class="n">signed_tx_group</span><span class="p">)</span>
+</pre></div>
+</div>
+<section id="composability-of-transactions">
+<h2>Composability of transactions.<a class="headerlink" href="#composability-of-transactions" title="Permalink to this headline"></a></h2>
+<p>The SDK has two sets of methods for creating transactions:</p>
+<ol class="arabic">
+<li><p><code class="docutils literal notranslate"><span class="pre">prepare_..._tx_group</span></code> e.g. <code class="docutils literal notranslate"><span class="pre">pool.prepare_swap_tx_group</span></code></p>
+<p>Those methods are convenience methods which ask algod for suggested transaction parameters, build transactions and create a transaction group. You can’t add you own transactions to the group using those methods.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">build_..._txs</span></code> e.g. <code class="docutils literal notranslate"><span class="pre">pool.build_swap_txs</span></code></p>
+<p>Those methods return a list of transactions. You can extend that list with your own transactions and create a <code class="docutils literal notranslate"><span class="pre">TransactionGroup</span></code> manually from this list.</p>
+</li>
+</ol>
+</section>
+</section>
+<section id="development">
+<h1>Development<a class="headerlink" href="#development" title="Permalink to this headline"></a></h1>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">poetry</span> <span class="pre">install</span></code></p></li>
+</ul>
+<p>Development requires <a class="reference external" href="https://github.com/pactfi/algorand-testbed">Pact contracts V1</a> to be checked out.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">git&#64;github.com:pactfi/algorand-testbed.git</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">algorand-testbed</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">poetry</span> <span class="pre">install</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">compose</span> <span class="pre">up</span> <span class="pre">-d</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">..</span></code></p></li>
+</ul>
+<section id="building">
+<h2>Building<a class="headerlink" href="#building" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">poetry</span> <span class="pre">build</span></code></p></li>
+</ul>
+<p>You can install the package locally with
+<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">dist/pactsdk-&lt;version&gt;.whl</span></code></p>
+<p>Validate the installation <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-c</span> <span class="pre">&quot;import</span> <span class="pre">pactsdk;</span> <span class="pre">print(pactsdk.__version__)&quot;</span></code></p>
+</section>
+<section id="running-tests">
+<h2>Running tests<a class="headerlink" href="#running-tests" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">poetry</span> <span class="pre">run</span> <span class="pre">pytest</span></code></p></li>
+</ul>
+</section>
+</section>
+<section id="list-of-content">
+<h1>List of content<a class="headerlink" href="#list-of-content" title="Permalink to this headline"></a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pactsdk/index.html">pactsdk</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pactsdk/client.html">client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pactsdk/asset.html">asset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pactsdk/pool.html">pool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pactsdk/swap.html">swap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pactsdk/pool_state.html">pool_state</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pactsdk/transaction_group.html">transaction_group</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pactsdk/api.html">api</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pactsdk/pool_calculator.html">pool_calculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pactsdk/constant_product_calculator.html">constant_product_calculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pactsdk/stableswap_calculator.html">stableswap_calculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pactsdk/exceptions.html">exceptions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/get_pool_state.html">Get pool state</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/add_liquidity.html">Add liquidity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/swap.html">Swap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/composing_transactions.html">Composing transactions</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline"></a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pactsdk/index.html" class="btn btn-neutral float-right" title="pactsdk" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Pact.fi.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

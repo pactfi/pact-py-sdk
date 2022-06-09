@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>client &mdash; pactsdk  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="asset" href="asset.html" />
+    <link rel="prev" title="pactsdk" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> pactsdk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">pactsdk</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="asset.html">asset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pool.html">pool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="swap.html">swap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pool_state.html">pool_state</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transaction_group.html">transaction_group</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html">api</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pool_calculator.html">pool_calculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="constant_product_calculator.html">constant_product_calculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stableswap_calculator.html">stableswap_calculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html">exceptions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pactsdk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">pactsdk</a> &raquo;</li>
+      <li>client</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/pactsdk/client.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pactsdk.client">
+<span id="client"></span><h1>client<a class="headerlink" href="#module-pactsdk.client" title="Permalink to this headline"></a></h1>
+<p>This module exposes PactClient class which is an entry points for interacting with the SDK.</p>
+<p>Typical usage example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">algosdk</span>
+<span class="kn">from</span> <span class="nn">algosdk.v2client.algod</span> <span class="kn">import</span> <span class="n">AlgodClient</span>
+
+<span class="kn">import</span> <span class="nn">pactsdk</span>
+
+<span class="n">algod</span> <span class="o">=</span> <span class="n">AlgodClient</span><span class="p">(</span><span class="s2">&quot;&lt;token&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;url&gt;&quot;</span><span class="p">)</span>
+<span class="n">pact</span> <span class="o">=</span> <span class="n">pactsdk</span><span class="o">.</span><span class="n">PactClient</span><span class="p">(</span><span class="n">algod</span><span class="p">)</span>
+
+<span class="n">algo</span> <span class="o">=</span> <span class="n">pact</span><span class="o">.</span><span class="n">fetch_asset</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">other_coin</span> <span class="o">=</span> <span class="n">pact</span><span class="o">.</span><span class="n">fetch_asset</span><span class="p">(</span><span class="mi">12345678</span><span class="p">)</span>
+
+<span class="n">pools</span> <span class="o">=</span> <span class="n">pact</span><span class="o">.</span><span class="n">fetch_pools_by_assets</span><span class="p">(</span><span class="n">algo</span><span class="p">,</span> <span class="n">other_coin</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="pactsdk.client.PactClient">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pactsdk.client.</span></span><span class="sig-name descname"><span class="pre">PactClient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algod</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pact_api_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'https://api.pact.fi'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.client.PactClient" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>An entry point for interacting with the SDK.</p>
+<p>Exposes convenience methods for fetching assets and pools.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.client.PactClient.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algod</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pact_api_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'https://api.pact.fi'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.client.PactClient.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Constructor for the PactClient class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>algod</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">AlgodClient</span></code>) – Algorand client to work with.</p></li>
+<li><p><strong>pact_api_url</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Pact API URL to use.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.client.PactClient.algod">
+<span class="sig-name descname"><span class="pre">algod</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">algosdk.v2client.algod.AlgodClient</span></em><a class="headerlink" href="#pactsdk.client.PactClient.algod" title="Permalink to this definition"></a></dt>
+<dd><p>Algorand client to work with.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.client.PactClient.pact_api_url">
+<span class="sig-name descname"><span class="pre">pact_api_url</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pactsdk.client.PactClient.pact_api_url" title="Permalink to this definition"></a></dt>
+<dd><p>Pact API URL to use.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.client.PactClient.fetch_asset">
+<span class="sig-name descname"><span class="pre">fetch_asset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">asset_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.client.PactClient.fetch_asset" title="Permalink to this definition"></a></dt>
+<dd><p>A convenient method for fetching ASAs (Algorand Standard Asset).</p>
+<p>This will return an Asset class with the relevant data about the asset if the asset index is valid.
+Note that an index of zero (0) will return the Algo asset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>asset_index</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – The id of the asset.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>algosdk.error.AlgodHTTPError</strong> – If the asset does not exist.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="asset.html#pactsdk.asset.Asset" title="pactsdk.asset.Asset"><code class="xref py py-class docutils literal notranslate"><span class="pre">Asset</span></code></a></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Asset instance for the given index.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.client.PactClient.list_pools">
+<span class="sig-name descname"><span class="pre">list_pools</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.client.PactClient.list_pools" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a list of pools according to the pool options passed in. Uses Pact API for fetching the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>params</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="api.html#pactsdk.api.ListPoolsParams" title="pactsdk.api.ListPoolsParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">ListPoolsParams</span></code></a>]) – API call parameters.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="api.html#pactsdk.api.ApiListPoolsResponse" title="pactsdk.api.ApiListPoolsResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">ApiListPoolsResponse</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Paginated list of pools.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.client.PactClient.fetch_pools_by_assets">
+<span class="sig-name descname"><span class="pre">fetch_pools_by_assets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">primary_asset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secondary_asset</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.client.PactClient.fetch_pools_by_assets" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a list of liquidity pools on Pact that are across the primary and secondary assets.</p>
+<p>First, it uses Pact API retrieve app ids matching the provided assets and then uses algod client to fetch contracts data from the blockchain.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>primary_asset</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="asset.html#pactsdk.asset.Asset" title="pactsdk.asset.Asset"><code class="xref py py-class docutils literal notranslate"><span class="pre">Asset</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – Primary asset or the asset id for the pool to find.</p></li>
+<li><p><strong>secondary_asset</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="asset.html#pactsdk.asset.Asset" title="pactsdk.asset.Asset"><code class="xref py py-class docutils literal notranslate"><span class="pre">Asset</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – Secondary asset or the asset id for the pool to find.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="pool.html#pactsdk.pool.Pool" title="pactsdk.pool.Pool"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pool</span></code></a>]</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List of pools for the two assets, the list may be empty.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.client.PactClient.fetch_pool_by_id">
+<span class="sig-name descname"><span class="pre">fetch_pool_by_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.client.PactClient.fetch_pool_by_id" title="Permalink to this definition"></a></dt>
+<dd><p>Fetches the pool by the application id. It uses algod client to fetch the data directly from the blockchain.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>app_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – The application id of pool to return.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>algosdk.error.AlgodHTTPError</strong> – If the pool does not exist.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="pool.html#pactsdk.pool.Pool" title="pactsdk.pool.Pool"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pool</span></code></a></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The pool for the application id.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="pactsdk" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="asset.html" class="btn btn-neutral float-right" title="asset" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Pact.fi.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
