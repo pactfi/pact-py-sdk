@@ -15,10 +15,9 @@ jobs:
       - name: Fetch gh-pages
         uses: actions/checkout@v2
         with:
-          repository: "pactfi/pact-py-sdk-private"
+          repository: "pactfi/pact-py-sdk"
           ref: gh-pages
           path: gh-pages
-          token: ${{ secrets.GH_PAT }}
       - run: poetry install
       - run: |
           git config --global user.name "GitHub Actions Bot"
