@@ -2,6 +2,10 @@
 
 **pactsdk** is a software development kit for interfacing to [Pact](https://pact.fi), a decentralized automated market maker on the Algorand protocol.
 
+The full documentation for this module can be found here:
+
+[https://pactfi.github.io/pact-py-sdk/latest/](https://pactfi.github.io/pact-py-sdk/latest/)
+
 The Python SDK provides a set of modules on top of the Algorand Python SDK for interacting with liquidity pools and making swaps.
 Clients can use the Python SDK to enhance their trading experience with Pact.
 
