@@ -1,12 +1,20 @@
-from decimal import Decimal as D
-
 import algosdk
 import pytest
 import responses
 
 import pactsdk
+from pactsdk.client import PactClient
 
-from .utils import TestBed, algod, deploy_contract, sign_and_send
+from .utils import (
+    POOL_TYPES,
+    TestBed,
+    algod,
+    create_asset,
+    deploy_contract,
+    deploy_exchange_contract,
+    new_account,
+    sign_and_send,
+)
 
 
 @responses.activate
@@ -123,8 +131,11 @@ def test_fetching_pools_by_assets_with_reversed_assets(testbed: TestBed):
 
 @responses.activate
 def test_fetching_pools_by_assets_multiple_results(testbed: TestBed):
-    second_app_id = deploy_contract(
-        testbed.account, testbed.algo.index, testbed.coin.index, fee_bps=100
+    second_app_id = deploy_exchange_contract(
+        testbed.account,
+        testbed.algo.index,
+        testbed.coin.index,
+        fee_bps=100,
     )
     mocked_api_data: dict = {
         "results": [
@@ -239,78 +250,40 @@ def test_pool_get_other_other(testbed: TestBed):
         testbed.pool.get_other_asset(shitcoin)
 
 
-def test_pool_e2e_scenario(testbed: TestBed):
-    assert testbed.pool.state == pactsdk.PoolState(
-        total_liquidity=0,
-        total_primary=0,
-        total_secondary=0,
-        primary_asset_price=D(0),
-        secondary_asset_price=D(0),
+@pytest.mark.parametrize("pool_type", POOL_TYPES)
+def test_adding_big_liquidity_to_an_empty_pool_using_split(
+    pool_type: pactsdk.pool.PoolType,
+):
+    account = new_account()
+    pact = PactClient(algod)
+
+    coin_a_index = create_asset(account, "coinA", 0, 2**50 - 1)
+    coin_b_index = create_asset(account, "coinB", 0, 2**50 - 1)
+
+    app_id = deploy_contract(account, pool_type, coin_a_index, coin_b_index)
+    pool = pact.fetch_pool_by_id(app_id)
+
+    assert pool.pool_type == pool_type
+    assert pool.calculator.is_empty
+
+    liq_opt_in_tx = pool.liquidity_asset.prepare_opt_in_tx(account.address)
+    sign_and_send(liq_opt_in_tx, account)
+
+    # Adding initial liquidity has a limitation that the product of 2 assets must be lower then 2**64.
+    # Let's go beyond that limit and check what happens.
+    [primary_asset_amount, secondary_asset_amount] = [2**40, 2**30]
+
+    tx_group = pool.prepare_add_liquidity_tx_group(
+        address=account.address,
+        primary_asset_amount=primary_asset_amount,
+        secondary_asset_amount=secondary_asset_amount,
     )
 
-    # Opt in for liquidity asset.
-    liq_opt_in_tx = testbed.pool.liquidity_asset.prepare_opt_in_tx(
-        testbed.account.address
-    )
-    sign_and_send(liq_opt_in_tx, testbed.account)
+    # liquidity is split into two chunks, so 6 txs instead of 3.
+    assert len(tx_group.transactions) == 6
 
-    # Add liquidity.
-    add_liq_tx = testbed.pool.prepare_add_liquidity_tx(
-        address=testbed.account.address,
-        primary_asset_amount=100_000,
-        secondary_asset_amount=100_000,
-    )
-    sign_and_send(add_liq_tx, testbed.account)
-    testbed.pool.update_state()
-    assert testbed.pool.state == pactsdk.PoolState(
-        total_liquidity=100_000,
-        total_primary=100_000,
-        total_secondary=100_000,
-        primary_asset_price=D(1),
-        secondary_asset_price=D(1),
-    )
+    sign_and_send(tx_group, account)
 
-    # Remove liquidity.
-    remove_liq_tx = testbed.pool.prepare_remove_liquidity_tx(
-        address=testbed.account.address,
-        amount=10_000,
-    )
-    sign_and_send(remove_liq_tx, testbed.account)
-    testbed.pool.update_state()
-    assert testbed.pool.state == pactsdk.PoolState(
-        total_liquidity=90_000,
-        total_primary=90_000,
-        total_secondary=90_000,
-        primary_asset_price=D(1),
-        secondary_asset_price=D(1),
-    )
-
-    # Swap algo.
-    algo_swap = testbed.pool.prepare_swap(
-        asset=testbed.algo,
-        amount=20_000,
-        slippage_pct=2,
-    )
-    algo_swap_tx = algo_swap.prepare_tx(testbed.account.address)
-    sign_and_send(algo_swap_tx, testbed.account)
-    testbed.pool.update_state()
-    assert testbed.pool.state.total_liquidity == 90_000
-    assert testbed.pool.state.total_primary > 100_000
-    assert testbed.pool.state.total_secondary < 100_000
-    assert testbed.pool.state.primary_asset_price < D(1)
-    assert testbed.pool.state.secondary_asset_price > D(1)
-
-    # Swap secondary.
-    coin_swap = testbed.pool.prepare_swap(
-        asset=testbed.coin,
-        amount=50_000,
-        slippage_pct=2,
-    )
-    coin_swap_tx = coin_swap.prepare_tx(testbed.account.address)
-    sign_and_send(coin_swap_tx, testbed.account)
-    testbed.pool.update_state()
-    assert testbed.pool.state.total_liquidity == 90_000
-    assert testbed.pool.state.total_primary < 100_000
-    assert testbed.pool.state.total_secondary > 100_000
-    assert testbed.pool.state.primary_asset_price > D(1)
-    assert testbed.pool.state.secondary_asset_price < D(1)
+    pool.update_state()
+    assert pool.state.total_primary == primary_asset_amount
+    assert pool.state.total_secondary == secondary_asset_amount

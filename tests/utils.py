@@ -10,6 +10,8 @@ from algosdk.v2client.algod import AlgodClient
 
 import pactsdk
 
+POOL_TYPES: list[pactsdk.pool.PoolType] = ["CONSTANT_PRODUCT", "STABLESWAP"]
+
 
 @dataclass
 class Account:
@@ -51,7 +53,7 @@ def create_asset(
     account: Account,
     name: Optional[str] = "COIN",
     decimals=6,
-    total=1_000_000,
+    total=100_000_000,
 ) -> int:
     suggested_params = algod.suggested_params()
 
@@ -70,11 +72,45 @@ def create_asset(
     return ptx["asset-index"]
 
 
-def deploy_contract(
+def deploy_exchange_contract(
+    account: Account, primary_asset_index: int, secondary_asset_index: int, fee_bps=30
+):
+    return deploy_contract(
+        account,
+        "CONSTANT_PRODUCT",
+        primary_asset_index,
+        secondary_asset_index,
+        fee_bps=fee_bps,
+    )
+
+
+def deploy_stableswap_contract(
     account: Account,
     primary_asset_index: int,
     secondary_asset_index: int,
     fee_bps=30,
+    pact_fee_bps=30,
+    amplifier=80,
+):
+    return deploy_contract(
+        account,
+        "STABLESWAP",
+        primary_asset_index,
+        secondary_asset_index,
+        fee_bps=fee_bps,
+        pact_fee_bps=pact_fee_bps,
+        amplifier=amplifier,
+    )
+
+
+def deploy_contract(
+    account: Account,
+    pool_type: pactsdk.pool.PoolType,
+    primary_asset_index: int,
+    secondary_asset_index: int,
+    fee_bps=30,
+    pact_fee_bps=30,
+    amplifier=80,
 ) -> int:
     mnemonic = algosdk.mnemonic.from_private_key(account.private_key)
 
@@ -83,9 +119,13 @@ def deploy_contract(
         "run",
         "python",
         "scripts/deploy.py",
+        f"--contract-type={pool_type.lower()}",
         f"--primary_asset_id={primary_asset_index}",
         f"--secondary_asset_id={secondary_asset_index}",
         f"--fee_bps={fee_bps}",
+        f"--pact_fee_bps={pact_fee_bps}",
+        f"--amplifier={amplifier * 1000}",
+        f"--admin_and_treasury_address={account.address}",
     ]
 
     env = {
@@ -108,7 +148,7 @@ def deploy_contract(
     return int(match[1])
 
 
-def add_liqudity(
+def add_liquidity(
     account: Account,
     pool: pactsdk.Pool,
     primary_asset_amount=10_000,
@@ -117,12 +157,12 @@ def add_liqudity(
     opt_in_tx = pool.liquidity_asset.prepare_opt_in_tx(account.address)
     sign_and_send(opt_in_tx, account)
 
-    add_liq_tx = pool.prepare_add_liquidity_tx(
+    add_liq_tx_group = pool.prepare_add_liquidity_tx_group(
         address=account.address,
         primary_asset_amount=primary_asset_amount,
         secondary_asset_amount=secondary_asset_amount,
     )
-    sign_and_send(add_liq_tx, account)
+    sign_and_send(add_liq_tx_group, account)
     pool.update_state()
 
 
@@ -159,17 +199,21 @@ class TestBed:
     pool: pactsdk.Pool
 
 
-def make_fresh_testbed(fee_bps=30) -> TestBed:
+def make_fresh_testbed(
+    pool_type: pactsdk.pool.PoolType, fee_bps=30, amplifier=80
+) -> TestBed:
     account = new_account()
     pact = pactsdk.PactClient(algod)
 
     coin_index = create_asset(account)
 
     app_id = deploy_contract(
+        pool_type=pool_type,
         account=account,
         primary_asset_index=0,
         secondary_asset_index=coin_index,
         fee_bps=fee_bps,
+        amplifier=amplifier,
     )
     pool = pact.fetch_pool_by_id(app_id=app_id)
 
@@ -179,4 +223,61 @@ def make_fresh_testbed(fee_bps=30) -> TestBed:
         algo=pool.primary_asset,
         coin=pool.secondary_asset,
         pool=pool,
+    )
+
+
+def assert_swap(swap: pactsdk.Swap, account: Account):
+    # Perform the swap.
+    old_state = swap.pool.state
+    swap_tx_group = swap.prepare_tx_group(account.address)
+    sign_and_send(swap_tx_group, account)
+    swap.pool.update_state()
+
+    # Compare the simulated effect with what really happened on the blockchain.
+    assert_pool_state(swap, old_state, swap.pool.state)
+
+
+def assert_pool_state(
+    swap: pactsdk.Swap, old_state: pactsdk.PoolState, new_state: pactsdk.PoolState
+):
+    if swap.asset_deposited == swap.pool.primary_asset:
+        assert (
+            swap.effect.amount_deposited
+            == new_state.total_primary - old_state.total_primary
+        )
+        assert (
+            swap.effect.amount_received
+            == old_state.total_secondary - new_state.total_secondary
+        )
+    else:
+        assert (
+            swap.effect.amount_received
+            == old_state.total_primary - new_state.total_primary
+        )
+        assert (
+            swap.effect.amount_deposited
+            == new_state.total_secondary - old_state.total_secondary
+        )
+
+    assert swap.effect.minimum_amount_received == int(
+        swap.effect.amount_received
+        - swap.effect.amount_received * (swap.slippage_pct / 100)
+    )
+
+    diff_ratio = swap.asset_deposited.ratio / swap.asset_received.ratio
+    expected_price = (
+        (swap.effect.amount_received + swap.effect.fee) / swap.effect.amount_deposited
+    ) * diff_ratio
+    assert swap.effect.price == expected_price
+
+    assert swap.effect.primary_asset_price_after_swap == new_state.primary_asset_price
+    assert (
+        swap.effect.secondary_asset_price_after_swap == new_state.secondary_asset_price
+    )
+
+    assert swap.effect.primary_asset_price_change_pct == (
+        (new_state.primary_asset_price / old_state.primary_asset_price) * 100 - 100
+    )
+    assert swap.effect.secondary_asset_price_change_pct == (
+        (new_state.secondary_asset_price / old_state.secondary_asset_price) * 100 - 100
     )
