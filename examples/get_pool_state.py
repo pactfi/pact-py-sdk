@@ -1,13 +1,15 @@
+"""This example fetches a pool and reads its state."""
+
 from algosdk.v2client.algod import AlgodClient
 
 import pactsdk
 
-algod = AlgodClient("<token>", "<url>")  # provide options
+algod = AlgodClient("<token>", "<url>")
 pact = pactsdk.PactClient(algod)
 
 algo = pact.fetch_asset(0)
-jamnik = pact.fetch_asset(41409282)
+usdc = pact.fetch_asset(31566704)
 
-pool = pact.fetch_pools_by_assets(algo, jamnik)[0]
+pool = pact.fetch_pools_by_assets(algo, usdc)[0]
 
-print("State {pool.state}")
+print(f"State {pool.state}")

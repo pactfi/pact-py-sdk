@@ -1,0 +1,25 @@
+name: Docs
+on:
+  push:
+    tags:
+      - "*.*.*"
+jobs:
+  Push-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v1
+        with:
+          python-version: "3.10"
+      - uses: Gr1N/setup-poetry@v7
+      - name: Fetch gh-pages
+        uses: actions/checkout@v2
+        with:
+          repository: "pactfi/pact-py-sdk"
+          ref: gh-pages
+          path: gh-pages
+      - run: poetry install
+      - run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "no.reply@github.actions"
+      - run: ./push-docs.sh
