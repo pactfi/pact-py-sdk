@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 MAX_GET_PRICE_RETRIES = 5
 
 
-class ConvergeError(PactSdkError):
+class ConvergenceError(PactSdkError):
     pass
 
 
@@ -77,7 +77,7 @@ class StableswapCalculator:
         """
         Price is calculated by simulating a swap for 10**6 of micro values.
         This price is highly inaccurate for low liquidity pools.
-        In case of "didn't converge" error we try to simulate a swap using a different swap amount.
+        In case of ConvergenceError we try to simulate a swap using a different swap amount.
         Returns zero if all retries will fail.
         """
         if retries <= 0:
@@ -89,7 +89,7 @@ class StableswapCalculator:
         liq_b *= ratio
 
         # The division helps minimize price impact of simulated swap.
-        amount_deposited = 10**6 * (MAX_GET_PRICE_RETRIES - retries + 1)
+        amount_deposited = 10 ** (6 + MAX_GET_PRICE_RETRIES - retries)
         amount_deposited = min(amount_deposited, int(liq_a // 100), int(liq_b // 100))
 
         try:
@@ -98,8 +98,11 @@ class StableswapCalculator:
                 int(liq_a),
                 int(amount_deposited),
             )
+            if amount_received == 0:
+                return self._get_price(liq_a, liq_b, retries - 1)
+
             return amount_deposited / amount_received
-        except ConvergeError:
+        except ConvergenceError:
             return self._get_price(liq_a, liq_b, retries - 1)
 
     def get_swap_gross_amount_received(
@@ -159,7 +162,7 @@ class StableswapCalculator:
             elif Dprev - D <= 1:
                 break
         if i == 255:
-            raise ConvergeError(f"Didn't converge {Dprev=}, {D=}")
+            raise ConvergenceError(f"Didn't converge {Dprev=}, {D=}")
         return D
 
     def get_new_liq(self, liq_other: int, amplifier: int, inv: int) -> int:
