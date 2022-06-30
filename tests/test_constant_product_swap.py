@@ -36,4 +36,5 @@ def test_constant_product_swap_asa_to_asa():
         asset=pool.primary_asset,
         slippage_pct=10,
     )
+    assert swap.effect.amplifier == 0
     assert_swap(swap, account)

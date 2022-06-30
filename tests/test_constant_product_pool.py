@@ -1,3 +1,5 @@
+from dataclasses import asdict
+
 import pactsdk
 
 from .utils import TestBed, sign_and_send
@@ -19,10 +21,12 @@ def test_constant_product_pool_e2e_scenario(testbed: TestBed):
     sign_and_send(liq_opt_in_tx, testbed.account)
 
     # Add liquidity.
-    add_liq_tx_group = testbed.pool.prepare_add_liquidity_tx_group(
-        address=testbed.account.address,
+    liquidity_addition = testbed.pool.prepare_add_liquidity(
         primary_asset_amount=100_000,
         secondary_asset_amount=100_000,
+    )
+    add_liq_tx_group = liquidity_addition.prepare_tx_group(
+        address=testbed.account.address,
     )
     assert add_liq_tx_group.group_id
     assert len(add_liq_tx_group.transactions) == 3
@@ -82,3 +86,34 @@ def test_constant_product_pool_e2e_scenario(testbed: TestBed):
     assert testbed.pool.state.total_secondary > 100_000
     assert testbed.pool.state.primary_asset_price > 1
     assert testbed.pool.state.secondary_asset_price < 1
+
+
+def test_constant_product_pool_parsing_state(testbed: TestBed):
+    assert testbed.pool.primary_asset.index == testbed.algo.index
+    assert testbed.pool.secondary_asset.index == testbed.coin.index
+
+    assert testbed.pool.pool_type == "CONSTANT_PRODUCT"
+    assert testbed.pool.version == 2
+
+    assert asdict(testbed.pool.internal_state) == {
+        "A": 0,
+        "ADMIN": testbed.account.address,
+        "ASSET_A": testbed.pool.primary_asset.index,
+        "ASSET_B": testbed.pool.secondary_asset.index,
+        "LTID": testbed.pool.liquidity_asset.index,
+        "B": 0,
+        "CONTRACT_NAME": "PACT AMM",
+        "FEE_BPS": testbed.pool.fee_bps,
+        "L": 0,
+        "PACT_FEE_BPS": 0,
+        "PRIMARY_FEES": 0,
+        "SECONDARY_FEES": 0,
+        "TREASURY": testbed.account.address,
+        "VERSION": 2,
+        "FUTURE_A": None,
+        "FUTURE_ADMIN": None,
+        "FUTURE_A_TIME": None,
+        "INITIAL_A": None,
+        "INITIAL_A_TIME": None,
+        "PRECISION": None,
+    }

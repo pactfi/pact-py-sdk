@@ -6,7 +6,6 @@ import pactsdk
 from pactsdk.client import PactClient
 
 from .utils import (
-    POOL_TYPES,
     TestBed,
     algod,
     create_asset,
@@ -250,34 +249,31 @@ def test_pool_get_other_other(testbed: TestBed):
         testbed.pool.get_other_asset(shitcoin)
 
 
-@pytest.mark.parametrize("pool_type", POOL_TYPES)
-def test_adding_big_liquidity_to_an_empty_pool_using_split(
-    pool_type: pactsdk.pool.PoolType,
-):
+def test_adding_big_liquidity_to_an_empty_pool_using_split():
     account = new_account()
     pact = PactClient(algod)
 
     coin_a_index = create_asset(account, "coinA", 0, 2**50 - 1)
     coin_b_index = create_asset(account, "coinB", 0, 2**50 - 1)
 
-    app_id = deploy_contract(account, pool_type, coin_a_index, coin_b_index)
+    app_id = deploy_contract(account, "CONSTANT_PRODUCT", coin_a_index, coin_b_index)
     pool = pact.fetch_pool_by_id(app_id)
 
-    assert pool.pool_type == pool_type
+    assert pool.pool_type == "CONSTANT_PRODUCT"
     assert pool.calculator.is_empty
 
     liq_opt_in_tx = pool.liquidity_asset.prepare_opt_in_tx(account.address)
     sign_and_send(liq_opt_in_tx, account)
 
-    # Adding initial liquidity has a limitation that the product of 2 assets must be lower then 2**64.
+    # Adding initial liquidity has a limitation that the product of 2 assets must be lower than 2**64.
     # Let's go beyond that limit and check what happens.
     [primary_asset_amount, secondary_asset_amount] = [2**40, 2**30]
 
-    tx_group = pool.prepare_add_liquidity_tx_group(
-        address=account.address,
+    liquidity_addition = pool.prepare_add_liquidity(
         primary_asset_amount=primary_asset_amount,
         secondary_asset_amount=secondary_asset_amount,
     )
+    tx_group = liquidity_addition.prepare_tx_group(address=account.address)
 
     # liquidity is split into two chunks, so 6 txs instead of 3.
     assert len(tx_group.transactions) == 6

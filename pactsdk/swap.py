@@ -3,6 +3,8 @@
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
+from pactsdk.stableswap_calculator import StableswapCalculator, get_tx_fee
+
 from .asset import Asset
 from .transaction_group import TransactionGroup
 
@@ -23,6 +25,10 @@ class SwapEffect:
     primary_asset_price_change_pct: float
     secondary_asset_price_change_pct: float
     price: float
+    tx_fee: int
+
+    amplifier: float
+    """Stableswap only. Zero otherwise."""
 
 
 @dataclass
@@ -99,6 +105,16 @@ class Swap:
             primary_liq_change = -amount_received
             secondary_liq_change = amount_deposited
 
+        amplifier = 0
+        tx_fee = 2000
+        swap_calc = self.pool.calculator.swap_calculator
+
+        if isinstance(swap_calc, StableswapCalculator):
+            amplifier = swap_calc.get_amplifier() / (
+                self.pool.internal_state.PRECISION or 1
+            )
+            tx_fee = get_tx_fee(swap_calc.swap_invariant_iterations, 1)
+
         return SwapEffect(
             amount_deposited=amount_deposited,
             amount_received=amount_received,
@@ -129,4 +145,6 @@ class Swap:
                 secondary_liq_change,
             ),
             fee=self.pool.calculator.get_fee(self.asset_deposited, amount_deposited),
+            amplifier=amplifier,
+            tx_fee=tx_fee,
         )

@@ -127,11 +127,11 @@ Managing the liquidity.
 
 ```py
 # Add liquidity.
-add_liq_tx_group = pool.prepare_add_liquidity_tx_group(
-  address=address,
+liquidity_addition = pool.prepare_add_liquidity(
   primary_asset_amount=100_000,
   secondary_asset_amount=50_000,
 );
+add_liq_tx_group = liquidity_addition.prepare_tx_group(address)
 signed_add_liq_tx_group = add_liq_tx_group.sign(private_key)
 algod.send_transactions(signed_add_liq_tx_group)
 
