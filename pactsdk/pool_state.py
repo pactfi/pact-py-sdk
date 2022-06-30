@@ -18,19 +18,20 @@ class AppInternalState:
     L: int
     FEE_BPS: int
 
-    # Stableswaps only below.
     PACT_FEE_BPS: Optional[int] = None
+    ADMIN: Optional[str] = None
+    ADMIN_TRANSFER_DEADLINE: Optional[int] = None
+    VERSION: Optional[int] = None
+    TREASURY: Optional[str] = None
+    CONTRACT_NAME: Optional[str] = None
+    PRIMARY_FEES: Optional[int] = None
+    SECONDARY_FEES: Optional[int] = None
+
+    # Stableswaps only below.
     INITIAL_A: Optional[int] = None
     INITIAL_A_TIME: Optional[int] = None
     FUTURE_A: Optional[int] = None
     FUTURE_A_TIME: Optional[int] = None
-    ADMIN: Optional[str] = None
-    FUTURE_ADMIN: Optional[str] = None
-    ADMIN_TRANSFER_DEADLINE: Optional[int] = None
-    TREASURY: Optional[str] = None
-    PRIMARY_FEES: Optional[int] = None
-    SECONDARY_FEES: Optional[int] = None
-    PRECISION: Optional[int] = None
 
 
 @dataclass
@@ -51,17 +52,16 @@ def parse_global_pool_state(raw_state: list) -> AppInternalState:
     """
     state = parse_state(raw_state)
     if "INITIAL_A" in state:
-        asset_a, asset_b, fee_bps, precision = deserialize_uint64(state.pop("CONFIG"))
+        asset_a, asset_b, _, precision = deserialize_uint64(state.pop("CONFIG"))
         return AppInternalState(
             ASSET_A=asset_a,
             ASSET_B=asset_b,
-            FEE_BPS=fee_bps,
             PRECISION=precision,
             **state,
         )
 
-    asset_a, asset_b, fee_bps = deserialize_uint64(state.pop("CONFIG"))
-    return AppInternalState(ASSET_A=asset_a, ASSET_B=asset_b, FEE_BPS=fee_bps, **state)
+    asset_a, asset_b, _ = deserialize_uint64(state.pop("CONFIG"))
+    return AppInternalState(ASSET_A=asset_a, ASSET_B=asset_b, **state)
 
 
 def parse_state(kv: list) -> dict[str, Any]:
