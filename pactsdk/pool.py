@@ -9,9 +9,15 @@ from algosdk.v2client.algod import AlgodClient
 
 from pactsdk.api import ListPoolsParams, list_pools
 from pactsdk.constant_product_calculator import ConstantProductParams
-from pactsdk.pool_state import AppInternalState, PoolState, parse_global_pool_state
+from pactsdk.pool_state import (
+    AppInternalState,
+    PoolState,
+    get_pool_type_from_internal_state,
+    parse_global_pool_state,
+)
 from pactsdk.stableswap_calculator import StableswapParams
 
+from .add_liquidity import LiquidityAddition
 from .asset import Asset, fetch_asset_by_index
 from .exceptions import PactSdkError
 from .pool_calculator import PoolCalculator
@@ -165,29 +171,34 @@ class Pool:
     pool_type: PoolType = field(init=False)
     """Different pool types use different formulas for making swaps."""
 
+    version: int = field(init=False)
+    """The version of the contract. May be 0 for some old pools which don't expose the version in the global state."""
+
     def __post_init__(self):
         self.params: StableswapParams | ConstantProductParams
 
-        if self.internal_state.INITIAL_A is not None:
-            self.pool_type = "STABLESWAP"
+        self.pool_type = get_pool_type_from_internal_state(self.internal_state)
+
+        if self.pool_type == "CONSTANT_PRODUCT":
+            self.params = ConstantProductParams(
+                fee_bps=self.internal_state.FEE_BPS,
+                pact_fee_bps=self.internal_state.PACT_FEE_BPS or 0,
+            )
+        elif self.pool_type == "STABLESWAP":
             self.params = StableswapParams(
                 fee_bps=self.internal_state.FEE_BPS,
                 pact_fee_bps=self.internal_state.PACT_FEE_BPS or 0,
-                initial_a=self.internal_state.INITIAL_A,
+                initial_a=self.internal_state.INITIAL_A or 0,
                 initial_a_time=self.internal_state.INITIAL_A_TIME or 0,
                 future_a=self.internal_state.FUTURE_A or 0,
                 future_a_time=self.internal_state.FUTURE_A_TIME or 0,
                 precision=self.internal_state.PRECISION or 1,
             )
         else:
-            self.pool_type = "CONSTANT_PRODUCT"
-            self.params = ConstantProductParams(
-                fee_bps=self.internal_state.FEE_BPS,
-            )
+            raise PactSdkError(f'Unknown pool type "{self.pool_type}".')
 
-        self.fee_bps = self.internal_state.FEE_BPS + (
-            self.internal_state.PACT_FEE_BPS or 0
-        )
+        self.fee_bps = self.internal_state.FEE_BPS
+        self.version = self.internal_state.VERSION or 0
 
         self.calculator = PoolCalculator(self)
         self.state = self.parse_internal_state(self.internal_state)
@@ -232,11 +243,30 @@ class Pool:
         self.state = self.parse_internal_state(self.internal_state)
         return self.state
 
+    def prepare_add_liquidity(
+        self,
+        primary_asset_amount: int,
+        secondary_asset_amount: int,
+    ) -> LiquidityAddition:
+        """
+        Creates a new LiquidityAddition instance.
+
+        Args:
+            options: Options for adding the liquidity.
+
+        Returns:
+            A new LiquidityAddition object.
+        """
+        return LiquidityAddition(
+            pool=self,
+            primary_asset_amount=primary_asset_amount,
+            secondary_asset_amount=secondary_asset_amount,
+        )
+
     def prepare_add_liquidity_tx_group(
         self,
         address: str,
-        primary_asset_amount: int,
-        secondary_asset_amount: int,
+        liquidity_addition: LiquidityAddition,
     ) -> TransactionGroup:
         """Prepares a :py:class:`pactsdk.transaction_group.TransactionGroup` for adding liquidity to the pool. See :py:meth:`pactsdk.pool.Pool.buildAddLiquidityTxs` for details.
 
@@ -250,17 +280,15 @@ class Pool:
         """
         suggested_params = self.algod.suggested_params()
         txs = self.build_add_liquidity_txs(
-            address, primary_asset_amount, secondary_asset_amount, suggested_params
+            address, liquidity_addition, suggested_params
         )
         return TransactionGroup(txs)
 
     def build_add_liquidity_txs(
         self,
         address: str,
-        primary_asset_amount: int,
-        secondary_asset_amount: int,
+        liquidity_addition: LiquidityAddition,
         suggested_params: transaction.SuggestedParams,
-        note=b"",
     ) -> list[transaction.Transaction]:
         """Builds the transactions to add liquidity for the primary asset and secondary asset of the pool.
 
@@ -270,7 +298,7 @@ class Pool:
         - deposit of asset B
         - "ADDLIQ" application call to add liquidity with the above deposits
 
-        If the pool is empty and the product of both assets is larger then 2**64 then an additional set of 3 transactions is built.
+        For constant product pools only - if the pool is empty and the product of both assets is larger or equal 2**64 than an additional set of 3 transactions is built.
 
         The initial liquidity must satisfy the expression `sqrt(a * b) - 1000 > 0`.
 
@@ -287,32 +315,56 @@ class Pool:
         Returns:
             List of transactions to add the liquidity.
         """
-        txs: list[transaction.Transaction] = []
+        primary_asset_amount = liquidity_addition.primary_asset_amount
+        secondary_asset_amount = liquidity_addition.secondary_asset_amount
+
+        initial_liq_txs: list[transaction.Transaction] = []
         if self.calculator.is_empty:
             assert (
                 math.isqrt(primary_asset_amount * secondary_asset_amount) - 1000 > 0
             ), "Initial liquidity must satisfy the expression `sqrt(a * b) - 1000 > 0`"
 
-            # Adding initial liquidity has a limitation that the product of 2 assets must be lower then 2**64. Let's check if we can fit below the limit.
-            max_product = 2**64
-            product = primary_asset_amount * secondary_asset_amount
-            if product >= max_product:
-                # Need to split the liquidity into two chunks.
-                divisor = int((product / max_product) ** 0.5 + 1)
-                primary_small_amount = primary_asset_amount // divisor
-                secondary_small_amount = secondary_asset_amount // divisor
+            if self.pool_type == "CONSTANT_PRODUCT":
+                # Adding initial liquidity has a limitation that the product of 2 assets must be lower than 2**64. Let's check if we can fit below the limit.
+                max_product = 2**64
+                product = primary_asset_amount * secondary_asset_amount
+                if product >= max_product:
+                    # Need to split the liquidity into two chunks.
+                    divisor = int((product / max_product) ** 0.5 + 1)
+                    primary_small_amount = primary_asset_amount // divisor
+                    secondary_small_amount = secondary_asset_amount // divisor
 
-                primary_asset_amount -= primary_small_amount
-                secondary_asset_amount -= secondary_small_amount
+                    primary_asset_amount -= primary_small_amount
+                    secondary_asset_amount -= secondary_small_amount
 
-                txs = self.build_add_liquidity_txs(
-                    address=address,
-                    primary_asset_amount=primary_small_amount,
-                    secondary_asset_amount=secondary_small_amount,
-                    suggested_params=suggested_params,
-                    note=b"Initial add liquidity",
-                )
+                    initial_liq_txs = self.build_raw_add_liquidity_txs(
+                        address=address,
+                        primary_asset_amount=primary_small_amount,
+                        secondary_asset_amount=secondary_small_amount,
+                        suggested_params=suggested_params,
+                        fee=liquidity_addition.effect.tx_fee,
+                        note=b"Initial add liquidity",
+                    )
 
+        txs = self.build_raw_add_liquidity_txs(
+            address=address,
+            primary_asset_amount=primary_asset_amount,
+            secondary_asset_amount=secondary_asset_amount,
+            suggested_params=suggested_params,
+            fee=liquidity_addition.effect.tx_fee,
+        )
+
+        return [*initial_liq_txs, *txs]
+
+    def build_raw_add_liquidity_txs(
+        self,
+        address: str,
+        primary_asset_amount: int,
+        secondary_asset_amount: int,
+        suggested_params: transaction.SuggestedParams,
+        fee: int,
+        note=b"",
+    ):
         tx1 = self._make_deposit_tx(
             address=address,
             asset=self.primary_asset,
@@ -327,14 +379,14 @@ class Pool:
         )
         tx3 = self._make_application_noop_tx(
             address=address,
-            fee=3000 if self.pool_type == "CONSTANT_PRODUCT" else 7000,
+            fee=fee,
             args=["ADDLIQ", 0],
             extraAsset=self.liquidity_asset,
             suggested_params=suggested_params,
             note=note,
         )
 
-        return [*txs, tx1, tx2, tx3]
+        return [tx1, tx2, tx3]
 
     def prepare_remove_liquidity_tx_group(
         self, address: str, amount: int
@@ -444,7 +496,7 @@ class Pool:
         )
         tx2 = self._make_application_noop_tx(
             address=address,
-            fee=2000 if self.pool_type == "CONSTANT_PRODUCT" else 8000,
+            fee=swap.effect.tx_fee,
             args=["SWAP", swap.effect.minimum_amount_received],
             suggested_params=suggested_params,
         )

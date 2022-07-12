@@ -42,6 +42,7 @@ def test_stableswap_asa_to_asa():
         asset=pool.primary_asset,
         slippage_pct=10,
     )
+    assert swap.effect.amplifier == 80
     assert_swap(swap, account)
 
 
@@ -134,6 +135,7 @@ def test_stableswap_with_big_amplifier():
         asset=testbed.algo,
         slippage_pct=0,
     )
+    assert swap.effect.amplifier == 200
 
     assert (swap.effect.amount_received + swap.effect.fee) == 999
 

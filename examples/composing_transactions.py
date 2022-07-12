@@ -17,10 +17,13 @@ suggested_params = algod.suggested_params()
 
 opt_in_tx = pool.liquidity_asset.prepare_opt_in_tx(address)
 
-add_liquidity_txs = pool.build_add_liquidity_txs(
-    address="<address>",
+liquidity_addition = pool.prepare_add_liquidity(
     primary_asset_amount=100_000,
     secondary_asset_amount=200_000,
+)
+add_liquidity_txs = pool.build_add_liquidity_txs(
+    address="<address>",
+    liquidity_addition=liquidity_addition,
     suggested_params=suggested_params,
 )
 

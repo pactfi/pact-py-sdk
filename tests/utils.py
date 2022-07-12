@@ -73,7 +73,11 @@ def create_asset(
 
 
 def deploy_exchange_contract(
-    account: Account, primary_asset_index: int, secondary_asset_index: int, fee_bps=30
+    account: Account,
+    primary_asset_index: int,
+    secondary_asset_index: int,
+    fee_bps=30,
+    pact_fee_bps=0,
 ):
     return deploy_contract(
         account,
@@ -81,6 +85,7 @@ def deploy_exchange_contract(
         primary_asset_index,
         secondary_asset_index,
         fee_bps=fee_bps,
+        pact_fee_bps=pact_fee_bps,
     )
 
 
@@ -89,7 +94,7 @@ def deploy_stableswap_contract(
     primary_asset_index: int,
     secondary_asset_index: int,
     fee_bps=30,
-    pact_fee_bps=30,
+    pact_fee_bps=0,
     amplifier=80,
 ):
     return deploy_contract(
@@ -109,7 +114,7 @@ def deploy_contract(
     primary_asset_index: int,
     secondary_asset_index: int,
     fee_bps=30,
-    pact_fee_bps=30,
+    pact_fee_bps=0,
     amplifier=80,
 ) -> int:
     mnemonic = algosdk.mnemonic.from_private_key(account.private_key)
@@ -157,11 +162,11 @@ def add_liquidity(
     opt_in_tx = pool.liquidity_asset.prepare_opt_in_tx(account.address)
     sign_and_send(opt_in_tx, account)
 
-    add_liq_tx_group = pool.prepare_add_liquidity_tx_group(
-        address=account.address,
+    liquidity_addition = pool.prepare_add_liquidity(
         primary_asset_amount=primary_asset_amount,
         secondary_asset_amount=secondary_asset_amount,
     )
+    add_liq_tx_group = liquidity_addition.prepare_tx_group(account.address)
     sign_and_send(add_liq_tx_group, account)
     pool.update_state()
 

@@ -1,5 +1,6 @@
 __version__ = "0.3.0"
 
+from .add_liquidity import LiquidityAddition  # noqa
 from .asset import Asset  # noqa
 from .client import PactClient  # noqa
 from .exceptions import PactSdkError  # noqa

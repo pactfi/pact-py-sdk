@@ -1,3 +1,4 @@
+from dataclasses import asdict
 from typing import cast
 
 import pactsdk
@@ -6,10 +7,10 @@ from pactsdk.stableswap_calculator import StableswapParams
 
 from .matchers import Any
 from .utils import (
-    add_liquidity,
     algod,
     create_asset,
     deploy_stableswap_contract,
+    make_fresh_testbed,
     new_account,
     sign_and_send,
 )
@@ -26,7 +27,7 @@ def test_stableswap_pool_e2e_scenario():
     coin_b = pact.fetch_asset(coin_b_index)
 
     app_id = deploy_stableswap_contract(
-        account, coin_a_index, coin_b_index, amplifier=20
+        account, coin_a_index, coin_b_index, amplifier=20, fee_bps=60
     )
     pool = pact.fetch_pool_by_id(app_id)
 
@@ -43,11 +44,11 @@ def test_stableswap_pool_e2e_scenario():
     sign_and_send(liq_opt_in_tx, account)
 
     # Add liquidity.
-    add_liq_tx_group = pool.prepare_add_liquidity_tx_group(
-        address=account.address,
+    liquidity_addition = pool.prepare_add_liquidity(
         primary_asset_amount=100_000_000,
         secondary_asset_amount=100_000_000,
     )
+    add_liq_tx_group = liquidity_addition.prepare_tx_group(address=account.address)
     assert add_liq_tx_group.group_id
     assert len(add_liq_tx_group.transactions) == 3
     sign_and_send(add_liq_tx_group, account)
@@ -156,26 +157,36 @@ def test_stableswap_pool_e2e_scenario():
     assert f"{pool.state.secondary_asset_price:.2f}" == "0.99"
 
 
-def test_pool_with_convergence_issues():
-    account = new_account()
-    pact = PactClient(algod)
+def test_stableswap_pool_parsing_state():
+    testbed = make_fresh_testbed("STABLESWAP")
 
-    coinAIndex = create_asset(account, "COIN_A", 0, 10**15)
-    coinBIndex = create_asset(account, "COIN_B", 0, 10**15)
+    assert testbed.pool.primary_asset.index == testbed.algo.index
+    assert testbed.pool.secondary_asset.index == testbed.coin.index
 
-    appId = deploy_stableswap_contract(
-        account,
-        coinAIndex,
-        coinBIndex,
-        fee_bps=5,
-        pact_fee_bps=5,
-        amplifier=5,
-    )
-    pool = pact.fetch_pool_by_id(appId)
+    assert testbed.pool.pool_type == "STABLESWAP"
+    assert testbed.pool.version == 1
 
-    # Pool highly out of balance.
-    add_liquidity(account, pool, 20692785, 227709222785)
+    timestamp = testbed.pool.internal_state.INITIAL_A_TIME
 
-    pool.update_state()
-    assert pool.state.primary_asset_price == 0  # Because of convergence issues.
-    assert pool.state.secondary_asset_price > 0  # This is calculated normally.
+    assert asdict(testbed.pool.internal_state) == {
+        "A": 0,
+        "ADMIN": testbed.account.address,
+        "ASSET_A": testbed.pool.primary_asset.index,
+        "ASSET_B": testbed.pool.secondary_asset.index,
+        "LTID": testbed.pool.liquidity_asset.index,
+        "B": 0,
+        "CONTRACT_NAME": "[SI] PACT AMM",
+        "FEE_BPS": testbed.pool.fee_bps,
+        "L": 0,
+        "PACT_FEE_BPS": 0,
+        "PRIMARY_FEES": 0,
+        "SECONDARY_FEES": 0,
+        "TREASURY": testbed.account.address,
+        "VERSION": 1,
+        "INITIAL_A": 80000,
+        "INITIAL_A_TIME": timestamp,
+        "FUTURE_A": 80000,
+        "FUTURE_A_TIME": timestamp,
+        "PRECISION": 1000,
+        "FUTURE_ADMIN": None,
+    }

@@ -62,6 +62,18 @@ class SwapCalculator(Protocol):
         """
         ...
 
+    def get_minted_liquidity_tokens(self, added_liq_a: int, added_liq_b: int) -> int:
+        """Returns amount of liquidity tokens that are going to be minted when adding liquidity.
+
+        Args:
+            added_liq_a: Amount of primary asset to add to the pool.
+            added_liq_b: Amount of secondary asset to add to the pool.
+
+        Returns:
+            Amount of liquidity tokens that will be minted and given to user.
+        """
+        ...
+
 
 class PoolCalculator:
     """Contains functions for calculation statistics and other numerical data about the pool.
