@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pactsdk"
-version = "0.3.0"
+version = "0.4.0"
 description = "Python SDK for Pact smart contracts"
 authors = ["Mateusz Tomczyk <mateusz.tomczyk@ulam.io>"]
 homepage = "https://github.com/pactfi/pact-py-sdk"
