@@ -11,7 +11,7 @@ mv docs/_build/html "gh-pages/$version"
 
 cd gh-pages
 
-ln -s "$version" latest
+ln -sf "$version" latest
 
 git add -A
 git commit -m "Updated docs for $version"
