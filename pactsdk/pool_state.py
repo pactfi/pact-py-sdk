@@ -26,8 +26,8 @@ class AppInternalState:
     FEE_BPS: int
 
     # Those may be missing in older contracts.
-    CONTRACT_NAME: Optional[Literal["PACT AMM", "[SI] PACT AMM"]]
-    VERSION: Optional[int]
+    CONTRACT_NAME: Optional[Literal["PACT AMM", "[SI] PACT AMM"]] = None
+    VERSION: Optional[int] = None
     PACT_FEE_BPS: Optional[int] = None
     ADMIN: Optional[str] = None
     FUTURE_ADMIN: Optional[str] = None
@@ -80,8 +80,11 @@ def parse_global_pool_state(raw_state: list) -> AppInternalState:
             **state,
         )
 
-    asset_a, asset_b, _ = deserialize_uint64(state.pop("CONFIG"))
-    return AppInternalState(ASSET_A=asset_a, ASSET_B=asset_b, **state)
+    if "FEE_BPS" in state:
+        del state["FEE_BPS"]
+
+    asset_a, asset_b, fee_bps = deserialize_uint64(state.pop("CONFIG"))
+    return AppInternalState(ASSET_A=asset_a, ASSET_B=asset_b, FEE_BPS=fee_bps, **state)
 
 
 def parse_state(kv: list) -> dict[str, Any]:
