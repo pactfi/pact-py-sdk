@@ -205,7 +205,7 @@ class PoolCalculator:
         asset: Asset,
         int_gross_amount_received: int,
     ) -> int:
-        A, B = self._get_liquidities(asset)
+        A, B = self.get_liquidities(asset)
         return self.swap_calculator.get_swap_amount_deposited(
             A,
             B,
@@ -217,14 +217,22 @@ class PoolCalculator:
         asset: Asset,
         amount_deposited: int,
     ) -> int:
-        A, B = self._get_liquidities(asset)
+        A, B = self.get_liquidities(asset)
         return self.swap_calculator.get_swap_gross_amount_received(
             A,
             B,
             amount_deposited,
         )
 
-    def _get_liquidities(self, asset: Asset) -> tuple[int, int]:
+    def get_liquidities(self, asset: Asset) -> tuple[int, int]:
+        """Returns the array of liquidities from the pool, sorting them by setting provided asset as primary.
+
+        Args:
+            asset: The asset that is supposed to be the primary one.
+
+        Returns:
+            Total liquidities of assets.
+        """
         A, B = [self.primary_asset_amount, self.secondary_asset_amount]
         if asset != self.pool.primary_asset:
             A, B = B, A

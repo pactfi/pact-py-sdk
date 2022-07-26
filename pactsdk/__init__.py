@@ -7,3 +7,4 @@ from .exceptions import PactSdkError  # noqa
 from .pool import Pool, PoolState  # noqa
 from .swap import Swap, SwapEffect  # noqa
 from .transaction_group import TransactionGroup  # noqa
+from .zap import Zap, ZapParams  # noqa
