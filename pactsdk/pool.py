@@ -23,6 +23,7 @@ from .exceptions import PactSdkError
 from .pool_calculator import PoolCalculator
 from .swap import Swap
 from .transaction_group import TransactionGroup
+from .zap import Zap
 
 PoolType = Literal["CONSTANT_PRODUCT", "STABLESWAP"]
 
@@ -530,6 +531,62 @@ class Pool:
             primary_asset_price=self.calculator.primary_asset_price,
             secondary_asset_price=self.calculator.secondary_asset_price,
         )
+
+    def prepare_zap(self, asset: Asset, amount: int, slippage_pct: float) -> Zap:
+        """Creates a new zap instance for getting all required data for performing a zap.
+
+        Args:
+            asset: The asset to zap.
+            amount: Amount used for the zap.
+            slippage_pct: The maximum allowed slippage in percents e.g. `10` is 10%. The swap will fail if the slippage will be higher.
+
+        Returns:
+            A new zap object.
+        """
+        return Zap(
+            self,
+            asset=asset,
+            amount=amount,
+            slippage_pct=slippage_pct,
+        )
+
+    def prepare_zap_tx_group(self, zap: Zap, address: str) -> TransactionGroup:
+        """Prepares a transaction group that when executed will perform a Zap on the pool.
+
+        Args:
+            zap: The zap for which to generate transactions.
+            address: The address that is performing the Zap.
+
+        Returns:
+            Transaction group that when executed will perform a Zap on the pool.
+        """
+        suggested_params = self.algod.suggested_params()
+        txs = self.build_zap_txs(zap, address, suggested_params)
+        return TransactionGroup(txs)
+
+    def build_zap_txs(
+        self, zap: Zap, address: str, suggested_params: transaction.SuggestedParams
+    ) -> list[transaction.Transaction]:
+        """Builds the transactions to perform a Zap on the pool as per the options passed in. Zap allows to add liquidity to the pool by providing only one asset.
+
+        This function will generate swap Txs to get a proper amount of the second asset and then generate add liquidity Txs with both of those assets.
+        See :py:meth:`pactsdk.pool.Pool.buildSwapTxs` and :py:meth:`pactsdk.pool.Pool.buildAddLiquidityTxs` for more details.
+
+        This feature is supposed to work with constant product pools only. Stableswaps can accept one asset to add liquidity by default.
+
+        Args:
+            zap: The zap for which to generate transactions.
+            address: The address that is performing the Zap.
+            suggested_params: Algorand suggested parameters for transactions.
+
+        Returns:
+            List of transactions to perform the Zap.
+        """
+        swap_txs = self.build_swap_txs(zap.swap, address, suggested_params)
+        add_liq_txs = self.build_add_liquidity_txs(
+            address, zap.liquidity_addition, suggested_params
+        )
+        return [*swap_txs, *add_liq_txs]
 
     def _make_deposit_tx(
         self,
