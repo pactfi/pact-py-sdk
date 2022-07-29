@@ -6,6 +6,14 @@ from .utils import TestBed, sign_and_send
 
 
 def test_constant_product_pool_e2e_scenario(testbed: TestBed):
+    __base_e2e_scenario(testbed)
+
+
+def test_constant_product_v_1_pool_e2e_scenario(testbed_v_1: TestBed):
+    __base_e2e_scenario(testbed_v_1)
+
+
+def __base_e2e_scenario(testbed: TestBed):
     assert testbed.pool.state == pactsdk.PoolState(
         total_liquidity=0,
         total_primary=0,
@@ -89,13 +97,7 @@ def test_constant_product_pool_e2e_scenario(testbed: TestBed):
 
 
 def test_constant_product_pool_parsing_state(testbed: TestBed):
-    assert testbed.pool.primary_asset.index == testbed.algo.index
-    assert testbed.pool.secondary_asset.index == testbed.coin.index
-
-    assert testbed.pool.pool_type == "CONSTANT_PRODUCT"
-    assert testbed.pool.version == 2
-
-    assert asdict(testbed.pool.internal_state) == {
+    state = {
         "A": 0,
         "ADMIN": testbed.account.address,
         "ASSET_A": testbed.pool.primary_asset.index,
@@ -117,3 +119,41 @@ def test_constant_product_pool_parsing_state(testbed: TestBed):
         "INITIAL_A_TIME": None,
         "PRECISION": None,
     }
+    __base_pool_parsing_state(testbed, state)
+
+
+def test_constant_product_v_1_pool_parsing_state(testbed_v_1: TestBed):
+    testbed = testbed_v_1
+    state = {
+        "A": 0,
+        "ADMIN": None,
+        "ASSET_A": testbed.pool.primary_asset.index,
+        "ASSET_B": testbed.pool.secondary_asset.index,
+        "LTID": testbed.pool.liquidity_asset.index,
+        "B": 0,
+        "CONTRACT_NAME": None,
+        "FEE_BPS": testbed.pool.fee_bps,
+        "L": 0,
+        "PACT_FEE_BPS": None,
+        "PRIMARY_FEES": None,
+        "SECONDARY_FEES": None,
+        "TREASURY": None,
+        "VERSION": None,
+        "FUTURE_A": None,
+        "FUTURE_ADMIN": None,
+        "FUTURE_A_TIME": None,
+        "INITIAL_A": None,
+        "INITIAL_A_TIME": None,
+        "PRECISION": None,
+    }
+    __base_pool_parsing_state(testbed, state, 0)
+
+
+def __base_pool_parsing_state(testbed: TestBed, state: dict, version: int = 2):
+    assert testbed.pool.primary_asset.index == testbed.algo.index
+    assert testbed.pool.secondary_asset.index == testbed.coin.index
+
+    assert testbed.pool.pool_type == "CONSTANT_PRODUCT"
+    assert testbed.pool.version == version
+
+    assert asdict(testbed.pool.internal_state) == state

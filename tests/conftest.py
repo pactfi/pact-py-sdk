@@ -9,6 +9,11 @@ def testbed():
     return make_fresh_testbed("CONSTANT_PRODUCT")
 
 
+@pytest.fixture
+def testbed_v_1():
+    return make_fresh_testbed("CONSTANT_PRODUCT", version=1)
+
+
 @pytest.fixture()
 def time():
     with freeze_time("2021-06-01") as ft:

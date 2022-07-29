@@ -1,3 +1,5 @@
+import pytest
+
 import pactsdk
 
 from .utils import (
@@ -10,14 +12,17 @@ from .utils import (
 )
 
 
-def test_constant_product_swap_asa_to_asa():
+@pytest.mark.parametrize("version", [(2), (1)])
+def test_constant_product_swap_asa_to_asa(version):
     account = new_account()
     pact = pactsdk.PactClient(algod)
 
     coin_a_index = create_asset(account, "COIN_A", 3)
     coin_b_index = create_asset(account, "COIN_B", 2)
 
-    app_id = deploy_contract(account, "CONSTANT_PRODUCT", coin_a_index, coin_b_index)
+    app_id = deploy_contract(
+        account, "CONSTANT_PRODUCT", coin_a_index, coin_b_index, version=version
+    )
     pool = pact.fetch_pool_by_id(app_id=app_id)
 
     add_liquidity(account, pool, 20_000, 20_000)

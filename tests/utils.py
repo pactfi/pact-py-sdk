@@ -110,12 +110,13 @@ def deploy_stableswap_contract(
 
 def deploy_contract(
     account: Account,
-    pool_type: pactsdk.pool.PoolType,
+    pool_type: str,
     primary_asset_index: int,
     secondary_asset_index: int,
     fee_bps=30,
     pact_fee_bps=0,
     amplifier=80,
+    version=None,  # New smart contracts Stableswap and Constant Exchange marked as version 2, old Constant Exchange as version 1.
 ) -> int:
     mnemonic = algosdk.mnemonic.from_private_key(account.private_key)
 
@@ -132,17 +133,18 @@ def deploy_contract(
         f"--amplifier={amplifier * 1000}",
         f"--admin_and_treasury_address={account.address}",
     ]
-
+    if version:
+        command.append(f"--version={version}")
     env = {
         "PATH": os.environ["PATH"],
         "ALGOD_URL": "http://localhost:8787",
         "ALGOD_TOKEN": "8cec5f4261a2b5ad831a8a701560892cabfe1f0ca00a22a37dee3e1266d726e3",
         "DEPLOYER_MNEMONIC": mnemonic,
     }
-
     process = subprocess.run(
         command, cwd="algorand-testbed", env=env, capture_output=True
     )
+
     if process.stderr:
         raise RuntimeError(f"Failed to deploy contract: {process.stderr.decode()}")
 
@@ -205,7 +207,10 @@ class TestBed:
 
 
 def make_fresh_testbed(
-    pool_type: pactsdk.pool.PoolType, fee_bps=30, amplifier=80
+    pool_type: pactsdk.pool.PoolType,
+    fee_bps=30,
+    amplifier=80,
+    version: Union[None, int] = None,
 ) -> TestBed:
     account = new_account()
     pact = pactsdk.PactClient(algod)
@@ -219,6 +224,7 @@ def make_fresh_testbed(
         secondary_asset_index=coin_index,
         fee_bps=fee_bps,
         amplifier=amplifier,
+        version=version,
     )
     pool = pact.fetch_pool_by_id(app_id=app_id)
 
