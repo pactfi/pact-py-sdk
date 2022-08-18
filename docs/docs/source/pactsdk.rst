@@ -84,6 +84,14 @@ pactsdk.swap module
    :undoc-members:
    :show-inheritance:
 
+pactsdk.zap module
+-------------------
+
+.. automodule:: pactsdk.zap
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pactsdk.transaction\_group module
 ---------------------------------
 

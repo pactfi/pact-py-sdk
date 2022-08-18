@@ -5,6 +5,7 @@ pactsdk
    asset
    pool
    swap
+   zap
    pool_state
    transaction_group
    api

@@ -5,3 +5,4 @@ Examples
    add_liquidity
    swap
    composing_transactions
+   zap
