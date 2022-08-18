@@ -23,7 +23,7 @@ def test_calculate_zap_params():
     assert zap_primary_add.params == pactsdk.ZapParams(
         swap_deposited=4888,
         primary_add_liq=5112,
-        secondary_add_liq=4646,
+        secondary_add_liq=4645,
     )
 
     #  Perform a zap using secondary asset.
@@ -32,7 +32,7 @@ def test_calculate_zap_params():
     )
     assert zap_secondary_add.params == pactsdk.ZapParams(
         swap_deposited=4888,
-        primary_add_liq=4646,
+        primary_add_liq=4645,
         secondary_add_liq=5112,
     )
 
@@ -44,7 +44,7 @@ def test_calculate_zap_params():
     ubalanced_zap = testbed2.pool.prepare_zap(testbed2.pool.secondary_asset, 20_000, 2)
     assert ubalanced_zap.params == pactsdk.ZapParams(
         swap_deposited=7339,
-        primary_add_liq=42199,
+        primary_add_liq=42198,
         secondary_add_liq=12661,
     )
 
@@ -102,9 +102,9 @@ def test_zap_e2e():
     testbed.pool.update_state()
 
     assert testbed.pool.state == pactsdk.PoolState(
-        total_liquidity=104872,
-        total_primary=109999,
-        total_secondary=100000,
-        primary_asset_price=0.9090991736288512,
-        secondary_asset_price=1.09999,
+        total_liquidity=104871,
+        total_primary=109998,
+        total_secondary=99999,
+        primary_asset_price=0.9090983472426772,
+        secondary_asset_price=1.099990999909999,
     )

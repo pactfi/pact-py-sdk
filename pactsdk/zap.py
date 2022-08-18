@@ -1,5 +1,6 @@
 """Set of utility classes for managing and performing zaps.
 """
+import copy
 import math
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
@@ -119,11 +120,7 @@ class Zap:
         self.swap = self.pool.prepare_swap(
             self.asset, self.params.swap_deposited, self.slippage_pct
         )
-        self.liquidity_addition = LiquidityAddition(
-            pool=self.pool,
-            primary_asset_amount=self.params.primary_add_liq,
-            secondary_asset_amount=self.params.secondary_add_liq,
-        )
+        self.liquidity_addition = self.prepare_add_liq()
 
     def prepare_tx_group(self, address: str) -> TransactionGroup:
         """Creates the transactions needed to perform zap and returns them as a transaction group ready to be signed and committed.
@@ -149,7 +146,26 @@ class Zap:
         )
         if not self._is_asset_primary():
             temp = params.primary_add_liq
-            params.primary_add_liq = params.secondary_add_liq
+            params.primary_add_liq = params.secondary_add_liq - 1
             params.secondary_add_liq = temp
+        else:
+            params.secondary_add_liq -= 1
 
         return params
+
+    def prepare_add_liq(self):
+        updated_state = self.pool.state
+        if self._is_asset_primary():
+            updated_state.total_primary += self.params.swap_deposited
+            updated_state.total_secondary -= self.params.secondary_add_liq
+        else:
+            updated_state.total_primary -= self.params.primary_add_liq
+            updated_state.total_secondary += self.params.swap_deposited
+
+        pool = copy.copy(self.pool)
+        pool.state = updated_state
+        return LiquidityAddition(
+            pool=pool,
+            primary_asset_amount=self.params.primary_add_liq,
+            secondary_asset_amount=self.params.secondary_add_liq,
+        )

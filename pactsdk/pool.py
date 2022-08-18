@@ -344,7 +344,7 @@ class Pool:
                         secondary_asset_amount=secondary_small_amount,
                         suggested_params=suggested_params,
                         fee=liquidity_addition.effect.tx_fee,
-                        note=b"Initial add liquidity",
+                        note=b"Pact initial add liquidity",
                     )
 
         txs = self.build_raw_add_liquidity_txs(
@@ -370,12 +370,14 @@ class Pool:
             address=address,
             asset=self.primary_asset,
             amount=primary_asset_amount,
+            note=b"Pact add liquidity deposit",
             suggested_params=suggested_params,
         )
         tx2 = self._make_deposit_tx(
             address=address,
             asset=self.secondary_asset,
             amount=secondary_asset_amount,
+            note=b"Pact add liquidity deposit",
             suggested_params=suggested_params,
         )
         tx3 = self._make_application_noop_tx(
@@ -425,6 +427,7 @@ class Pool:
             address=address,
             amount=amount,
             asset=self.liquidity_asset,
+            note=b"Pact remove liquidity deposit",
             suggested_params=suggested_params,
         )
         tx2 = self._make_application_noop_tx(
@@ -493,6 +496,7 @@ class Pool:
             address=address,
             amount=swap.effect.amount_deposited,
             asset=swap.asset_deposited,
+            note=b"Pact swap deposit",
             suggested_params=suggested_params,
         )
         tx2 = self._make_application_noop_tx(
@@ -593,6 +597,7 @@ class Pool:
         asset: Asset,
         address: str,
         amount: int,
+        note: bytes,
         suggested_params: transaction.SuggestedParams,
     ):
         if not asset.index:
@@ -601,6 +606,7 @@ class Pool:
                 sender=address,
                 receiver=self.get_escrow_address(),
                 amt=amount,
+                note=note,
                 sp=suggested_params,
             )
 
@@ -608,6 +614,7 @@ class Pool:
             sender=address,
             receiver=self.get_escrow_address(),
             amt=amount,
+            note=note,
             sp=suggested_params,
             index=asset.index,
         )

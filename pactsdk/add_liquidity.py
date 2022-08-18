@@ -5,6 +5,7 @@
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, cast
 
+from pactsdk.exceptions import PactSdkError
 from pactsdk.stableswap_calculator import (
     StableswapCalculator,
     StableswapParams,
@@ -12,6 +13,7 @@ from pactsdk.stableswap_calculator import (
     get_tx_fee,
 )
 
+from .constant_product_calculator import get_constant_product_minted_liquidity_tokens
 from .transaction_group import TransactionGroup
 
 if TYPE_CHECKING:
@@ -87,11 +89,6 @@ class LiquidityAddition:
         swap_calc = self.pool.calculator.swap_calculator
         state = self.pool.state
 
-        minted_liquidity_tokens = swap_calc.get_minted_liquidity_tokens(
-            self.primary_asset_amount,
-            self.secondary_asset_amount,
-        )
-
         if isinstance(swap_calc, StableswapCalculator):
             i_amplifier = swap_calc.get_amplifier()
             params = cast(StableswapParams, self.pool.params)
@@ -104,10 +101,26 @@ class LiquidityAddition:
                 i_amplifier,
                 params.precision,
             )
+            minted_liquidity_tokens = swap_calc.get_minted_liquidity_tokens(
+                self.primary_asset_amount,
+                self.secondary_asset_amount,
+            )
             amplifier = i_amplifier / (self.pool.internal_state.PRECISION or 1)
 
             # 1 for each invariant calculation (3) and 1 for sending liquidity tokens.
             tx_fee = get_tx_fee(swap_calc.mint_tokens_invariant_iterations, 4)
+        else:
+            minted_liquidity_tokens = get_constant_product_minted_liquidity_tokens(
+                self.primary_asset_amount,
+                self.secondary_asset_amount,
+                state.total_primary,
+                state.total_secondary,
+                state.total_liquidity,
+            )
+            if minted_liquidity_tokens <= 0:
+                raise PactSdkError(
+                    "Amount of minted liquidity tokens must be greater then 0.",
+                )
 
         return AddLiquidityEffect(
             minted_liquidity_tokens=minted_liquidity_tokens,
