@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>zap &mdash; pactsdk  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pool_state" href="pool_state.html" />
+    <link rel="prev" title="swap" href="swap.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> pactsdk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">pactsdk</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="client.html">client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="asset.html">asset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pool.html">pool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="swap.html">swap</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">zap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pool_state.html">pool_state</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transaction_group.html">transaction_group</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html">api</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pool_calculator.html">pool_calculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="constant_product_calculator.html">constant_product_calculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stableswap_calculator.html">stableswap_calculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html">exceptions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pactsdk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">pactsdk</a> &raquo;</li>
+      <li>zap</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/pactsdk/zap.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pactsdk.zap">
+<span id="zap"></span><h1>zap<a class="headerlink" href="#module-pactsdk.zap" title="Permalink to this headline"></a></h1>
+<p>Set of utility classes for managing and performing zaps.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pactsdk.zap.ZapParams">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pactsdk.zap.</span></span><span class="sig-name descname"><span class="pre">ZapParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">swap_deposited</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primary_add_liq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secondary_add_liq</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.zap.ZapParams" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>All amounts that should be used in swap and add liquidity transactions.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.zap.ZapParams.swap_deposited">
+<span class="sig-name descname"><span class="pre">swap_deposited</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.zap.ZapParams.swap_deposited" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.zap.ZapParams.primary_add_liq">
+<span class="sig-name descname"><span class="pre">primary_add_liq</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.zap.ZapParams.primary_add_liq" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.zap.ZapParams.secondary_add_liq">
+<span class="sig-name descname"><span class="pre">secondary_add_liq</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.zap.ZapParams.secondary_add_liq" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pactsdk.zap.get_constant_product_zap_params">
+<span class="sig-prename descclassname"><span class="pre">pactsdk.zap.</span></span><span class="sig-name descname"><span class="pre">get_constant_product_zap_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">liq_a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">liq_b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zap_amount</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fee_bps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pact_fee_bps</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.zap.get_constant_product_zap_params" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pactsdk.zap.ZapParams" title="pactsdk.zap.ZapParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">ZapParams</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pactsdk.zap.get_swap_amount_deposited_from_zapping">
+<span class="sig-prename descclassname"><span class="pre">pactsdk.zap.</span></span><span class="sig-name descname"><span class="pre">get_swap_amount_deposited_from_zapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zap_amount</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_amount</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fee_bps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pact_fee_bps</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.zap.get_swap_amount_deposited_from_zapping" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pactsdk.zap.get_secondary_added_liquidity_from_zapping">
+<span class="sig-prename descclassname"><span class="pre">pactsdk.zap.</span></span><span class="sig-name descname"><span class="pre">get_secondary_added_liquidity_from_zapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">swap_deposited</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_primary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_secondary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fee_bps</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.zap.get_secondary_added_liquidity_from_zapping" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pactsdk.zap.Zap">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pactsdk.zap.</span></span><span class="sig-name descname"><span class="pre">Zap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amount</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slippage_pct</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.zap.Zap" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Zap class represents a zap trade on a particular pool, which allows to exchange single asset for PLP token.</p>
+<p>Zap performs a swap to get second asset from the pool and then adds liquidity using both of those assets. Users may be left with some leftovers due to rounding and slippage settings.</p>
+<p>Zaps are meant only for Constant Product pools; For Stableswaps, adding only one asset works out of the box.</p>
+<p>Typically, users don’t have to manually instantiate this class. Use <a class="reference internal" href="pool.html#pactsdk.pool.Pool.prepare_zap" title="pactsdk.pool.Pool.prepare_zap"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pactsdk.pool.Pool.prepare_zap()</span></code></a> instead.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.zap.Zap.pool">
+<span class="sig-name descname"><span class="pre">pool</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pool.html#pactsdk.pool.Pool" title="pactsdk.pool.Pool"><span class="pre">pactsdk.pool.Pool</span></a></em><a class="headerlink" href="#pactsdk.zap.Zap.pool" title="Permalink to this definition"></a></dt>
+<dd><p>The pool the zap is going to be performed in.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.zap.Zap.asset">
+<span class="sig-name descname"><span class="pre">asset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="asset.html#pactsdk.asset.Asset" title="pactsdk.asset.Asset"><span class="pre">pactsdk.asset.Asset</span></a></em><a class="headerlink" href="#pactsdk.zap.Zap.asset" title="Permalink to this definition"></a></dt>
+<dd><p>The asset that will be used in zap.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.zap.Zap.amount">
+<span class="sig-name descname"><span class="pre">amount</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.zap.Zap.amount" title="Permalink to this definition"></a></dt>
+<dd><p>Amount to be used in zap.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.zap.Zap.slippage_pct">
+<span class="sig-name descname"><span class="pre">slippage_pct</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#pactsdk.zap.Zap.slippage_pct" title="Permalink to this definition"></a></dt>
+<dd><p>The maximum amount of slippage allowed in performing the swap.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.zap.Zap.swap">
+<span class="sig-name descname"><span class="pre">swap</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="swap.html#pactsdk.swap.Swap" title="pactsdk.swap.Swap"><span class="pre">pactsdk.swap.Swap</span></a></em><a class="headerlink" href="#pactsdk.zap.Zap.swap" title="Permalink to this definition"></a></dt>
+<dd><p>The swap object that will be executed during the zap.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.zap.Zap.liquidity_addition">
+<span class="sig-name descname"><span class="pre">liquidity_addition</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pactsdk.add_liquidity.LiquidityAddition</span></em><a class="headerlink" href="#pactsdk.zap.Zap.liquidity_addition" title="Permalink to this definition"></a></dt>
+<dd><p>Liquidity Addition object that will be executed during the zap.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.zap.Zap.params">
+<span class="sig-name descname"><span class="pre">params</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pactsdk.zap.ZapParams" title="pactsdk.zap.ZapParams"><span class="pre">pactsdk.zap.ZapParams</span></a></em><a class="headerlink" href="#pactsdk.zap.Zap.params" title="Permalink to this definition"></a></dt>
+<dd><p>All amounts used in swap and add liquidity transactions.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.zap.Zap.prepare_tx_group">
+<span class="sig-name descname"><span class="pre">prepare_tx_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.zap.Zap.prepare_tx_group" title="Permalink to this definition"></a></dt>
+<dd><p>Creates the transactions needed to perform zap and returns them as a transaction group ready to be signed and committed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>address</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The account that will be performing the zap.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="transaction_group.html#pactsdk.transaction_group.TransactionGroup" title="pactsdk.transaction_group.TransactionGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransactionGroup</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A transaction group that when executed will perform the zap.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.zap.Zap.get_zap_params">
+<span class="sig-name descname"><span class="pre">get_zap_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.zap.Zap.get_zap_params" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pactsdk.zap.ZapParams" title="pactsdk.zap.ZapParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">ZapParams</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.zap.Zap.prepare_add_liq">
+<span class="sig-name descname"><span class="pre">prepare_add_liq</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.zap.Zap.prepare_add_liq" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="swap.html" class="btn btn-neutral float-left" title="swap" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pool_state.html" class="btn btn-neutral float-right" title="pool_state" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Pact.fi.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
