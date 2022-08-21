@@ -153,3 +153,10 @@ class Asset:
         if not isinstance(other_asset, Asset):
             return False
         return self.index == other_asset.index
+
+    def __hash__(self) -> int:
+        """Returns an int which is the asset_id of the :class:`Asset` current object
+        :return: asset_id
+        :rtype: int
+        """
+        return self.asset_id
