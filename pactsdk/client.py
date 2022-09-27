@@ -20,6 +20,7 @@ from typing import Union
 from algosdk.v2client.algod import AlgodClient
 
 from pactsdk.api import ApiListPoolsResponse
+from pactsdk.farming.farming_client import PactFarmingClient
 
 from .asset import Asset, fetch_asset_by_index
 from .pool import (
@@ -43,6 +44,8 @@ class PactClient:
     pact_api_url: str
     """Pact API URL to use."""
 
+    farming: PactFarmingClient
+
     def __init__(self, algod: AlgodClient, pact_api_url: str = "https://api.pact.fi"):
         """Constructor for the PactClient class.
 
@@ -52,6 +55,7 @@ class PactClient:
         """
         self.algod = algod
         self.pact_api_url = pact_api_url
+        self.farming = PactFarmingClient(algod)
 
     def fetch_asset(self, asset_index: int) -> Asset:
         """A convenient method for fetching ASAs (Algorand Standard Asset).

@@ -5,15 +5,8 @@ import responses
 import pactsdk
 from pactsdk.client import PactClient
 
-from .utils import (
-    TestBed,
-    algod,
-    create_asset,
-    deploy_contract,
-    deploy_exchange_contract,
-    new_account,
-    sign_and_send,
-)
+from .pool_utils import TestBed, deploy_constant_product_contract, deploy_exchange
+from .utils import algod, create_asset, new_account, sign_and_send
 
 
 @responses.activate
@@ -130,7 +123,7 @@ def test_fetching_pools_by_assets_with_reversed_assets(testbed: TestBed):
 
 @responses.activate
 def test_fetching_pools_by_assets_multiple_results(testbed: TestBed):
-    second_app_id = deploy_exchange_contract(
+    second_app_id = deploy_constant_product_contract(
         testbed.account,
         testbed.algo.index,
         testbed.coin.index,
@@ -256,7 +249,7 @@ def test_adding_big_liquidity_to_an_empty_pool_using_split():
     coin_a_index = create_asset(account, "coinA", 0, 2**50 - 1)
     coin_b_index = create_asset(account, "coinB", 0, 2**50 - 1)
 
-    app_id = deploy_contract(account, "CONSTANT_PRODUCT", coin_a_index, coin_b_index)
+    app_id = deploy_exchange(account, "CONSTANT_PRODUCT", coin_a_index, coin_b_index)
     pool = pact.fetch_pool_by_id(app_id)
 
     assert pool.pool_type == "CONSTANT_PRODUCT"

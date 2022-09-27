@@ -6,14 +6,8 @@ from pactsdk.client import PactClient
 from pactsdk.stableswap_calculator import StableswapParams
 
 from .matchers import Any
-from .utils import (
-    algod,
-    create_asset,
-    deploy_stableswap_contract,
-    make_fresh_testbed,
-    new_account,
-    sign_and_send,
-)
+from .pool_utils import deploy_stableswap_contract, make_fresh_testbed
+from .utils import algod, create_asset, new_account, sign_and_send
 
 
 def test_stableswap_pool_e2e_scenario():

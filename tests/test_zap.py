@@ -2,14 +2,8 @@ import pytest
 
 import pactsdk
 
-from .utils import (
-    add_liquidity,
-    algod,
-    create_asset,
-    make_fresh_testbed,
-    new_account,
-    sign_and_send,
-)
+from .pool_utils import add_liquidity, make_fresh_testbed
+from .utils import algod, create_asset, new_account, sign_and_send
 
 
 def test_calculate_zap_params():

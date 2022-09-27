@@ -14,7 +14,7 @@ def serialize_uint64(values: Sequence[int]) -> str:
     return base64.b64encode(_bytes).decode("ascii")
 
 
-def deserialize_uint64(data: str) -> Sequence[int]:
+def deserialize_uint64(data: str) -> list[int]:
     decoded = base64.b64decode(data)
     return [
         int.from_bytes(decoded[offset : offset + 8], byteorder="big", signed=False)

@@ -600,23 +600,12 @@ class Pool:
         note: bytes,
         suggested_params: transaction.SuggestedParams,
     ):
-        if not asset.index:
-            # ALGO
-            return transaction.PaymentTxn(
-                sender=address,
-                receiver=self.get_escrow_address(),
-                amt=amount,
-                note=note,
-                sp=suggested_params,
-            )
-
-        return transaction.AssetTransferTxn(
+        return asset.build_transfer_tx(
             sender=address,
             receiver=self.get_escrow_address(),
-            amt=amount,
+            amount=amount,
             note=note,
-            sp=suggested_params,
-            index=asset.index,
+            suggested_params=suggested_params,
         )
 
     def _make_application_noop_tx(

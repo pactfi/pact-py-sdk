@@ -2,7 +2,8 @@ from dataclasses import asdict
 
 import pactsdk
 
-from .utils import TestBed, sign_and_send
+from .pool_utils import TestBed
+from .utils import sign_and_send
 
 
 def test_constant_product_pool_e2e_scenario(testbed: TestBed):

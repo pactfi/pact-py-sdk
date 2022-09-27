@@ -4,7 +4,8 @@ import pytest
 from pactsdk import LiquidityAddition
 from pactsdk.exceptions import PactSdkError
 from pactsdk.pool import Pool, PoolType
-from tests.utils import POOL_TYPES, add_liquidity, make_fresh_testbed, sign_and_send
+from tests.pool_utils import POOL_TYPES, add_liquidity, make_fresh_testbed
+from tests.utils import sign_and_send
 
 
 def assert_add_liquidity(

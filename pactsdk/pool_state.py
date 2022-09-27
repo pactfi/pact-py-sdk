@@ -1,12 +1,13 @@
-import base64
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, Optional
+from typing import TYPE_CHECKING, Literal, Optional
 
 from pactsdk.encoding import (
     decode_address_from_global_state,
     decode_string_from_global_state,
     deserialize_uint64,
 )
+
+from .utils import parse_app_state
 
 if TYPE_CHECKING:
     from pactsdk.pool import PoolType
@@ -59,7 +60,7 @@ def parse_global_pool_state(raw_state: list) -> AppInternalState:
     Args:
         raw_state: The contract's global state retrieved from algosdk.
     """
-    state = parse_state(raw_state)
+    state = parse_app_state(raw_state)
 
     if "CONTRACT_NAME" in state:
         state["CONTRACT_NAME"] = decode_string_from_global_state(state["CONTRACT_NAME"])
@@ -85,28 +86,6 @@ def parse_global_pool_state(raw_state: list) -> AppInternalState:
 
     asset_a, asset_b, fee_bps = deserialize_uint64(state.pop("CONFIG"))
     return AppInternalState(ASSET_A=asset_a, ASSET_B=asset_b, FEE_BPS=fee_bps, **state)
-
-
-def parse_state(kv: list) -> dict[str, Any]:
-    """Utility function for converting the Algorand key-value schema into a python dictionary.
-
-    Algorand store keys in base64 encoding and store values as either bytes or unsigned integers depending on the type. This function decodes this information into a more human friendly structure.
-
-    Args:
-        kv: Algorand key-value data structure to parse.
-
-    Returns:
-        The parsed key value dictionary.
-    """
-    res = {}
-    for elem in kv:
-        key = str(base64.b64decode(elem["key"]), encoding="ascii")
-        if elem["value"]["type"] == 1:
-            val = elem["value"]["bytes"]
-        else:
-            val = elem["value"]["uint"]
-        res[key] = val
-    return res
 
 
 def get_pool_type_from_internal_state(
