@@ -143,6 +143,10 @@ class Asset:
             The amount of this asset the account is holding, or None if the account is not opted into the asset.
         """
         account_info = self.algod.account_info(address)
+
+        if self.index == 0:
+            return account_info["amount"]
+
         for asset in account_info["assets"]:
             if asset["asset-id"] == self.index:
                 return asset["amount"]
