@@ -24,7 +24,6 @@ class FarmInternalState:
     next_rewards: list[int]
     rpt_frac: list[int]
     rpt: list[int]
-    deprecated_at: int
     duration: int
     next_duration: int
     num_stakers: int
@@ -72,9 +71,6 @@ class FarmState:
     updated_at: datetime.datetime
     """The time the farm was last updated."""
 
-    deprecated_at: datetime.datetime
-    """The Time after which the farm can be destroyed by the admin."""
-
     admin: str
     """The address of the farm's admin account. The admin can deposit new rewards and destroy the farm after it is deprecated."""
 
@@ -110,7 +106,6 @@ class FarmUserState:
 def parse_internal_state(raw_state: dict) -> FarmInternalState:
     return FarmInternalState(
         claimed_rewards=deserialize_uint64(raw_state["ClaimedRewards"]),
-        deprecated_at=raw_state["DeprecatedAt"],
         duration=raw_state["Duration"],
         next_duration=raw_state["NextDuration"],
         next_rewards=deserialize_uint64(raw_state["NextRewards"]),
@@ -157,7 +152,6 @@ def internal_state_to_state(
         num_stakers=internal_state.num_stakers,
         total_staked=internal_state.total_staked,
         updated_at=datetime.datetime.fromtimestamp(internal_state.updated_at),
-        deprecated_at=datetime.datetime.fromtimestamp(internal_state.deprecated_at),
         admin=internal_state.admin,
         updater=internal_state.updater,
     )

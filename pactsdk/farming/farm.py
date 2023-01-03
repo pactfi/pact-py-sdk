@@ -16,7 +16,12 @@ from pactsdk.asset import Asset, fetch_asset_by_index
 from ..encoding import deserialize_uint64
 from ..gas_station import get_gas_station
 from ..utils import get_selector, parse_app_state, sp_fee
-from .escrow import Escrow, build_deploy_escrow_txs, fetch_escrow_by_id
+from .escrow import (
+    Escrow,
+    build_deploy_escrow_txs,
+    fetch_escrow_approval_program,
+    fetch_escrow_by_id,
+)
 from .farm_state import (
     FarmingRewards,
     FarmInternalState,
@@ -29,8 +34,9 @@ from .farm_state import (
 )
 
 UPDATE_TX_FEE = 3000
-MAX_REWARD_ASSETS = 10
+MAX_REWARD_ASSETS = 6
 
+UPDATE_GLOBAL_STATE_SIG = get_selector("update_global_state()void")
 UPDATE_STATE_SIG = get_selector("update_state(application,account,account,asset)void")
 CLAIM_REWARDS_SIG = get_selector("claim_rewards(account,uint64[])void")
 ADD_REWARD_ASSET_SIG = get_selector("add_reward_asset(asset)void")
@@ -198,6 +204,7 @@ class Farm:
             at_time=at_time,
             staked_amount=staked_amount,
             total_staked=self.state.total_staked + staked_amount,
+            extrapolate_future_rewards=True,
         )
 
     def simulate_accrued_rewards(
@@ -205,10 +212,8 @@ class Farm:
         at_time: datetime.datetime,
         staked_amount: int,
         total_staked: int,
+        extrapolate_future_rewards=False,
     ) -> FarmingRewards[int]:
-        # TODO missing in contract.
-        # at_time = min(at_time, self.state.deprecated_at)
-
         duration = int((at_time - self.state.updated_at).total_seconds())
 
         if total_staked == 0:
@@ -242,12 +247,18 @@ class Farm:
             if duration <= 0:
                 return rewards
 
+        if not extrapolate_future_rewards:
+            return rewards
+
+        next_duration = self.state.next_duration or self.state.duration
+        if next_duration == 0:
+            return rewards
+
         next_rewards = (
             self.state.next_rewards
             if self.state.next_duration
             else self.state.pending_rewards
         )
-        next_duration = self.state.next_duration or self.state.duration
         next_next_rewards = {
             asset: int(amount * (duration / next_duration))
             for asset, amount in next_rewards.items()
@@ -269,7 +280,9 @@ class Farm:
         rewards: FarmingRewards[int],
         stake_duration: int,
         cycle_duration: int,
-    ):
+    ) -> FarmingRewards[int]:
+        if cycle_duration == 0:
+            return {asset: 0 for asset in self.state.reward_assets}
 
         stake_duration = min(stake_duration, cycle_duration)
 
@@ -284,7 +297,7 @@ class Farm:
         self,
         staked_amount: int,
         user_rpt: FarmingRewards[float],
-    ):
+    ) -> FarmingRewards[int]:
         return {
             asset: int(
                 (self.state.rpt.get(asset, 0) - user_rpt.get(asset, 0)) * staked_amount
@@ -300,31 +313,47 @@ class Farm:
             for asset, amount in rewards_a.items()
         }
 
-    def build_deploy_escrow_txs(self, sender: str) -> list[transaction.Transaction]:
+    def prepare_deploy_escrow_txs(self, sender: str) -> list[transaction.Transaction]:
+        approval_program = fetch_escrow_approval_program(self.algod, self.app_id)
+        return self.build_deploy_escrow_txs(sender, approval_program)
+
+    def build_deploy_escrow_txs(
+        self, sender: str, approval_program: bytes
+    ) -> list[transaction.Transaction]:
         return build_deploy_escrow_txs(
             sender=sender,
             farm_app_id=self.app_id,
             staked_asset_id=self.staked_asset.index,
             suggested_params=self.suggested_params,
+            approval_program=approval_program,
         )
 
-    def build_update_increase_opcode_quota_tx(self, sender: str):
+    def build_update_increase_opcode_quota_tx(
+        self, sender: str
+    ) -> Optional[transaction.Transaction]:
+        seconds_passed = (datetime.datetime.now() - self.state.updated_at).seconds
+        opcodes_cost = 671 if seconds_passed > self.state.duration > 0 else 513
+        count = (opcodes_cost * len(self.state.reward_assets)) // 700
+        if count == 0:
+            return None
+
         return get_gas_station().build_increase_opcode_quota_tx(
             sender=sender,
-            count=4,
+            count=count,
             suggested_params=self.suggested_params,
         )
 
     def build_update_with_opcode_increase_txs(
         self, escrow: Escrow
     ) -> list[transaction.Transaction]:
-        increase_opcode_quota_tx = self.build_update_increase_opcode_quota_tx(
+        txs = [self.build_update_tx(escrow)]
+
+        if increase_opcode_quota_tx := self.build_update_increase_opcode_quota_tx(
             escrow.user_address
-        )
+        ):
+            txs.insert(0, increase_opcode_quota_tx)
 
-        update_tx = self.build_update_tx(escrow)
-
-        return [increase_opcode_quota_tx, update_tx]
+        return txs
 
     def build_update_tx(self, escrow: Escrow) -> transaction.Transaction:
         return transaction.ApplicationNoOpTxn(
@@ -366,6 +395,14 @@ class Farm:
             sp=sp_fee(self.suggested_params, 1000 * (number_of_assets + 1)),
         )
 
+    def build_update_global_state_tx(self, sender: str):
+        return transaction.ApplicationNoOpTxn(
+            sender=sender,
+            index=self.app_id,
+            app_args=[UPDATE_GLOBAL_STATE_SIG],
+            sp=self.suggested_params,
+        )
+
     def admin_build_add_reward_asset_tx(self, asset: Asset) -> transaction.Transaction:
         return transaction.ApplicationNoOpTxn(
             sender=self.state.admin,
@@ -395,6 +432,8 @@ class Farm:
             increase_opcode_tx = self.build_update_increase_opcode_quota_tx(
                 self.state.admin
             )
+
+        update_tx = self.build_update_global_state_tx(sender=self.state.admin)
 
         # Fund farm with minimal ALGO balance required for assets opt-ins.
         opt_in_txs: list[transaction.Transaction] = [
@@ -442,6 +481,12 @@ class Farm:
             app_args=app_args,
         )
 
-        txs = [increase_opcode_tx, *opt_in_txs, *transfer_txs, deposit_rewards_tx]
+        txs = [
+            increase_opcode_tx,
+            update_tx,
+            *opt_in_txs,
+            *transfer_txs,
+            deposit_rewards_tx,
+        ]
 
         return [tx for tx in txs if tx]

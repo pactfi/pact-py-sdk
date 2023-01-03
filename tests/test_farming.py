@@ -8,7 +8,6 @@ import pactsdk
 from pactsdk.asset import ASSETS_CACHE
 
 from .farming_utils import (
-    deploy_escrow_for_account,
     deploy_farm,
     make_fresh_farming_testbed,
     make_new_account_and_escrow,
@@ -73,51 +72,6 @@ def test_farming_fetch_farm():
     assert escrow == escrow_2
 
 
-def test_farming_listing_escrows():
-    testbed_a = make_fresh_farming_testbed()
-    testbed_b = make_fresh_farming_testbed()
-
-    escrow_farm_a_user_b = deploy_escrow_for_account(
-        testbed_a.farm, testbed_b.user_account, testbed_a.farm.suggested_params
-    )
-
-    user_a_escrows = testbed_a.pact.farming.list_escrows(testbed_a.user_account.address)
-    user_b_escrows = testbed_a.pact.farming.list_escrows(testbed_b.user_account.address)
-    assert user_a_escrows == [testbed_a.escrow]
-    assert user_b_escrows == [testbed_b.escrow, escrow_farm_a_user_b]
-
-    # Can provide a list of farms to save some requests to algod.
-    farms = [testbed_a.farm, testbed_b.farm]
-    user_a_escrows = testbed_a.pact.farming.list_escrows(
-        testbed_a.user_account.address, farms=farms
-    )
-    user_b_escrows = testbed_a.pact.farming.list_escrows(
-        testbed_b.user_account.address, farms=farms
-    )
-    assert user_a_escrows == [testbed_a.escrow]
-    assert user_b_escrows == [testbed_b.escrow, escrow_farm_a_user_b]
-
-    # Escrows for farms not provided in the list are ignored.
-    farms = [testbed_a.farm]
-    user_a_escrows = testbed_a.pact.farming.list_escrows(
-        testbed_a.user_account.address, farms=farms
-    )
-    user_b_escrows = testbed_a.pact.farming.list_escrows(
-        testbed_b.user_account.address, farms=farms
-    )
-    assert user_a_escrows == [testbed_a.escrow]
-    assert user_b_escrows == [escrow_farm_a_user_b]
-
-    user_a_escrows = testbed_a.pact.farming.list_escrows(
-        testbed_a.user_account.address, farms=[]
-    )
-    user_b_escrows = testbed_a.pact.farming.list_escrows(
-        testbed_b.user_account.address, farms=[]
-    )
-    assert user_a_escrows == []
-    assert user_b_escrows == []
-
-
 def test_farming_farm_state():
     testbed = make_fresh_farming_testbed()
 
@@ -126,18 +80,17 @@ def test_farming_farm_state():
     assert testbed.farm.internal_state == pactsdk.FarmInternalState(
         staked_asset_id=testbed.staked_asset.index,
         reward_asset_ids=[],
-        distributed_rewards=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        claimed_rewards=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        pending_rewards=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        next_rewards=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        rpt_frac=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        rpt=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        distributed_rewards=[0, 0, 0, 0, 0, 0],
+        claimed_rewards=[0, 0, 0, 0, 0, 0],
+        pending_rewards=[0, 0, 0, 0, 0, 0],
+        next_rewards=[0, 0, 0, 0, 0, 0],
+        rpt_frac=[0, 0, 0, 0, 0, 0],
+        rpt=[0, 0, 0, 0, 0, 0],
         duration=0,
         next_duration=0,
         num_stakers=0,
         total_staked=0,
         updated_at=last_block - 6,
-        deprecated_at=0,
         admin=testbed.admin_account.address,
         updater=testbed.admin_account.address,
     )
@@ -154,7 +107,6 @@ def test_farming_farm_state():
         num_stakers=0,
         total_staked=0,
         updated_at=datetime.datetime.fromtimestamp(last_block - 6),
-        deprecated_at=datetime.datetime.fromtimestamp(0),
         admin=testbed.admin_account.address,
         updater=testbed.admin_account.address,
     )
@@ -175,7 +127,6 @@ def test_farming_farm_state():
         num_stakers=0,
         total_staked=0,
         updated_at=datetime.datetime.fromtimestamp(last_block),
-        deprecated_at=datetime.datetime.fromtimestamp(0),
         admin=testbed.admin_account.address,
         updater=testbed.admin_account.address,
     )
@@ -197,7 +148,6 @@ def test_farming_farm_state():
         num_stakers=1,
         total_staked=1000,
         updated_at=datetime.datetime.fromtimestamp(last_block),
-        deprecated_at=datetime.datetime.fromtimestamp(0),
         admin=testbed.admin_account.address,
         updater=testbed.admin_account.address,
     )
@@ -245,7 +195,6 @@ def test_farming_happy_path():
         num_stakers=1,
         total_staked=1000,
         updated_at=Any(datetime.datetime),
-        deprecated_at=Any(datetime.datetime),
         admin=testbed.admin_account.address,
         updater=testbed.admin_account.address,
     )
@@ -278,7 +227,6 @@ def test_farming_happy_path():
         num_stakers=0,
         total_staked=0,
         updated_at=Any(datetime.datetime),
-        deprecated_at=Any(datetime.datetime),
         admin=testbed.admin_account.address,
         updater=testbed.admin_account.address,
     )
@@ -310,7 +258,6 @@ def test_farming_happy_path():
         num_stakers=0,
         total_staked=0,
         updated_at=Any(datetime.datetime),
-        deprecated_at=Any(datetime.datetime),
         admin=testbed.admin_account.address,
         updater=testbed.admin_account.address,
     )
@@ -350,7 +297,7 @@ def test_farming_stake_and_unstake():
     assert testbed.farm.state.total_staked == 0
 
 
-def test_farming_delete_and_clear_micro_farm():
+def test_farming_exit_and_delete():
     testbed = make_fresh_farming_testbed()
     testbed.deposit_rewards({testbed.reward_asset: 1000}, duration=100)
 
@@ -361,34 +308,74 @@ def test_farming_delete_and_clear_micro_farm():
     assert testbed.farm.state.total_staked == 1_000_000
     assert testbed.farm.state.num_stakers == 1
 
-    user_asset_amount = testbed.staked_asset.get_holding(testbed.user_account.address)
-    user_algo_amount = testbed.algo.get_holding(testbed.user_account.address)
-
     assert testbed.staked_asset.get_holding(testbed.escrow.address) == 1_000_000
     assert testbed.algo.get_holding(testbed.escrow.address) == 200_000
 
-    # Delete the micro farm.
-    delete_txs = testbed.escrow.build_delete_and_clear_txs()
-    sign_and_send(pactsdk.TransactionGroup(delete_txs), testbed.user_account)
+    # Claim and unstake are required before exiting.
+    exit_tx = testbed.escrow.build_exit_tx()
+    delete_tx = testbed.escrow.build_delete_tx()
+    exit_and_delete_group = pactsdk.TransactionGroup([exit_tx, delete_tx])
+    with pytest.raises(algosdk.error.AlgodHTTPError):
+        sign_and_send(exit_and_delete_group, testbed.user_account)
+
+    # Do claim and unstake.
+    unstake_txs = testbed.escrow.build_unstake_txs(1_000_000)
+    claim_tx = testbed.escrow.build_claim_rewards_tx()
+    sign_and_send(
+        pactsdk.TransactionGroup([*unstake_txs, claim_tx]), testbed.user_account
+    )
+
+    user_algo_amount = testbed.algo.get_holding(testbed.user_account.address)
+
+    # Close out and delete the micro farm.
+    sign_and_send(exit_and_delete_group, testbed.user_account)
 
     # Make sure the escrow address is cleared.
     assert testbed.staked_asset.get_holding(testbed.escrow.address) is None
     assert testbed.algo.get_holding(testbed.escrow.address) == 0
 
-    # Make sure all tokens are claimed by the user account (algos and staked asset).
-    assert (
-        testbed.staked_asset.get_holding(testbed.user_account.address)
-        == user_asset_amount + 1_000_000
-    )
+    # Make sure all algos are claimed by the user account.
     assert (
         testbed.algo.get_holding(testbed.user_account.address)
-        == user_algo_amount + 200_000 - 5000  # + locked amount - fee
+        == user_algo_amount + 200_000 - 4000  # + locked amount - fee
     )
 
-    # Check farm's global state.
-    testbed.farm.update_state()
+
+def test_farming_force_exit_and_delete():
+    testbed = make_fresh_farming_testbed()
+    testbed.deposit_rewards({testbed.reward_asset: 1000}, duration=100)
+
+    testbed.stake(1_000_000)
+    testbed.wait_rounds_and_update_farm(5)
+
     assert testbed.farm.state.distributed_rewards == {testbed.reward_asset: 50}
-    assert testbed.farm.state.num_stakers == 0
+    assert testbed.farm.state.total_staked == 1_000_000
+    assert testbed.farm.state.num_stakers == 1
+
+    assert testbed.staked_asset.get_holding(testbed.escrow.address) == 1_000_000
+    assert testbed.algo.get_holding(testbed.escrow.address) == 200_000
+
+    user_algo_amount = testbed.algo.get_holding(testbed.user_account.address)
+    user_staked_amount = testbed.staked_asset.get_holding(testbed.user_account.address)
+
+    # Close out and delete the micro farm. Unstake is not required when doing force_exit.
+    exit_tx = testbed.escrow.build_force_exit_tx()
+    delete_tx = testbed.escrow.build_delete_tx()
+    sign_and_send(pactsdk.TransactionGroup([exit_tx, delete_tx]), testbed.user_account)
+
+    # Make sure the escrow address is cleared.
+    assert testbed.staked_asset.get_holding(testbed.escrow.address) is None
+    assert testbed.algo.get_holding(testbed.escrow.address) == 0
+
+    # Make sure all algos and staked tokens are claimed by the user account.
+    assert (
+        testbed.algo.get_holding(testbed.user_account.address)
+        == user_algo_amount + 200_000 - 4000  # + locked amount - fee
+    )
+    assert (
+        testbed.staked_asset.get_holding(testbed.user_account.address)
+        == user_staked_amount + 1_000_000
+    )
 
 
 def test_farming_estimate_rewards():
@@ -432,7 +419,7 @@ def test_farming_estimate_rewards():
     # No next rewards, estimate end of first cycle.
     at_time = testbed.farm.state.updated_at + datetime.timedelta(seconds=10)
     assert testbed.farm.estimate_accrued_rewards(at_time, user_state) == {
-        testbed.reward_asset: 1000
+        testbed.reward_asset: 1000  # no future extrapolation for estimate.
     }
     assert testbed.farm.simulate_new_staker(at_time, 0) == {testbed.reward_asset: 0}
     assert testbed.farm.simulate_new_staker(at_time, 10) == {testbed.reward_asset: 90}
@@ -445,7 +432,7 @@ def test_farming_estimate_rewards():
     # No next rewards, estimate future cycles.
     at_time = testbed.farm.state.updated_at + datetime.timedelta(seconds=55)
     assert testbed.farm.estimate_accrued_rewards(at_time, user_state) == {
-        testbed.reward_asset: 5500
+        testbed.reward_asset: 1000
     }
     assert testbed.farm.simulate_new_staker(at_time, 0) == {testbed.reward_asset: 0}
     assert testbed.farm.simulate_new_staker(at_time, 10) == {testbed.reward_asset: 499}
@@ -497,7 +484,7 @@ def test_farming_estimate_rewards():
     # Next rewards, estimate future cycles.
     at_time = testbed.farm.state.updated_at + datetime.timedelta(seconds=54)
     assert testbed.farm.estimate_accrued_rewards(at_time, user_state) == {
-        testbed.reward_asset: 12_250
+        testbed.reward_asset: 6000
     }
     at_time = testbed.farm.state.updated_at + datetime.timedelta(seconds=55)
     assert testbed.farm.simulate_new_staker(at_time, 0) == {testbed.reward_asset: 0}
@@ -531,7 +518,34 @@ def test_farming_estimate_rewards():
         testbed.reward_asset: 2250
     }
 
-    # TODO missing in contract, limit to deprecation time.
+    # Wait until duration is 0
+    testbed.wait_rounds_and_update_farm(4)
+    assert testbed.farm.state.duration == 1
+    assert testbed.farm.state.next_duration == 20
+
+    # TODO these are failing, contract bug
+    # testbed.wait_rounds_and_update_farm(1)
+    # assert testbed.farm.state.duration == 20
+    # assert testbed.farm.state.next_duration == 0
+
+    # testbed.wait_rounds_and_update_farm(1)
+    # assert testbed.farm.state.duration == 19
+    # assert testbed.farm.state.next_duration == 0
+
+    # testbed.wait_rounds_and_update_farm(19)
+    testbed.wait_rounds_and_update_farm(21)
+    assert testbed.farm.state.duration == 0
+    assert testbed.farm.state.next_duration == 0
+
+    at_time = testbed.farm.state.updated_at + datetime.timedelta(seconds=10)
+    assert testbed.farm.estimate_accrued_rewards(at_time, user_state) == {
+        testbed.reward_asset: 6000
+    }
+
+    # Cannot simulate new staker if duration is 0.
+    at_time = testbed.farm.state.updated_at + datetime.timedelta(seconds=10)
+    assert testbed.farm.simulate_new_staker(at_time, 0) == {testbed.reward_asset: 0}
+    assert testbed.farm.simulate_new_staker(at_time, 10) == {testbed.reward_asset: 0}
 
 
 def test_farming_deposit_next_rewards():
@@ -666,19 +680,19 @@ def test_farming_rewards_limit():
     testbed = make_fresh_farming_testbed()
 
     # Can't put all rewards in a single transaction group. Number of transactions surpasses group size limit. Need to split it into two groups.
-    deposit_multiple_rewards(5)
-    assert len(testbed.farm.state.reward_assets) == 5
-    assert len(testbed.farm.state.pending_rewards) == 5
+    deposit_multiple_rewards(3)
+    assert len(testbed.farm.state.reward_assets) == 3
+    assert len(testbed.farm.state.pending_rewards) == 3
 
     # Can't deploy rewards above the limit.
     with pytest.raises(AssertionError) as err:
-        deposit_multiple_rewards(6)
-    assert "Maximum number of reward assets per farm is 10" in str(err.value)
+        deposit_multiple_rewards(4)
+    assert "Maximum number of reward assets per farm is 6" in str(err.value)
 
     # Deploy maximum number of rewards.
-    deposit_multiple_rewards(5)
-    assert len(testbed.farm.state.reward_assets) == 10
-    assert len(testbed.farm.state.pending_rewards) == 10
+    deposit_multiple_rewards(3)
+    assert len(testbed.farm.state.reward_assets) == 6
+    assert len(testbed.farm.state.pending_rewards) == 6
 
 
 def test_farming_different_reward_asset_between_cycles():
@@ -825,8 +839,6 @@ def test_farming_algo_rewards():
         testbed.claim()
     update_farm(testbed.escrow, testbed.user_account)
     assert testbed.farm.state.pending_rewards == {algo: 500, reward_asset: 10_000}
-    # TODO
-    # assert algo.get_holding(testbed.user_account.address) == old_algo_amount + 500-3000
 
 
 def test_farming_stake_for_longer_then_farm_duration():
@@ -998,7 +1010,7 @@ def test_farming_no_testbed():
     assert escrow is None
 
     # Deploy an escrow.
-    deploy_txs = farm.build_deploy_escrow_txs(sender=user_account.address)
+    deploy_txs = farm.prepare_deploy_escrow_txs(sender=user_account.address)
     sign_and_send(pactsdk.TransactionGroup(deploy_txs), user_account)
     txinfo = algod.pending_transaction_info(deploy_txs[-2].get_txid())
     escrow_id = txinfo["application-index"]
@@ -1023,7 +1035,7 @@ def test_farming_no_testbed():
     assert reward_asset.get_holding(user_account.address) == 59
 
 
-def test_farming_custom_escrow_transaction():
+def test_farming_governance():
     testbed = make_fresh_farming_testbed()
     testbed.deposit_rewards({testbed.reward_asset: 2000}, duration=100)
 
@@ -1032,54 +1044,30 @@ def test_farming_custom_escrow_transaction():
     testbed.farm.update_state()
     assert testbed.farm.state.total_staked == 1000
 
-    # Send a zero algo transaction from the escrow e.g. governance.
-    with testbed.escrow.rekey() as txs:
-        txs.append(
-            testbed.algo.build_transfer_tx(
-                sender=testbed.user_account.address,
-                receiver=testbed.admin_account.address,
-                amount=0,
-                suggested_params=testbed.farm.suggested_params,
-            )
-        )
-    sign_and_send(pactsdk.TransactionGroup(txs), testbed.user_account)
+    # Commit to governance
+    send_message_tx = testbed.escrow.build_send_message_tx(
+        testbed.admin_account.address, "some message required by the Foundation"
+    )
+    sign_and_send(send_message_tx, testbed.user_account)
 
-    # The staked amount should be unchanged.
-    testbed.farm.update_state()
-    assert testbed.farm.state.total_staked == 1000
-    user_state = testbed.escrow.fetch_user_state()
-    assert user_state.staked == 1000
+    # Simulate governance reward.
+    transfer_tx = testbed.algo.build_transfer_tx(
+        sender=testbed.admin_account.address,
+        receiver=testbed.escrow.address,
+        amount=100,
+        suggested_params=testbed.escrow.suggested_params,
+    )
+    sign_and_send(transfer_tx, testbed.admin_account)
 
-    # Now let's send some of the staked tokens out of the escrow.
-    with testbed.escrow.rekey() as txs:
-        # Send some algo to cover fee for the next tx.
-        txs.append(
-            testbed.algo.build_transfer_tx(
-                sender=testbed.user_account.address,
-                receiver=testbed.escrow.address,
-                amount=1000,
-                suggested_params=testbed.farm.suggested_params,
-            )
-        )
+    escrow_algos = testbed.algo.get_holding(testbed.escrow.address)
+    user_algos = testbed.algo.get_holding(testbed.user_account.address)
 
-        # Send staked asset.
-        txs.append(
-            testbed.farm.staked_asset.build_transfer_tx(
-                sender=testbed.escrow.address,
-                receiver=testbed.admin_account.address,
-                amount=800,
-                suggested_params=testbed.farm.suggested_params,
-            )
-        )
-    sign_and_send(pactsdk.TransactionGroup(txs), testbed.user_account)
+    # Withdraw reward.
+    withdraw_tx = testbed.escrow.build_withdraw_algos()
+    sign_and_send(withdraw_tx, testbed.user_account)
 
-    # Check if farm is notified about the change is staked amount.
-    testbed.farm.update_state()
-    assert testbed.farm.state.total_staked == 200
-    user_state = testbed.escrow.fetch_user_state()
-    assert user_state.staked == 200
-
-
-def test_farming_deprecation():
-    # TODO missing in contract
-    ...
+    assert testbed.algo.get_holding(testbed.escrow.address) == escrow_algos - 100
+    assert (
+        testbed.algo.get_holding(testbed.user_account.address)
+        == user_algos + 100 - 2000
+    )

@@ -2,9 +2,9 @@ from .escrow import (  # noqa
     Escrow,
     EscrowInternalState,
     build_deploy_escrow_txs,
+    fetch_escrow_approval_program,
     fetch_escrow_by_id,
     fetch_escrow_global_state,
-    list_escrows_from_account_info,
     parse_global_escrow_state,
 )
 from .farm import (  # noqa

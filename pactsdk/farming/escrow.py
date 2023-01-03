@@ -5,11 +5,11 @@ The contract is very minimal and has strong guarantees for user funds safety.
 """
 
 import base64
-from contextlib import contextmanager
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Optional
 
 import algosdk
+from algosdk import abi
 from algosdk.future import transaction
 from algosdk.v2client.algod import AlgodClient
 
@@ -19,14 +19,15 @@ from ..utils import get_selector, parse_app_state, sp_fee
 if TYPE_CHECKING:
     from .farm import Farm
 
-COMPILED_APPROVAL_PROGRAM_B64 = "CCADAAYBJgMLTWFzdGVyQXBwSUQBAQEAMgkxABJEMRlAAIoxGEAAQzYaAIAEOIgacRJEKDYaARfAMmexI7IQNhoCF8AyshiABLc1X9GyGiKyAbOxgQSyEDIKshQ2GgMXwDCyESKyAbNCAF42GgCABA2GHEISRLEjshAoZLIYgATDFArnshopshoqshopshoqshoyCbIcMgiyMjYaAhfAMLIwMgmyICKyAbNCABwxGYEFEkAAAQAyCShkYRREsSSyECKyATIJsiCzJEM="
 COMPILED_CLEAR_PROGRAM_B64 = "CIEBQw=="
 
 REKEY_TO_USER_FEE = 2000
 REKEY_TO_CONTRACT_FEE = 1000
 
 CREATE_SIG = get_selector("create(application,application,asset)void")
-REKEY_TO_CREATOR_SIG = get_selector("rekey_to_creator(application,asset)void")
+UNSTAKE_SIG = get_selector("unstake(asset,uint64,application)void")
+SEND_MESSAGE_SIG = get_selector("send_message(account,string)void")
+WITHDRAW_ALGOS_SIG = get_selector("withdraw_algos()void")
 
 
 @dataclass
@@ -34,14 +35,19 @@ class EscrowInternalState:
     master_app: int
 
 
+def fetch_escrow_approval_program(algod: AlgodClient, farm_app_id: int) -> bytes:
+    box = algod.application_box_by_name(farm_app_id, b"Escrow")
+    return base64.b64decode(box["value"])
+
+
 def build_deploy_escrow_txs(
     sender: str,
     farm_app_id: int,
     staked_asset_id: int,
+    approval_program: bytes,
     suggested_params: transaction.SuggestedParams,
 ) -> list[transaction.Transaction]:
 
-    approval_program = base64.b64decode(COMPILED_APPROVAL_PROGRAM_B64)
     clear_program = base64.b64decode(COMPILED_CLEAR_PROGRAM_B64)
 
     gas_station = get_gas_station()
@@ -88,44 +94,6 @@ def fetch_escrow_by_id(
     return Escrow(
         algod=algod, app_id=app_id, user_address=creator, farm=farm, state=state
     )
-
-
-def list_escrows_from_account_info(
-    algod: AlgodClient,
-    account_info: dict,
-    farms: Optional[list["Farm"]] = None,
-) -> list["Escrow"]:
-    from .farm import fetch_farm_by_id
-
-    farms_by_id = {farm.app_id: farm for farm in farms or []}
-    escrows: list[Escrow] = []
-
-    for app_info in account_info["created-apps"]:
-        if app_info["params"]["approval-program"] != COMPILED_APPROVAL_PROGRAM_B64:
-            continue
-
-        state = parse_global_escrow_state(app_info["params"]["global-state"])
-        creator = app_info["params"]["creator"]
-
-        if farms is None:
-            farm = fetch_farm_by_id(algod, state.master_app)
-        else:
-            farm = farms_by_id.get(state.master_app)
-
-        if farm is None:
-            continue
-
-        escrows.append(
-            Escrow(
-                algod=algod,
-                app_id=app_info["id"],
-                user_address=creator,
-                farm=farm,
-                state=state,
-            )
-        )
-
-    return escrows
 
 
 def fetch_escrow_global_state(
@@ -183,27 +151,6 @@ class Escrow:
     def get_user_state_from_account_info(self, account_info: dict):
         return self.farm.get_user_state_from_account_info(account_info)
 
-    def build_rekey_to_user_tx(self, fee=REKEY_TO_USER_FEE) -> transaction.Transaction:
-        return transaction.ApplicationNoOpTxn(
-            sender=self.user_address,
-            index=self.app_id,
-            foreign_apps=[self.farm.app_id],
-            foreign_assets=[self.farm.staked_asset.index],
-            app_args=[REKEY_TO_CREATOR_SIG, 1, 0],
-            sp=sp_fee(self.suggested_params, fee),
-        )
-
-    def build_rekey_to_contract_tx(
-        self, fee=REKEY_TO_CONTRACT_FEE
-    ) -> transaction.Transaction:
-        return transaction.PaymentTxn(
-            sender=self.address,
-            receiver=self.address,
-            amt=0,
-            rekey_to=self.address,
-            sp=sp_fee(self.suggested_params, fee),
-        )
-
     def build_stake_txs(self, amount: int) -> list[transaction.Transaction]:
         transfer_tx = self.farm.staked_asset.build_transfer_tx(
             sender=self.user_address,
@@ -216,81 +163,74 @@ class Escrow:
         return [transfer_tx, *update_txs]
 
     def build_unstake_txs(self, amount: int) -> list[transaction.Transaction]:
-        with self.rekey() as txs:
-            transfer_tx = self.farm.staked_asset.build_transfer_tx(
-                sender=self.address,
-                receiver=self.user_address,
-                amount=amount,
-                suggested_params=sp_fee(self.suggested_params, 0),
-            )
-            txs.append(transfer_tx)
+        unstake_tx = transaction.ApplicationNoOpTxn(
+            sender=self.user_address,
+            index=self.app_id,
+            foreign_apps=[self.farm.app_id],
+            foreign_assets=[self.farm.staked_asset.index],
+            app_args=[
+                UNSTAKE_SIG,
+                abi.UintType(8).encode(0),
+                abi.UintType(64).encode(amount),
+                abi.UintType(8).encode(1),
+            ],
+            sp=sp_fee(self.suggested_params, 3000),
+        )
+
+        txs = [unstake_tx]
+
+        if increase_opcode_quota_tx := self.farm.build_update_increase_opcode_quota_tx(
+            self.user_address
+        ):
+            txs.insert(0, increase_opcode_quota_tx)
+
         return txs
 
     def build_claim_rewards_tx(self) -> transaction.Transaction:
         return self.farm.build_claim_rewards_tx(self)
+
+    def build_send_message_tx(
+        self, address: str, message: str
+    ) -> transaction.Transaction:
+        return transaction.ApplicationNoOpTxn(
+            sender=self.user_address,
+            index=self.app_id,
+            app_args=[
+                SEND_MESSAGE_SIG,
+                0,
+                message.encode(),
+            ],
+            accounts=[address],
+            sp=sp_fee(self.suggested_params, 2000),
+        )
+
+    def build_withdraw_algos(self) -> transaction.Transaction:
+        return transaction.ApplicationNoOpTxn(
+            sender=self.user_address,
+            index=self.app_id,
+            app_args=[WITHDRAW_ALGOS_SIG],
+            sp=sp_fee(self.suggested_params, 2000),
+        )
+
+    def build_force_exit_tx(self) -> transaction.Transaction:
+        return transaction.ApplicationClearStateTxn(
+            sender=self.user_address,
+            index=self.farm.app_id,
+            sp=self.suggested_params,
+        )
+
+    def build_exit_tx(self) -> transaction.Transaction:
+        return transaction.ApplicationCloseOutTxn(
+            sender=self.user_address,
+            index=self.farm.app_id,
+            sp=self.suggested_params,
+        )
 
     def build_delete_tx(self) -> transaction.Transaction:
         return transaction.ApplicationDeleteTxn(
             sender=self.user_address,
             index=self.app_id,
             foreign_apps=[self.farm.app_id],
-            sp=sp_fee(self.suggested_params, 2000),
+            foreign_assets=[self.farm.staked_asset.index],
+            sp=sp_fee(self.suggested_params, 3000),
         )
-
-    def build_clear_txs(self) -> list[transaction.Transaction]:
-        is_opted_in = self.farm.staked_asset.is_opted_in(self.address)
-
-        txs: list[transaction.Transaction] = []
-
-        # Claim staked tokens if needed.
-        if is_opted_in:
-            txs.append(
-                self.farm.staked_asset.build_opt_out_tx(
-                    address=self.address,
-                    close_to=self.user_address,
-                    suggested_params=self.suggested_params,
-                )
-            )
-
-        txs.append(
-            transaction.PaymentTxn(
-                sender=self.address,
-                receiver=self.user_address,
-                amt=0,
-                sp=self.suggested_params,
-                close_remainder_to=self.user_address,
-            )
-        )
-
-        return txs
-
-    def build_delete_and_clear_txs(self) -> list[transaction.Transaction]:
-        farm_opt_out = transaction.ApplicationCloseOutTxn(
-            sender=self.user_address, sp=self.suggested_params, index=self.farm.app_id
-        )
-        delete_tx = self.build_delete_tx()
-        clear_txs = self.build_clear_txs()
-
-        return [farm_opt_out, delete_tx, *clear_txs]
-
-    @contextmanager
-    def rekey(self):
-        """
-        Example usage:
-
-        with escrow.rekey() as txs:
-            gov_tx = build_governance_commit_tx(escrow.address, 1000)
-            txs.append(gov_tx)
-        """
-
-        fee = REKEY_TO_USER_FEE + REKEY_TO_CONTRACT_FEE + 2000
-
-        txs: list[transaction.Transaction] = [
-            self.farm.build_update_increase_opcode_quota_tx(self.user_address),
-            self.build_rekey_to_user_tx(fee=fee),
-        ]
-
-        yield txs
-
-        txs.append(self.build_rekey_to_contract_tx(fee=0))
-        txs.append(self.farm.build_update_tx(self))

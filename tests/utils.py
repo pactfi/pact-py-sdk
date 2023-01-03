@@ -71,7 +71,6 @@ def create_asset(
 
 
 def new_account():
-    # Accounts has a limit of 10 apps and 100 assets. Therefore, we need to create a new account for most of the tests.
     private_key, address = algosdk.account.generate_account()
     account = Account(address=address, private_key=private_key)
     fund_account_with_algos(account, 10_000_000)

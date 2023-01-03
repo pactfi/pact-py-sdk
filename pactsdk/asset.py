@@ -128,13 +128,13 @@ class Asset:
     def prepare_opt_out_tx(
         self, address: str, close_to: str
     ) -> transaction.AssetTransferTxn:
-        """This creates a transaction that will allow the account to "opt out" to the asset.
+        """This creates a transaction that will allow the account to "opt out" of the asset.
 
         Args:
-            address: Account to opt out to this asset.
+            address: Account to opt out of this asset.
 
         Returns:
-            A ready to send transaction to opt-out into the ASA.
+            A ready to send transaction to opt-out of the ASA.
         """
         suggested_params = self.algod.suggested_params()
         return self.build_opt_out_tx(address, close_to, suggested_params)
@@ -145,11 +145,11 @@ class Asset:
         """Creates the actual transaction for the account to opt-out from asset.
 
         Args:
-            address: Address of the account to opt out from the asset.
+            address: Address of the account to opt out of the asset.
             suggested_params: Algorand suggested parameters for transactions.
 
         Returns:
-            A transaction to opt-out from the asset.
+            A transaction to opt-out of the asset.
         """
         return transaction.AssetTransferTxn(
             sender=address,

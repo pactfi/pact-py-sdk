@@ -6,7 +6,7 @@ Pact utilizes an innovative architecture for farming called "micro farming". The
 
 **Escrow** - contract resposible for staking user tokens. Each user deploys his own escrow. It acts as a user's private escrow address.
 
-The main benefit of the micro farming architecture is that the user has very strong guarantees of his funds safety. The escrow contract is very simple and easy to understand/audit. Only the user has access to funds deposited in the escrow and he can withdraw them at any moment. This is achieved with the Algorand's rekey mechanism.
+The main benefit of the micro farming architecture is that the user has very strong guarantees of his funds safety. The escrow contract is very simple and easy to understand/audit. Only the user has access to funds deposited in the escrow and he can withdraw them at any moment.
 
 Any potential bugs or exploits in the farm do not threaten the safety of user funds. In worst case scenario the user can lose the accrued rewards.
 
@@ -41,7 +41,7 @@ farm = escrow.farm
 ```py
 farm.refresh_suggested_params()
 
-deploy_txs = farm.build_deploy_escrow_txs(sender=user_address)
+deploy_txs = farm.prepare_deploy_escrow_txs(sender=user_address)
 sign_send_and_wait(pactsdk.TransactionGroup(deploy_txs), user_private_key)
 
 txinfo = algod.pending_transaction_info(deploy_txs[-2].get_txid())
@@ -49,28 +49,6 @@ escrow_id = txinfo["application-index"]
 
 escrow = farm.fetch_escrow_by_id(escrow_id)
 escrow.refresh_suggested_params()
-```
-
-## How to find all escrows the user posses?
-
-This fetches the account info and retrieves all apps matching the Escrow's approval program. It also fetches the accompanying farms.
-
-```py
-escrows = pact.farming.list_escrows(user_address)
-```
-
-If you already have the farms fetched, you can provide them as an argument. This will save you the extra algod requests to fetch the farms.
-
-```py
-escrows = pact.farming.list_escrows(user_address, farms=farms)
-```
-
-If you already have the account info and the farms fetched, you can list the escrows like below. This will not perform any algod requests and will return immediately.
-
-```py
-account_info = algod.account_info(user_address)
-...
-escrows = pact.farming.list_escrows_from_account_info(user_address, account_info, farms=farms)
 ```
 
 ## How to check farm's state?
@@ -148,20 +126,11 @@ simulated_rewards = farm.simulate_new_staker(at_time, staked_amount=1_000_000)
 
 ## How to use staked asset in e.g. Algorand's governance?
 
-The users can you use the rekey mechanism to briefly gain full control over the escrow address.
-First, you must rekey the escrow to your account, then perform any transactions you want on the escrow address and then, rekey the escrow back to the contract.
-The SDK comes with a handy context manager that builds the transactions in the correct order for you.
-
 ```py
-def build_governance_commit_tx(address, amount):
-    # User custom code.
-    ...
-
-with escrow.rekey() as txs:
-    gov_tx = build_governance_commit_tx(escrow.address, 1000)
-    txs.append(gov_tx)
-
-sign_send_and_wait(pactsdk.TransactionGroup(txs), user_private_key)
+send_message_tx = testbed.escrow.build_send_message_tx(
+    sender, "some message required by the Foundation"
+)
+sign_send_and_wait(send_message_tx, sender, user_private_key)
 ```
 
 ## How to destroy the escrow / regain access to staked funds in case of emergency?
@@ -169,6 +138,20 @@ sign_send_and_wait(pactsdk.TransactionGroup(txs), user_private_key)
 The following code will close out the contract, transfer all algos and staked tokens to the user address, and delete the application.
 
 ```py
-delete_txs = escrow.build_delete_and_clear_txs()
-sign_send_and_wait(pactsdk.TransactionGroup(delete_txs), user_private_key)
+
+# Exit the farm.
+# This will claim all staked tokens and algos locked in the escrow back to the user account and delete the escrow.
+# It requires all the rewards to bo claimed, fails otherwise.
+exit_tx = escrow.build_exit_tx()
+delete_tx = escrow.build_delete_tx()
+exit_and_delete_group = pactsdk.TransactionGroup([exit_tx, delete_tx])
+sign_send_and_wait(exit_and_delete_group, user_private_key)
+
+# Force exit the farm.
+# Claim all the rewards before exiting from the farm or you will lose your rewards.
+# This will claim all staked tokens and algos locked in the escrow back to the user account and delete the escrow.
+exit_tx = escrow.build_force_exit_tx()
+delete_tx = escrow.build_delete_tx()
+exit_and_delete_group = pactsdk.TransactionGroup([exit_tx, delete_tx])
+sign_send_and_wait(exit_and_delete_group, user_private_key)
 ```
