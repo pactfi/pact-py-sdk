@@ -34,7 +34,7 @@ from .farm_state import (
 )
 
 UPDATE_TX_FEE = 3000
-MAX_REWARD_ASSETS = 6
+MAX_REWARD_ASSETS = 7
 
 UPDATE_GLOBAL_STATE_SIG = get_selector("update_global_state()void")
 UPDATE_STATE_SIG = get_selector("update_state(application,account,account,asset)void")
@@ -121,6 +121,28 @@ class Farm:
     def staked_asset(self):
         return self.state.staked_asset
 
+    def have_rewards(self, dt: Optional[datetime.datetime] = None) -> bool:
+        state = self.state
+
+        if state.duration == 0:
+            # Finished distributing rewards or there never were any rewards.
+            return False
+
+        if state.total_staked == 0:
+            # The farm is paused and still has rewards.
+            return True
+
+        if dt is None:
+            dt = datetime.datetime.now()
+
+        duration = datetime.timedelta(seconds=state.duration + state.next_duration)
+        if dt < state.updated_at + duration:
+            # The farm is going and still has rewards.
+            return True
+
+        # All the rewards will be distributed at the specified time.
+        return False
+
     def fetch_escrow_by_id(self, app_id: int) -> Escrow:
         return fetch_escrow_by_id(self.algod, app_id, farm=self)
 
@@ -166,7 +188,7 @@ class Farm:
         )
 
         return FarmUserState(
-            escrow_id=raw_state["MicroFarmID"],
+            escrow_id=raw_state["EscrowID"],
             staked=raw_state["Staked"],
             accrued_rewards=format_rewards(
                 self.state.reward_assets,
@@ -300,7 +322,10 @@ class Farm:
     ) -> FarmingRewards[int]:
         return {
             asset: int(
-                (self.state.rpt.get(asset, 0) - user_rpt.get(asset, 0)) * staked_amount
+                (
+                    max(0, self.state.rpt.get(asset, 0) - user_rpt.get(asset, 0))
+                    * staked_amount
+                )
             )
             for asset in self.state.reward_assets
         }

@@ -31,6 +31,7 @@ class FarmInternalState:
     updated_at: int
     admin: str
     updater: str
+    version: int
 
 
 @dataclass()
@@ -77,6 +78,9 @@ class FarmState:
     updater: str
     """The address of farm's updater. The updater can update the farm's contract to a new version."""
 
+    version: int
+    """Contract version."""
+
     @property
     def rewards_per_second(self) -> FarmingRewards[float]:
         return {
@@ -120,6 +124,7 @@ def parse_internal_state(raw_state: dict) -> FarmInternalState:
         updated_at=raw_state["UpdatedAt"],
         admin=decode_address_from_global_state(raw_state["Admin"]),
         updater=decode_address_from_global_state(raw_state["Updater"]),
+        version=raw_state["VERSION"],
     )
 
 
@@ -154,6 +159,7 @@ def internal_state_to_state(
         updated_at=datetime.datetime.fromtimestamp(internal_state.updated_at),
         admin=internal_state.admin,
         updater=internal_state.updater,
+        version=internal_state.version,
     )
 
 

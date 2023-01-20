@@ -80,12 +80,12 @@ def test_farming_farm_state():
     assert testbed.farm.internal_state == pactsdk.FarmInternalState(
         staked_asset_id=testbed.staked_asset.index,
         reward_asset_ids=[],
-        distributed_rewards=[0, 0, 0, 0, 0, 0],
-        claimed_rewards=[0, 0, 0, 0, 0, 0],
-        pending_rewards=[0, 0, 0, 0, 0, 0],
-        next_rewards=[0, 0, 0, 0, 0, 0],
-        rpt_frac=[0, 0, 0, 0, 0, 0],
-        rpt=[0, 0, 0, 0, 0, 0],
+        distributed_rewards=[0, 0, 0, 0, 0, 0, 0],
+        claimed_rewards=[0, 0, 0, 0, 0, 0, 0],
+        pending_rewards=[0, 0, 0, 0, 0, 0, 0],
+        next_rewards=[0, 0, 0, 0, 0, 0, 0],
+        rpt_frac=[0, 0, 0, 0, 0, 0, 0],
+        rpt=[0, 0, 0, 0, 0, 0, 0],
         duration=0,
         next_duration=0,
         num_stakers=0,
@@ -93,6 +93,7 @@ def test_farming_farm_state():
         updated_at=last_block - 6,
         admin=testbed.admin_account.address,
         updater=testbed.admin_account.address,
+        version=100,
     )
     assert testbed.farm.state == pactsdk.FarmState(
         staked_asset=testbed.staked_asset,
@@ -109,6 +110,7 @@ def test_farming_farm_state():
         updated_at=datetime.datetime.fromtimestamp(last_block - 6),
         admin=testbed.admin_account.address,
         updater=testbed.admin_account.address,
+        version=100,
     )
 
     testbed.deposit_rewards({testbed.reward_asset: 2000}, duration=100)
@@ -129,6 +131,7 @@ def test_farming_farm_state():
         updated_at=datetime.datetime.fromtimestamp(last_block),
         admin=testbed.admin_account.address,
         updater=testbed.admin_account.address,
+        version=100,
     )
 
     testbed.stake(1000)
@@ -150,6 +153,7 @@ def test_farming_farm_state():
         updated_at=datetime.datetime.fromtimestamp(last_block),
         admin=testbed.admin_account.address,
         updater=testbed.admin_account.address,
+        version=100,
     )
 
     user_state = testbed.escrow.fetch_user_state()
@@ -197,6 +201,7 @@ def test_farming_happy_path():
         updated_at=Any(datetime.datetime),
         admin=testbed.admin_account.address,
         updater=testbed.admin_account.address,
+        version=100,
     )
 
     # Wait some time and unstake all.
@@ -229,6 +234,7 @@ def test_farming_happy_path():
         updated_at=Any(datetime.datetime),
         admin=testbed.admin_account.address,
         updater=testbed.admin_account.address,
+        version=100,
     )
 
     # Claim rewards.
@@ -260,6 +266,7 @@ def test_farming_happy_path():
         updated_at=Any(datetime.datetime),
         admin=testbed.admin_account.address,
         updater=testbed.admin_account.address,
+        version=100,
     )
 
     assert testbed.reward_asset.get_holding(testbed.farm.app_address) == 1781
@@ -523,17 +530,15 @@ def test_farming_estimate_rewards():
     assert testbed.farm.state.duration == 1
     assert testbed.farm.state.next_duration == 20
 
-    # TODO these are failing, contract bug
-    # testbed.wait_rounds_and_update_farm(1)
-    # assert testbed.farm.state.duration == 20
-    # assert testbed.farm.state.next_duration == 0
+    testbed.wait_rounds_and_update_farm(1)
+    assert testbed.farm.state.duration == 20
+    assert testbed.farm.state.next_duration == 0
 
-    # testbed.wait_rounds_and_update_farm(1)
-    # assert testbed.farm.state.duration == 19
-    # assert testbed.farm.state.next_duration == 0
+    testbed.wait_rounds_and_update_farm(1)
+    assert testbed.farm.state.duration == 19
+    assert testbed.farm.state.next_duration == 0
 
-    # testbed.wait_rounds_and_update_farm(19)
-    testbed.wait_rounds_and_update_farm(21)
+    testbed.wait_rounds_and_update_farm(19)
     assert testbed.farm.state.duration == 0
     assert testbed.farm.state.next_duration == 0
 
@@ -686,13 +691,13 @@ def test_farming_rewards_limit():
 
     # Can't deploy rewards above the limit.
     with pytest.raises(AssertionError) as err:
-        deposit_multiple_rewards(4)
-    assert "Maximum number of reward assets per farm is 6" in str(err.value)
+        deposit_multiple_rewards(5)
+    assert "Maximum number of reward assets per farm is 7" in str(err.value)
 
     # Deploy maximum number of rewards.
-    deposit_multiple_rewards(3)
-    assert len(testbed.farm.state.reward_assets) == 6
-    assert len(testbed.farm.state.pending_rewards) == 6
+    deposit_multiple_rewards(4)
+    assert len(testbed.farm.state.reward_assets) == 7
+    assert len(testbed.farm.state.pending_rewards) == 7
 
 
 def test_farming_different_reward_asset_between_cycles():
@@ -1071,3 +1076,33 @@ def test_farming_governance():
         testbed.algo.get_holding(testbed.user_account.address)
         == user_algos + 100 - 2000
     )
+
+
+def test_farming_have_rewards():
+    testbed = make_fresh_farming_testbed()
+    assert testbed.farm.have_rewards() is False
+
+    testbed.deposit_rewards({testbed.reward_asset: 100}, duration=10)
+    assert testbed.farm.have_rewards() is True
+
+    # Farm is freezed.
+    dt = testbed.farm.state.updated_at + datetime.timedelta(seconds=20)
+    assert testbed.farm.have_rewards(dt) is True
+
+    testbed.stake(10)
+    update_farm(testbed.escrow, testbed.user_account)
+    dt = testbed.farm.state.updated_at + datetime.timedelta(seconds=5)
+    assert testbed.farm.have_rewards(dt) is True
+
+    dt = testbed.farm.state.updated_at + datetime.timedelta(seconds=8)
+    assert testbed.farm.have_rewards(dt) is True
+
+    dt = testbed.farm.state.updated_at + datetime.timedelta(seconds=9)
+    assert testbed.farm.have_rewards(dt) is False
+
+    dt = testbed.farm.state.updated_at + datetime.timedelta(seconds=20)
+    assert testbed.farm.have_rewards(dt) is False
+
+    # Farm is finished.
+    testbed.wait_rounds_and_update_farm(10)
+    assert testbed.farm.have_rewards() is False
