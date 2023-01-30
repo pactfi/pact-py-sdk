@@ -1,16 +1,15 @@
-import algosdk
 import pytest
 
 from pactsdk import LiquidityAddition
 from pactsdk.exceptions import PactSdkError
 from pactsdk.pool import Pool, PoolType
 from tests.pool_utils import POOL_TYPES, add_liquidity, make_fresh_testbed
-from tests.utils import sign_and_send
+from tests.utils import Account, sign_and_send
 
 
 def assert_add_liquidity(
     liquidity_addition: LiquidityAddition,
-    account: algosdk.account,
+    account: Account,
 ):
     # Perform adding liquidity.
     old_state = liquidity_addition.pool.state
@@ -27,7 +26,7 @@ def assert_add_liquidity(
 
 def assert_stableswap_bonus(
     pool: Pool,
-    account: algosdk.account,
+    account: Account,
     liquidity_addition: LiquidityAddition,
 ):
     # Removes liquidity, calculates a real bonus and compares it with a simulation.

@@ -7,8 +7,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 import algosdk
-from algosdk import abi
-from algosdk import transaction
+from algosdk import abi, transaction
 from algosdk.v2client.algod import AlgodClient
 
 from pactsdk.asset import Asset, fetch_asset_by_index
@@ -82,7 +81,7 @@ class Farm:
 
     state: FarmState
 
-    suggested_params: algosdk.transaction.SuggestedParams = None
+    _suggested_params: Optional[algosdk.transaction.SuggestedParams] = None
 
     app_address: str = field(init=False)
 
@@ -100,10 +99,15 @@ class Farm:
             return False
         return self.app_id == other_obj.app_id
 
+    @property
+    def suggested_params(self) -> algosdk.transaction.SuggestedParams:
+        assert self._suggested_params is not None
+        return self._suggested_params
+
     def set_suggested_params(
         self, suggested_params: algosdk.transaction.SuggestedParams
     ):
-        self.suggested_params = suggested_params
+        self._suggested_params = suggested_params
 
     def refresh_suggested_params(self):
         self.set_suggested_params(self.algod.suggested_params())

@@ -7,7 +7,7 @@ from typing import Optional
 from algosdk import transaction
 from algosdk.v2client.algod import AlgodClient
 
-ASSETS_CACHE: dict[tuple[int, AlgodClient], "Asset"] = {}
+ASSETS_CACHE: dict[tuple[AlgodClient, int], "Asset"] = {}
 """Dictionary mapping the asset index number to the :py:class:`pactsdk.asset.Asset` class to speed up look up of the asset information."""
 
 

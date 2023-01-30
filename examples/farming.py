@@ -21,7 +21,7 @@ if escrow is None:
     farm.refresh_suggested_params()
 
     deploy_txs = farm.prepare_deploy_escrow_txs(sender=address)
-    algod.send_transaction(pactsdk.TransactionGroup(deploy_txs), private_key)
+    algod.send_transaction(pactsdk.TransactionGroup(deploy_txs).sign(private_key))
 
     txinfo = algod.pending_transaction_info(deploy_txs[-2].get_txid())
     escrow_id = txinfo["application-index"]

@@ -9,8 +9,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Optional
 
 import algosdk
-from algosdk import abi
-from algosdk import transaction
+from algosdk import abi, transaction
 from algosdk.v2client.algod import AlgodClient
 
 from ..gas_station import get_gas_station
@@ -117,7 +116,7 @@ class Escrow:
     farm: "Farm"
     user_address: str
     state: EscrowInternalState
-    suggested_params: transaction.SuggestedParams = None
+    _suggested_params: Optional[algosdk.transaction.SuggestedParams] = None
     address: str = field(init=False)
 
     def __post_init__(self):
@@ -137,10 +136,15 @@ class Escrow:
             return False
         return self.app_id == other_obj.app_id
 
+    @property
+    def suggested_params(self) -> algosdk.transaction.SuggestedParams:
+        assert self._suggested_params is not None
+        return self._suggested_params
+
     def set_suggested_params(
         self, suggested_params: algosdk.transaction.SuggestedParams
     ):
-        self.suggested_params = suggested_params
+        self._suggested_params = suggested_params
 
     def refresh_suggested_params(self):
         self.set_suggested_params(self.algod.suggested_params())
@@ -177,7 +181,7 @@ class Escrow:
             sp=sp_fee(self.suggested_params, 3000),
         )
 
-        txs = [unstake_tx]
+        txs: list[transaction.Transaction] = [unstake_tx]
 
         if increase_opcode_quota_tx := self.farm.build_update_increase_opcode_quota_tx(
             self.user_address
