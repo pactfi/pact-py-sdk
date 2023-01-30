@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from typing import Literal, Optional, Union
 
 import algosdk
-from algosdk.future import transaction
+from algosdk import transaction
 from algosdk.v2client.algod import AlgodClient
 
 from pactsdk.api import ListPoolsParams, list_pools

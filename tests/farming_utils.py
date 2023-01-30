@@ -1,7 +1,7 @@
 from contextlib import contextmanager
 from dataclasses import dataclass
 
-from algosdk.future import transaction
+from algosdk import transaction
 
 import pactsdk
 

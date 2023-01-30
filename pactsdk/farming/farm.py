@@ -8,7 +8,7 @@ from typing import Optional
 
 import algosdk
 from algosdk import abi
-from algosdk.future import transaction
+from algosdk import transaction
 from algosdk.v2client.algod import AlgodClient
 
 from pactsdk.asset import Asset, fetch_asset_by_index
@@ -82,7 +82,7 @@ class Farm:
 
     state: FarmState
 
-    suggested_params: algosdk.future.transaction.SuggestedParams = None
+    suggested_params: algosdk.transaction.SuggestedParams = None
 
     app_address: str = field(init=False)
 
@@ -101,7 +101,7 @@ class Farm:
         return self.app_id == other_obj.app_id
 
     def set_suggested_params(
-        self, suggested_params: algosdk.future.transaction.SuggestedParams
+        self, suggested_params: algosdk.transaction.SuggestedParams
     ):
         self.suggested_params = suggested_params
 

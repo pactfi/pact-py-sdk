@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Optional
 
 import algosdk
 from algosdk import abi
-from algosdk.future import transaction
+from algosdk import transaction
 from algosdk.v2client.algod import AlgodClient
 
 from ..gas_station import get_gas_station
@@ -138,7 +138,7 @@ class Escrow:
         return self.app_id == other_obj.app_id
 
     def set_suggested_params(
-        self, suggested_params: algosdk.future.transaction.SuggestedParams
+        self, suggested_params: algosdk.transaction.SuggestedParams
     ):
         self.suggested_params = suggested_params
 

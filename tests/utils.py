@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import Optional, Union
 
 import algosdk
-from algosdk.future import transaction
+from algosdk import transaction
 from algosdk.v2client.algod import AlgodClient
 
 import pactsdk

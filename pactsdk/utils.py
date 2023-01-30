@@ -2,7 +2,7 @@ import base64
 from copy import copy
 from typing import Any
 
-from algosdk.future import transaction
+from algosdk import transaction
 from Cryptodome.Hash import SHA512
 
 

@@ -2,7 +2,7 @@ import datetime
 
 import algosdk
 import pytest
-from algosdk.future import transaction
+from algosdk import transaction
 
 import pactsdk
 from pactsdk.asset import ASSETS_CACHE

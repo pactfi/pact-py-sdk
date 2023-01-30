@@ -1,6 +1,6 @@
 import base64
 
-from algosdk.future import transaction
+from algosdk import transaction
 
 from pactsdk.exceptions import PactSdkError
 
