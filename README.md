@@ -11,11 +11,10 @@ Clients can use the Python SDK to enhance their trading experience with Pact.
 
 What is covered by the library:
 
-- Fetching pools
-- Opt-in for assets
+- Creating pools
 - Managing liquidity
-- Inspecting pools state
 - Making swaps
+- Farming
 
 Signing and sending transactions is not covered by the library. The provided examples use algosdk directly to send the transactions.
 
@@ -37,10 +36,10 @@ algod = AlgodClient(token, url)
 pact = pactsdk.PactClient(algod)
 ```
 
-Optionally you can specify custom Pact API url. By default it directs to production API.
+By default, the client is configured to work with mainnet. You can easily change it by providing `network` argument. The `network` argument changes the default values in `pact.config` object. It contains things like API URL or global contract ids.
 
 ```py
-pact = pactsdk.PactClient(algod, pact_api_url="https://api.testnet.pact.fi")
+pact = pactsdk.PactClient(algod, network="testnet")
 ```
 
 Fetching pools by assets pair. It uses Pact API to retrieve the pool. Can return multiple pools with differing fee_bps.

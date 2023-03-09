@@ -204,6 +204,12 @@ class Pool:
         self.calculator = PoolCalculator(self)
         self.state = self.parse_internal_state(self.internal_state)
 
+    def __eq__(self, other_pool: object) -> bool:
+        """Return equal by comparing the pools app_id value."""
+        if not isinstance(other_pool, Pool):
+            return False
+        return self.app_id == other_pool.app_id
+
     def get_escrow_address(self) -> str:
         """Get the escrow address of the pool.
 
@@ -370,14 +376,14 @@ class Pool:
             address=address,
             asset=self.primary_asset,
             amount=primary_asset_amount,
-            note=b"Pact add liquidity deposit",
+            note=note or b"Pact add liquidity deposit",
             suggested_params=suggested_params,
         )
         tx2 = self._make_deposit_tx(
             address=address,
             asset=self.secondary_asset,
             amount=secondary_asset_amount,
-            note=b"Pact add liquidity deposit",
+            note=note or b"Pact add liquidity deposit",
             suggested_params=suggested_params,
         )
         tx3 = self._make_application_noop_tx(

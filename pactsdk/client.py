@@ -23,9 +23,13 @@ from pactsdk.api import ApiListPoolsResponse
 from pactsdk.farming.farming_client import PactFarmingClient
 
 from .asset import Asset, fetch_asset_by_index
+from .config import Config, Network, get_config
+from .factory import PoolFactory, get_pool_factory
+from .gas_station import get_gas_station, set_gas_station
 from .pool import (
     ListPoolsParams,
     Pool,
+    PoolType,
     fetch_pool_by_id,
     fetch_pools_by_assets,
     list_pools,
@@ -41,21 +45,27 @@ class PactClient:
     algod: AlgodClient
     """Algorand client to work with."""
 
-    pact_api_url: str
-    """Pact API URL to use."""
+    config: Config
+    """Client configuration with global contracts ids etc."""
 
     farming: PactFarmingClient
 
-    def __init__(self, algod: AlgodClient, pact_api_url: str = "https://api.pact.fi"):
+    def __init__(self, algod: AlgodClient, network: Network = "mainnet", **kwargs):
         """Constructor for the PactClient class.
 
         Args:
             algod: Algorand client to work with.
-            pact_api_url: Pact API URL to use.
+            network: The Algorand network to use the client with. The configuration values depend on the chosen network.
+            kwargs: Use it to overwrite configuration parameters.
         """
         self.algod = algod
-        self.pact_api_url = pact_api_url
-        self.farming = PactFarmingClient(algod)
+        self.config = get_config(network, **kwargs)
+        self.farming = PactFarmingClient(algod, self.config)
+
+        try:
+            get_gas_station()
+        except AssertionError:
+            set_gas_station(self.config.gas_station_id)
 
     def fetch_asset(self, asset_index: int) -> Asset:
         """A convenient method for fetching ASAs (Algorand Standard Asset).
@@ -83,7 +93,7 @@ class PactClient:
         Returns:
             Paginated list of pools.
         """
-        return list_pools(self.pact_api_url, params or {})
+        return list_pools(self.config.api_url, params or {})
 
     def fetch_pools_by_assets(
         self, primary_asset: Union[Asset, int], secondary_asset: Union[Asset, int]
@@ -103,7 +113,7 @@ class PactClient:
             algod=self.algod,
             asset_a=primary_asset,
             asset_b=secondary_asset,
-            pact_api_url=self.pact_api_url,
+            pact_api_url=self.config.api_url,
         )
 
     def fetch_pool_by_id(self, app_id: int) -> Pool:
@@ -119,3 +129,9 @@ class PactClient:
             The pool for the application id.
         """
         return fetch_pool_by_id(algod=self.algod, app_id=app_id)
+
+    def get_pool_factory(self, pool_type: PoolType) -> PoolFactory:
+        """Gets the pool factory for the given pool type according to the client's configuration."""
+        return get_pool_factory(
+            algod=self.algod, pool_type=pool_type, config=self.config
+        )

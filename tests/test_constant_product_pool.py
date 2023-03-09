@@ -10,6 +10,10 @@ def test_constant_product_pool_e2e_scenario(testbed: TestBed):
     __base_e2e_scenario(testbed)
 
 
+def test_constant_product_v_2_pool_e2e_scenario(testbed_v_2: TestBed):
+    __base_e2e_scenario(testbed_v_2)
+
+
 def test_constant_product_v_1_pool_e2e_scenario(testbed_v_1: TestBed):
     __base_e2e_scenario(testbed_v_1)
 
@@ -109,9 +113,35 @@ def test_constant_product_pool_parsing_state(testbed: TestBed):
         "FEE_BPS": testbed.pool.fee_bps,
         "L": 0,
         "PACT_FEE_BPS": 0,
+        "PRIMARY_FEES": None,
+        "SECONDARY_FEES": None,
+        "TREASURY": testbed.account.address,
+        "VERSION": 201,
+        "FUTURE_A": None,
+        "FUTURE_ADMIN": None,
+        "FUTURE_A_TIME": None,
+        "INITIAL_A": None,
+        "INITIAL_A_TIME": None,
+        "PRECISION": None,
+    }
+    __base_pool_parsing_state(testbed, state, version=201)
+
+
+def test_constant_product_v_2_pool_parsing_state(testbed_v_2: TestBed):
+    state = {
+        "A": 0,
+        "ADMIN": testbed_v_2.account.address,
+        "ASSET_A": testbed_v_2.pool.primary_asset.index,
+        "ASSET_B": testbed_v_2.pool.secondary_asset.index,
+        "LTID": testbed_v_2.pool.liquidity_asset.index,
+        "B": 0,
+        "CONTRACT_NAME": "PACT AMM",
+        "FEE_BPS": testbed_v_2.pool.fee_bps,
+        "L": 0,
+        "PACT_FEE_BPS": 0,
         "PRIMARY_FEES": 0,
         "SECONDARY_FEES": 0,
-        "TREASURY": testbed.account.address,
+        "TREASURY": testbed_v_2.account.address,
         "VERSION": 2,
         "FUTURE_A": None,
         "FUTURE_ADMIN": None,
@@ -120,7 +150,7 @@ def test_constant_product_pool_parsing_state(testbed: TestBed):
         "INITIAL_A_TIME": None,
         "PRECISION": None,
     }
-    __base_pool_parsing_state(testbed, state)
+    __base_pool_parsing_state(testbed_v_2, state, version=2)
 
 
 def test_constant_product_v_1_pool_parsing_state(testbed_v_1: TestBed):
@@ -147,7 +177,7 @@ def test_constant_product_v_1_pool_parsing_state(testbed_v_1: TestBed):
         "INITIAL_A_TIME": None,
         "PRECISION": None,
     }
-    __base_pool_parsing_state(testbed, state, 0)
+    __base_pool_parsing_state(testbed, state, version=0)
 
 
 def __base_pool_parsing_state(testbed: TestBed, state: dict, version: int = 2):

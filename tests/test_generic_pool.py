@@ -25,7 +25,7 @@ def test_listing_pools():
 
     responses.add(
         responses.GET,
-        f"{pact.pact_api_url}/api/pools",
+        f"{pact.config.api_url}/api/pools",
         json=mocked_api_data,
     )
 
@@ -56,7 +56,7 @@ def test_fetching_pools_by_assets(testbed: TestBed):
 
     responses.add(
         responses.GET,
-        f"{testbed.pact.pact_api_url}/api/pools",
+        f"{testbed.pact.config.api_url}/api/pools",
         match=[responses.matchers.query_param_matcher(qs_params)],
         json=mocked_api_data,
     )
@@ -103,7 +103,7 @@ def test_fetching_pools_by_assets_with_reversed_assets(testbed: TestBed):
 
     responses.add(
         responses.GET,
-        f"{testbed.pact.pact_api_url}/api/pools",
+        f"{testbed.pact.config.api_url}/api/pools",
         match=[responses.matchers.query_param_matcher(qs_params)],
         json=mocked_api_data,
     )
@@ -159,7 +159,7 @@ def test_fetching_pools_by_assets_multiple_results(testbed: TestBed):
 
     responses.add(
         responses.GET,
-        f"{testbed.pact.pact_api_url}/api/pools",
+        f"{testbed.pact.config.api_url}/api/pools",
         match=[responses.matchers.query_param_matcher(qs_params)],
         json=mocked_api_data,
     )
@@ -196,7 +196,7 @@ def test_fetching_pools_by_assets_not_existing_pool(testbed: TestBed):
 
     responses.add(
         responses.GET,
-        f"{testbed.pact.pact_api_url}/api/pools",
+        f"{testbed.pact.config.api_url}/api/pools",
         match=[responses.matchers.query_param_matcher(qs_params)],
         json=mocked_api_data,
     )

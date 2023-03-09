@@ -1,3 +1,4 @@
+import base64
 import datetime
 
 import algosdk
@@ -1050,10 +1051,17 @@ def test_farming_governance():
     assert testbed.farm.state.total_staked == 1000
 
     # Commit to governance
+    _, gov_address = algosdk.account.generate_account()
     send_message_tx = testbed.escrow.build_send_message_tx(
-        testbed.admin_account.address, "some message required by the Foundation"
+        gov_address, 'af/gov1:j{"682482665":10000}'
     )
-    sign_and_send(send_message_tx, testbed.user_account)
+    txid = sign_and_send(send_message_tx, testbed.user_account)
+    txinfo = algod.pending_transaction_info(txid)
+    inner_tx = txinfo["inner-txns"][0]["txn"]["txn"]
+    note = base64.b64decode(inner_tx["note"])
+    assert note == b'af/gov1:j{"682482665":10000}'
+    assert inner_tx["snd"] == testbed.escrow.address
+    assert inner_tx["rcv"] == gov_address
 
     # Simulate governance reward.
     transfer_tx = testbed.algo.build_transfer_tx(

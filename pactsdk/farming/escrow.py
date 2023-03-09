@@ -196,14 +196,12 @@ class Escrow:
     def build_send_message_tx(
         self, address: str, message: str
     ) -> transaction.Transaction:
+        encoded_message = message.encode()
+        note = algosdk.abi.UintType(16).encode(len(encoded_message)) + encoded_message
         return transaction.ApplicationNoOpTxn(
             sender=self.user_address,
             index=self.app_id,
-            app_args=[
-                SEND_MESSAGE_SIG,
-                0,
-                message.encode(),
-            ],
+            app_args=[SEND_MESSAGE_SIG, 1, note],
             accounts=[address],
             sp=sp_fee(self.suggested_params, 2000),
         )

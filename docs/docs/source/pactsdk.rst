@@ -100,6 +100,22 @@ pactsdk.transaction\_group module
    :undoc-members:
    :show-inheritance:
 
+pactsdk.factory module
+---------------------------------
+
+.. automodule:: pactsdk.factory
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pactsdk.config module
+---------------------------------
+
+.. automodule:: pactsdk.config
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 
