@@ -1,8 +1,6 @@
 import dataclasses
 from typing import Literal
 
-CONSTANT_PRODUCT_FEE_BPS = [2, 5, 30, 100]
-
 MAINNET_API_URL = "https://api.pact.fi"
 MAINNET_GAS_STATION_ID = 1027956681
 MAINNET_FACTORY_CONSTANT_PRODUCT_ID = 0
@@ -19,9 +17,6 @@ class Config:
     api_url: str = ""
     gas_station_id: int = 0
     factory_constant_product_id: int = 0
-    factory_constant_product_fee_bps: list[int] = dataclasses.field(
-        default_factory=lambda: list(CONSTANT_PRODUCT_FEE_BPS)
-    )
 
 
 def get_config(network: Network, **kwargs) -> Config:
