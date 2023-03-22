@@ -4,7 +4,11 @@ from .add_liquidity import LiquidityAddition  # noqa
 from .asset import Asset, fetch_asset_by_index  # noqa
 from .client import PactClient  # noqa
 from .exceptions import PactSdkError  # noqa
-from .factory import ConstantProductFactory, ConstantProductParams  # noqa
+from .factory import (  # noqa
+    ConstantProductBuildParams,
+    ConstantProductFactory,
+    ConstantProductParams,
+)
 from .farming import *  # noqa
 from .gas_station import GasStation, get_gas_station, set_gas_station  # noqa
 from .pool import Pool, PoolState  # noqa

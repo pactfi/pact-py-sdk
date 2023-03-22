@@ -4,10 +4,18 @@ from typing import Any, Callable, Optional
 
 import algosdk
 
+from pactsdk.encoding import deserialize_uint64
+
 from .config import Config
 from .pool import Pool, PoolType, fetch_pool_by_id
 from .transaction_group import TransactionGroup
-from .utils import get_box_min_balance, get_selector, sp_fee, wait_for_confirmation
+from .utils import (
+    get_box_min_balance,
+    get_selector,
+    parse_app_state,
+    sp_fee,
+    wait_for_confirmation,
+)
 
 Signer = Callable[[TransactionGroup], list[algosdk.transaction.SignedTransaction]]
 
@@ -18,7 +26,7 @@ def get_contract_deploy_cost(
     cost = 100_000 + 100_000 * extra_pages
     cost += num_byte_slices * 50_000
     cost += num_uint * 28_500
-    cost += get_box_min_balance(24, 8)
+    cost += get_box_min_balance(32, 8)
 
     # exchange opt-ins & min balance
     cost += 300_000 if is_algo else 400_000
@@ -27,18 +35,31 @@ def get_contract_deploy_cost(
 
 
 @dataclasses.dataclass
-class ConstantProductParams:
+class ConstantProductBuildParams:
     primary_asset_id: int
     secondary_asset_id: int
     fee_bps: int
 
-    abi = algosdk.abi.ArrayStaticType(algosdk.abi.UintType(64), 3)
+
+@dataclasses.dataclass
+class ConstantProductParams:
+    primary_asset_id: int
+    secondary_asset_id: int
+    fee_bps: int
+    version: int
+
+    abi = algosdk.abi.ArrayStaticType(algosdk.abi.UintType(64), 4)
 
     def __hash__(self):
         return hash(self.as_tuple())
 
     def as_tuple(self):
-        return self.primary_asset_id, self.secondary_asset_id, self.fee_bps
+        return (
+            self.primary_asset_id,
+            self.secondary_asset_id,
+            self.fee_bps,
+            self.version,
+        )
 
     def to_box_name(self) -> bytes:
         return self.abi.encode(self.as_tuple())
@@ -191,24 +212,48 @@ class PoolFactory:
         raise NotImplementedError
 
 
+@dataclasses.dataclass
 class ConstantProductFactory(PoolFactory):
+    state: "ConstantProductFactoryState" = dataclasses.field(kw_only=True)
+
     def build_tx_group(
         self,
         sender: str,
         sp: algosdk.transaction.SuggestedParams,
-        pool_params: ConstantProductParams,
+        pool_params: ConstantProductBuildParams,
     ):
-        if self.config:
-            assert (
-                pool_params.fee_bps in self.config.factory_constant_product_fee_bps
-            ), f"only one of {self.config.factory_constant_product_fee_bps} is allowed for fee_bps"
+
+        assert (
+            pool_params.fee_bps in self.state.allowed_fee_bps
+        ), f"only one of {self.state.allowed_fee_bps} is allowed for fee_bps"
 
         return build_constant_product_tx_group(
             factory_id=self.app_id,
             sender=sender,
             sp=sp,
-            pool_params=pool_params,
+            pool_params=ConstantProductParams(
+                **dataclasses.asdict(pool_params),
+                version=self.state.deployed_contract_version,
+            ),
         )
+
+
+@dataclasses.dataclass
+class ConstantProductFactoryState:
+    deployed_contract_version: int
+    allowed_fee_bps: list[int]
+
+
+def parse_global_pool_state(raw_state: list) -> ConstantProductFactoryState:
+    """
+    Args:
+        raw_state: The contract's global state retrieved from algosdk.
+    """
+    state = parse_app_state(raw_state)
+    return ConstantProductFactoryState(
+        deployed_contract_version=state["POOL_CONTRACT_VERSION"],
+        allowed_fee_bps=deserialize_uint64(state["ALLOWED_FEE_BPS"]),
+    )
 
 
 def get_pool_factory(
@@ -218,6 +263,13 @@ def get_pool_factory(
         assert (
             config.factory_constant_product_id
         ), "factory_constant_product_id is missing in the config."
-        return ConstantProductFactory(algod, config.factory_constant_product_id, config)
+        app_info = algod.application_info(config.factory_constant_product_id)
+        factory_state = parse_global_pool_state(app_info["params"]["global-state"])
+        return ConstantProductFactory(
+            algod,
+            config.factory_constant_product_id,
+            config=config,
+            state=factory_state,
+        )
 
     raise NotImplementedError(f"Factory for {pool_type} is not implemented yet.")

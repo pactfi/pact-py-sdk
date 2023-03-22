@@ -1,3 +1,5 @@
+from dataclasses import asdict
+
 import algosdk
 import pytest
 
@@ -27,7 +29,7 @@ def test_factory_deploy_constant_product_pool(pact: pactsdk.PactClient, admin: A
     coin = pact.fetch_asset(create_asset(admin))
 
     factory = pact.get_pool_factory("CONSTANT_PRODUCT")
-    pool_params = pactsdk.ConstantProductParams(
+    pool_params = pactsdk.ConstantProductBuildParams(
         primary_asset_id=algo.index, secondary_asset_id=coin.index, fee_bps=100
     )
     pool = factory.build(
@@ -63,7 +65,7 @@ def test_factory_deploy_pool_as_normal_user(pact: pactsdk.PactClient, admin: Acc
     coin = pact.fetch_asset(create_asset(admin))
 
     factory = pact.get_pool_factory("CONSTANT_PRODUCT")
-    pool_params = pactsdk.ConstantProductParams(
+    pool_params = pactsdk.ConstantProductBuildParams(
         primary_asset_id=algo.index, secondary_asset_id=coin.index, fee_bps=100
     )
     pool = factory.build(
@@ -86,7 +88,7 @@ def test_factory_deploy_constant_product_pool_with_different_params_and_listing_
     factory = pact.get_pool_factory("CONSTANT_PRODUCT")
 
     # ALGO/COIN_A 0.02%
-    pool_params = pactsdk.ConstantProductParams(
+    pool_params = pactsdk.ConstantProductBuildParams(
         primary_asset_id=algo.index, secondary_asset_id=coin_a.index, fee_bps=2
     )
     pool = factory.build(
@@ -100,7 +102,7 @@ def test_factory_deploy_constant_product_pool_with_different_params_and_listing_
     assert pool.params.pact_fee_bps == 1
 
     # ALGO/COIN_A 0.05%
-    pool_params = pactsdk.ConstantProductParams(
+    pool_params = pactsdk.ConstantProductBuildParams(
         primary_asset_id=algo.index, secondary_asset_id=coin_a.index, fee_bps=5
     )
     pool = factory.build(
@@ -114,7 +116,7 @@ def test_factory_deploy_constant_product_pool_with_different_params_and_listing_
     assert pool.params.pact_fee_bps == 2
 
     # ALGO/COIN_A 0.3%
-    pool_params = pactsdk.ConstantProductParams(
+    pool_params = pactsdk.ConstantProductBuildParams(
         primary_asset_id=algo.index, secondary_asset_id=coin_a.index, fee_bps=30
     )
     pool = factory.build(
@@ -128,7 +130,7 @@ def test_factory_deploy_constant_product_pool_with_different_params_and_listing_
     assert pool.params.pact_fee_bps == 5
 
     # COIN_A/COIN_B 0.05%
-    pool_params = pactsdk.ConstantProductParams(
+    pool_params = pactsdk.ConstantProductBuildParams(
         primary_asset_id=coin_a.index, secondary_asset_id=coin_b.index, fee_bps=5
     )
     pool = factory.build(
@@ -141,8 +143,9 @@ def test_factory_deploy_constant_product_pool_with_different_params_and_listing_
     assert pool.fee_bps == 5
     assert pool.params.pact_fee_bps == 2
 
+    pool_version = pool.version
     # Cannot create a second pool with the same params.
-    pool_params = pactsdk.ConstantProductParams(
+    pool_params = pactsdk.ConstantProductBuildParams(
         primary_asset_id=coin_a.index, secondary_asset_id=coin_b.index, fee_bps=5
     )
     with pytest.raises(algosdk.error.AlgodHTTPError):
@@ -153,7 +156,7 @@ def test_factory_deploy_constant_product_pool_with_different_params_and_listing_
         )
 
     # Forbidden fee.
-    pool_params = pactsdk.ConstantProductParams(
+    pool_params = pactsdk.ConstantProductBuildParams(
         primary_asset_id=coin_a.index, secondary_asset_id=coin_b.index, fee_bps=200
     )
     with pytest.raises(AssertionError):
@@ -167,16 +170,28 @@ def test_factory_deploy_constant_product_pool_with_different_params_and_listing_
     pools = factory.list_pools()
     assert set(pools) == {
         pactsdk.ConstantProductParams(
-            primary_asset_id=algo.index, secondary_asset_id=coin_a.index, fee_bps=2
+            primary_asset_id=algo.index,
+            secondary_asset_id=coin_a.index,
+            fee_bps=2,
+            version=pool_version,
         ),
         pactsdk.ConstantProductParams(
-            primary_asset_id=algo.index, secondary_asset_id=coin_a.index, fee_bps=5
+            primary_asset_id=algo.index,
+            secondary_asset_id=coin_a.index,
+            fee_bps=5,
+            version=pool_version,
         ),
         pactsdk.ConstantProductParams(
-            primary_asset_id=algo.index, secondary_asset_id=coin_a.index, fee_bps=30
+            primary_asset_id=algo.index,
+            secondary_asset_id=coin_a.index,
+            fee_bps=30,
+            version=pool_version,
         ),
         pactsdk.ConstantProductParams(
-            primary_asset_id=coin_a.index, secondary_asset_id=coin_b.index, fee_bps=5
+            primary_asset_id=coin_a.index,
+            secondary_asset_id=coin_b.index,
+            fee_bps=5,
+            version=pool_version,
         ),
     }
 
@@ -187,17 +202,23 @@ def test_factory_fetch_pool(pact: pactsdk.PactClient, admin: Account):
 
     factory = pact.get_pool_factory("CONSTANT_PRODUCT")
 
-    pool_params = pactsdk.ConstantProductParams(
+    deploy_pool_params = pactsdk.ConstantProductBuildParams(
         primary_asset_id=algo.index, secondary_asset_id=coin.index, fee_bps=100
     )
     pool = factory.build(
         sender=admin.address,
-        pool_params=pool_params,
+        pool_params=deploy_pool_params,
         signer=lambda tx_group: tx_group.sign(admin.private_key),
+    )
+    pool_params = pactsdk.ConstantProductParams(
+        **asdict(deploy_pool_params), version=pool.version
     )
     assert factory.fetch_pool(pool_params) == pool
 
     pool_params = pactsdk.ConstantProductParams(
-        primary_asset_id=algo.index, secondary_asset_id=coin.index, fee_bps=30
+        primary_asset_id=algo.index,
+        secondary_asset_id=coin.index,
+        fee_bps=30,
+        version=pool.version,
     )
     assert factory.fetch_pool(pool_params) is None
