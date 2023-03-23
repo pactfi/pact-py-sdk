@@ -1,5 +1,6 @@
 from contextlib import contextmanager
 from dataclasses import dataclass
+from typing import Optional
 
 from algosdk import transaction
 
@@ -76,8 +77,8 @@ class FarmingTestBed:
     @contextmanager
     def assert_rewards(
         self,
-        rewards: pactsdk.FarmingRewards[int] = None,
-        address: str = None,
+        rewards: Optional[pactsdk.FarmingRewards[int]] = None,
+        address: Optional[str] = None,
     ):
         if address is None:
             address = self.user_account.address

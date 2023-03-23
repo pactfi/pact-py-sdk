@@ -25,7 +25,7 @@ from .swap import Swap
 from .transaction_group import TransactionGroup
 from .zap import Zap
 
-PoolType = Literal["CONSTANT_PRODUCT", "STABLESWAP"]
+PoolType = Literal["CONSTANT_PRODUCT", "NFT_CONSTANT_PRODUCT", "STABLESWAP"]
 
 OperationType = Literal["SWAP", "ADDLIQ", "REMLIQ"]
 """The basic three operation types in a PACT liquidity pool, namely Add Liquidity (ADDLIQ), Remove Liquidity (REMLIQ) and making a swap (SWAP)."""
@@ -180,7 +180,7 @@ class Pool:
 
         self.pool_type = get_pool_type_from_internal_state(self.internal_state)
 
-        if self.pool_type == "CONSTANT_PRODUCT":
+        if self.pool_type in ["CONSTANT_PRODUCT", "NFT_CONSTANT_PRODUCT"]:
             self.params = ConstantProductParams(
                 fee_bps=self.internal_state.FEE_BPS,
                 pact_fee_bps=self.internal_state.PACT_FEE_BPS or 0,

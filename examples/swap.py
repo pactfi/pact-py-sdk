@@ -9,7 +9,7 @@ private_key = algosdk.mnemonic.to_private_key("<mnemonic>")
 address = algosdk.account.address_from_private_key(private_key)
 
 algod = AlgodClient("<token>", "<url>")
-pact = pactsdk.PactClient(algod)
+pact = pactsdk.PactClient(algod, network="testnet")
 
 algo = pact.fetch_asset(0)
 usdc = pact.fetch_asset(31566704)

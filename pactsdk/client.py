@@ -15,7 +15,7 @@ Typical usage example::
 
     pools = pact.fetch_pools_by_assets(algo, other_coin)
 """
-from typing import Union
+from typing import Optional, Union, cast
 
 from algosdk.v2client.algod import AlgodClient
 
@@ -24,12 +24,11 @@ from pactsdk.farming.farming_client import PactFarmingClient
 
 from .asset import Asset, fetch_asset_by_index
 from .config import Config, Network, get_config
-from .factory import PoolFactory, get_pool_factory
+from .factories import ConstantProductFactory, get_pool_factory
 from .gas_station import get_gas_station, set_gas_station
 from .pool import (
     ListPoolsParams,
     Pool,
-    PoolType,
     fetch_pool_by_id,
     fetch_pools_by_assets,
     list_pools,
@@ -84,7 +83,9 @@ class PactClient:
         """
         return fetch_asset_by_index(self.algod, asset_index)
 
-    def list_pools(self, params: ListPoolsParams = None) -> ApiListPoolsResponse:
+    def list_pools(
+        self, params: Optional[ListPoolsParams] = None
+    ) -> ApiListPoolsResponse:
         """Returns a list of pools according to the pool options passed in. Uses Pact API for fetching the data.
 
         Args:
@@ -130,8 +131,16 @@ class PactClient:
         """
         return fetch_pool_by_id(algod=self.algod, app_id=app_id)
 
-    def get_pool_factory(self, pool_type: PoolType) -> PoolFactory:
-        """Gets the pool factory for the given pool type according to the client's configuration."""
-        return get_pool_factory(
-            algod=self.algod, pool_type=pool_type, config=self.config
+    def get_constant_product_pool_factory(self) -> ConstantProductFactory:
+        """Gets the constant product pool factory according to the client's configuration."""
+        factory = get_pool_factory(
+            algod=self.algod, pool_type="CONSTANT_PRODUCT", config=self.config
         )
+        return cast(ConstantProductFactory, factory)
+
+    def get_nft_constant_product_pool_factory(self) -> ConstantProductFactory:
+        """Gets the NFT constant product pool factory according to the client's configuration."""
+        factory = get_pool_factory(
+            algod=self.algod, pool_type="NFT_CONSTANT_PRODUCT", config=self.config
+        )
+        return cast(ConstantProductFactory, factory)

@@ -11,7 +11,7 @@ private_key = algosdk.mnemonic.to_private_key("<mnemonic>")
 address = algosdk.account.address_from_private_key(private_key)
 
 algod = AlgodClient("<token>", "<url>")
-pact = pactsdk.PactClient(algod)
+pact = pactsdk.PactClient(algod, network="testnet")
 
 farm = pact.farming.fetch_farm_by_id(123)
 escrow = farm.fetch_escrow_by_address(address)

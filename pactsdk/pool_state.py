@@ -94,6 +94,9 @@ def get_pool_type_from_internal_state(
     if state.CONTRACT_NAME == "PACT AMM":
         return "CONSTANT_PRODUCT"
 
+    if state.CONTRACT_NAME == "PACT AMM [NFT]":
+        return "NFT_CONSTANT_PRODUCT"
+
     if state.CONTRACT_NAME == "[SI] PACT AMM":
         return "STABLESWAP"
 

@@ -402,7 +402,7 @@ class Farm:
         )
 
     def build_claim_rewards_tx(
-        self, escrow: Escrow, assets: list[Asset] = None
+        self, escrow: Escrow, assets: Optional[list[Asset]] = None
     ) -> transaction.Transaction:
         if assets is None:
             assets = self.state.reward_assets
