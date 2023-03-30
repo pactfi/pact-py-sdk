@@ -6,3 +6,5 @@ Examples
    swap
    composing_transactions
    zap
+   build_pool
+   list_pools

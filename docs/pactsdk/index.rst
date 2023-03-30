@@ -13,5 +13,5 @@ pactsdk
    constant_product_calculator
    stableswap_calculator
    exceptions
-   factory
+   factories
    config
