@@ -176,7 +176,7 @@ class Pool:
     """The version of the contract. May be 0 for some old pools which don't expose the version in the global state."""
 
     def __post_init__(self):
-        self.params: StableswapParams | ConstantProductParams
+        self.params: Union[StableswapParams, ConstantProductParams]
 
         self.pool_type = get_pool_type_from_internal_state(self.internal_state)
 
