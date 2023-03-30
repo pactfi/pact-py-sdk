@@ -85,7 +85,7 @@ class PoolCalculator:
         self.pool = pool
 
         self.swap_calculator: SwapCalculator
-        if pool.pool_type == "CONSTANT_PRODUCT":
+        if pool.pool_type in ["CONSTANT_PRODUCT", "NFT_CONSTANT_PRODUCT"]:
             self.swap_calculator = ConstantProductCalculator(pool)
         elif pool.pool_type == "STABLESWAP":
             self.swap_calculator = StableswapCalculator(pool)

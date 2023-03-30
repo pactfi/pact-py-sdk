@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from typing import Literal, Optional, Union
 
 import algosdk
-from algosdk.future import transaction
+from algosdk import transaction
 from algosdk.v2client.algod import AlgodClient
 
 from pactsdk.api import ListPoolsParams, list_pools
@@ -25,7 +25,7 @@ from .swap import Swap
 from .transaction_group import TransactionGroup
 from .zap import Zap
 
-PoolType = Literal["CONSTANT_PRODUCT", "STABLESWAP"]
+PoolType = Literal["CONSTANT_PRODUCT", "NFT_CONSTANT_PRODUCT", "STABLESWAP"]
 
 OperationType = Literal["SWAP", "ADDLIQ", "REMLIQ"]
 """The basic three operation types in a PACT liquidity pool, namely Add Liquidity (ADDLIQ), Remove Liquidity (REMLIQ) and making a swap (SWAP)."""
@@ -176,11 +176,11 @@ class Pool:
     """The version of the contract. May be 0 for some old pools which don't expose the version in the global state."""
 
     def __post_init__(self):
-        self.params: StableswapParams | ConstantProductParams
+        self.params: Union[StableswapParams, ConstantProductParams]
 
         self.pool_type = get_pool_type_from_internal_state(self.internal_state)
 
-        if self.pool_type == "CONSTANT_PRODUCT":
+        if self.pool_type in ["CONSTANT_PRODUCT", "NFT_CONSTANT_PRODUCT"]:
             self.params = ConstantProductParams(
                 fee_bps=self.internal_state.FEE_BPS,
                 pact_fee_bps=self.internal_state.PACT_FEE_BPS or 0,
@@ -203,6 +203,12 @@ class Pool:
 
         self.calculator = PoolCalculator(self)
         self.state = self.parse_internal_state(self.internal_state)
+
+    def __eq__(self, other_pool: object) -> bool:
+        """Return equal by comparing the pools app_id value."""
+        if not isinstance(other_pool, Pool):
+            return False
+        return self.app_id == other_pool.app_id
 
     def get_escrow_address(self) -> str:
         """Get the escrow address of the pool.
@@ -370,14 +376,14 @@ class Pool:
             address=address,
             asset=self.primary_asset,
             amount=primary_asset_amount,
-            note=b"Pact add liquidity deposit",
+            note=note or b"Pact add liquidity deposit",
             suggested_params=suggested_params,
         )
         tx2 = self._make_deposit_tx(
             address=address,
             asset=self.secondary_asset,
             amount=secondary_asset_amount,
-            note=b"Pact add liquidity deposit",
+            note=note or b"Pact add liquidity deposit",
             suggested_params=suggested_params,
         )
         tx3 = self._make_application_noop_tx(
@@ -600,23 +606,12 @@ class Pool:
         note: bytes,
         suggested_params: transaction.SuggestedParams,
     ):
-        if not asset.index:
-            # ALGO
-            return transaction.PaymentTxn(
-                sender=address,
-                receiver=self.get_escrow_address(),
-                amt=amount,
-                note=note,
-                sp=suggested_params,
-            )
-
-        return transaction.AssetTransferTxn(
+        return asset.build_transfer_tx(
             sender=address,
             receiver=self.get_escrow_address(),
-            amt=amount,
+            amount=amount,
             note=note,
-            sp=suggested_params,
-            index=asset.index,
+            suggested_params=suggested_params,
         )
 
     def _make_application_noop_tx(

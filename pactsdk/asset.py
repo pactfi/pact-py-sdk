@@ -4,11 +4,19 @@ import copy
 from dataclasses import dataclass
 from typing import Optional
 
-from algosdk.future import transaction
+from algosdk import transaction
 from algosdk.v2client.algod import AlgodClient
 
-ASSETS_CACHE: dict[tuple[int, AlgodClient], "Asset"] = {}
+ASSETS_CACHE: dict[tuple[AlgodClient, int], "Asset"] = {}
 """Dictionary mapping the asset index number to the :py:class:`pactsdk.asset.Asset` class to speed up look up of the asset information."""
+
+
+def get_cached_asset(algod: AlgodClient, index: int, decimals: int) -> "Asset":
+    cache_key = (algod, index)
+    if cache_key in ASSETS_CACHE:
+        return copy.copy(ASSETS_CACHE[cache_key])
+
+    return Asset(algod=algod, index=index, decimals=decimals)
 
 
 def fetch_asset_by_index(
@@ -117,6 +125,41 @@ class Asset:
             sp=suggested_params,
         )
 
+    def prepare_opt_out_tx(
+        self, address: str, close_to: str
+    ) -> transaction.AssetTransferTxn:
+        """This creates a transaction that will allow the account to "opt out" of the asset.
+
+        Args:
+            address: Account to opt out of this asset.
+
+        Returns:
+            A ready to send transaction to opt-out of the ASA.
+        """
+        suggested_params = self.algod.suggested_params()
+        return self.build_opt_out_tx(address, close_to, suggested_params)
+
+    def build_opt_out_tx(
+        self, address: str, close_to: str, suggested_params: transaction.SuggestedParams
+    ) -> transaction.AssetTransferTxn:
+        """Creates the actual transaction for the account to opt-out from asset.
+
+        Args:
+            address: Address of the account to opt out of the asset.
+            suggested_params: Algorand suggested parameters for transactions.
+
+        Returns:
+            A transaction to opt-out of the asset.
+        """
+        return transaction.AssetTransferTxn(
+            sender=address,
+            receiver=address,
+            close_assets_to=close_to,
+            amt=0,
+            index=self.index,
+            sp=suggested_params,
+        )
+
     def is_opted_in(self, address: str) -> bool:
         """Checks if the account is already able to hold this asset, that is it has already opted in.
 
@@ -143,17 +186,55 @@ class Asset:
             The amount of this asset the account is holding, or None if the account is not opted into the asset.
         """
         account_info = self.algod.account_info(address)
+        return self.get_holding_from_account_info(account_info)
 
+    def get_holding_from_account_info(self, account_info: dict) -> Optional[int]:
         if self.index == 0:
             return account_info["amount"]
 
         for asset in account_info["assets"]:
             if asset["asset-id"] == self.index:
                 return asset["amount"]
+
         return None
+
+    def build_transfer_tx(
+        self,
+        sender: str,
+        receiver: str,
+        amount: int,
+        suggested_params: transaction.SuggestedParams,
+        note: Optional[bytes] = None,
+    ) -> transaction.Transaction:
+        if self.index == 0:
+            # ALGO
+            return transaction.PaymentTxn(
+                sender=sender,
+                receiver=receiver,
+                amt=amount,
+                note=note,
+                sp=suggested_params,
+            )
+
+        return transaction.AssetTransferTxn(
+            sender=sender,
+            receiver=receiver,
+            amt=amount,
+            note=note,
+            sp=suggested_params,
+            index=self.index,
+        )
 
     def __eq__(self, other_asset: object) -> bool:
         """Return equal by comparing the assets index value."""
         if not isinstance(other_asset, Asset):
             return False
         return self.index == other_asset.index
+
+    def __repr__(self):
+        if self.unit_name:
+            return f"<{self.unit_name}>"
+        return f"<Asset {self.index}>"
+
+    def __hash__(self) -> int:
+        return self.index

@@ -5,15 +5,8 @@ from algosdk.error import AlgodHTTPError
 import pactsdk
 from pactsdk.transaction_group import TransactionGroup
 
-from .utils import (
-    POOL_TYPES,
-    add_liquidity,
-    assert_swap,
-    create_asset,
-    make_fresh_testbed,
-    new_account,
-    sign_and_send,
-)
+from .pool_utils import POOL_TYPES, add_liquidity, assert_swap, make_fresh_testbed
+from .utils import create_asset, new_account, sign_and_send
 
 
 @pytest.mark.parametrize("pool_type", POOL_TYPES)

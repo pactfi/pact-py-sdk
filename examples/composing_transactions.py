@@ -9,7 +9,7 @@ private_key = algosdk.mnemonic.to_private_key("<mnemonic>")
 address = algosdk.account.address_from_private_key(private_key)
 
 algod = AlgodClient("<token>", "<url>")
-pact = pactsdk.PactClient(algod)
+pact = pactsdk.PactClient(algod, network="testnet")
 
 pool = pact.fetch_pool_by_id(620995314)  # ALGO/USDC
 

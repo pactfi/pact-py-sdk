@@ -4,15 +4,13 @@ from typing import cast
 import pactsdk
 from pactsdk.stableswap_calculator import StableswapCalculator, StableswapParams
 
-from .utils import (
+from .pool_utils import (
     add_liquidity,
-    algod,
     assert_swap,
-    create_asset,
     deploy_stableswap_contract,
     make_fresh_testbed,
-    new_account,
 )
+from .utils import algod, create_asset, new_account
 
 
 def test_stableswap_asa_to_asa():
