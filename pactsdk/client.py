@@ -88,6 +88,8 @@ class PactClient:
     ) -> ApiListPoolsResponse:
         """Returns a list of pools according to the pool options passed in. Uses Pact API for fetching the data.
 
+        This method is deprecated but is kept for backward compatibility. Pact is in the process of changing the way the pools are created. In the future, all pools will be created using a pool factory contract which allows for an on-chain discoverability of pools.
+
         Args:
             params: API call parameters.
 

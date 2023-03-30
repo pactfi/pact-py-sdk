@@ -63,25 +63,6 @@ You can also fetch a pool by providing app id. This way the pool is retrieved di
 pool = pact.fetch_pool_by_id(456321)
 ```
 
-You can list all pools from the Pact API.
-
-```py
-pools = pact.list_pools()
-print(pools)
-# {
-#   "count": 19,
-#   "offset": 0,
-#   "limit": 10,
-#   "results": [...],
-# }
-
-# The listing uses pagination and filtering.
-pools = pact.list_pools(
-  offset=10,
-  primary_asset__algoid=9843123,
-)
-```
-
 Before making the transactions you need to opt-in for the assets. There's no need to opt-in for algo.
 
 ```py
