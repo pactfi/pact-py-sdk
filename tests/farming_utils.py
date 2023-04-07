@@ -183,13 +183,11 @@ def deploy_escrow_for_account(
     user_account: Account,
     suggested_params: transaction.SuggestedParams,
 ) -> pactsdk.Escrow:
-    escrow_approval_program = pactsdk.fetch_escrow_approval_program(algod, farm.app_id)
     deploy_txs = pactsdk.build_deploy_escrow_txs(
         sender=user_account.address,
         farm_app_id=farm.app_id,
         staked_asset_id=farm.staked_asset.index,
         suggested_params=suggested_params,
-        approval_program=escrow_approval_program,
     )
     sign_and_send(pactsdk.TransactionGroup(deploy_txs), user_account)
     txinfo = algod.pending_transaction_info(deploy_txs[-2].get_txid())
