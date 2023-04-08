@@ -15,12 +15,7 @@ from pactsdk.asset import Asset, fetch_asset_by_index
 from ..encoding import deserialize_uint64
 from ..gas_station import get_gas_station
 from ..utils import get_selector, parse_app_state, sp_fee
-from .escrow import (
-    Escrow,
-    build_deploy_escrow_txs,
-    fetch_escrow_approval_program,
-    fetch_escrow_by_id,
-)
+from .escrow import Escrow, build_deploy_escrow_txs, fetch_escrow_by_id
 from .farm_state import (
     FarmingRewards,
     FarmInternalState,
@@ -343,18 +338,11 @@ class Farm:
         }
 
     def prepare_deploy_escrow_txs(self, sender: str) -> list[transaction.Transaction]:
-        approval_program = fetch_escrow_approval_program(self.algod, self.app_id)
-        return self.build_deploy_escrow_txs(sender, approval_program)
-
-    def build_deploy_escrow_txs(
-        self, sender: str, approval_program: bytes
-    ) -> list[transaction.Transaction]:
         return build_deploy_escrow_txs(
             sender=sender,
             farm_app_id=self.app_id,
             staked_asset_id=self.staked_asset.index,
             suggested_params=self.suggested_params,
-            approval_program=approval_program,
         )
 
     def build_update_increase_opcode_quota_tx(

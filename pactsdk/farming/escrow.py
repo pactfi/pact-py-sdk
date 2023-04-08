@@ -18,6 +18,7 @@ from ..utils import get_selector, parse_app_state, sp_fee
 if TYPE_CHECKING:
     from .farm import Farm
 
+COMPILED_HUSK_APPROVAL = "CCACAAExGEAASYALTWFzdGVyQXBwSUQ2GgEXwDJnsYEGshA2GgIXwDKyGIAEtzVf0bIaIrIBs7GBBLIQMgqyFCKyEjYaAxfAMLIRIrIBsyNCAAEjQw=="
 COMPILED_CLEAR_PROGRAM_B64 = "CIEBQw=="
 
 REKEY_TO_USER_FEE = 2000
@@ -43,10 +44,10 @@ def build_deploy_escrow_txs(
     sender: str,
     farm_app_id: int,
     staked_asset_id: int,
-    approval_program: bytes,
     suggested_params: transaction.SuggestedParams,
 ) -> list[transaction.Transaction]:
 
+    approval_program = base64.b64decode(COMPILED_HUSK_APPROVAL)
     clear_program = base64.b64decode(COMPILED_CLEAR_PROGRAM_B64)
 
     gas_station = get_gas_station()
@@ -64,7 +65,7 @@ def build_deploy_escrow_txs(
         on_complete=transaction.OnComplete.NoOpOC,
         global_schema=transaction.StateSchema(1, 0),
         local_schema=transaction.StateSchema(0, 0),
-        sp=sp_fee(suggested_params, 4000),
+        sp=sp_fee(suggested_params, 5000),
         foreign_apps=[farm_app_id, gas_station.app_id],
         foreign_assets=[staked_asset_id],
         app_args=[CREATE_SIG, 1, 2, 0],

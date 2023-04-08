@@ -17,10 +17,10 @@ pact = pactsdk.PactClient(algod, network="testnet")
 factory = pact.get_constant_product_pool_factory()
 
 pool_params = factory.list_pools()
-print('pools:')
+print("pools:")
 pprint.pprint(pool_params)
 
 # To fully fetch the pool of choice...
 pool = factory.fetch_pool(pool_params[0])
-print('Selected pool:')
+print("Selected pool:")
 pprint.pprint(pool)

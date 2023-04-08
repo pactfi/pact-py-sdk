@@ -94,7 +94,7 @@ def test_farming_farm_state():
         updated_at=last_block - 6,
         admin=testbed.admin_account.address,
         updater=testbed.admin_account.address,
-        version=100,
+        version=101,
     )
     assert testbed.farm.state == pactsdk.FarmState(
         staked_asset=testbed.staked_asset,
@@ -111,7 +111,7 @@ def test_farming_farm_state():
         updated_at=datetime.datetime.fromtimestamp(last_block - 6),
         admin=testbed.admin_account.address,
         updater=testbed.admin_account.address,
-        version=100,
+        version=101,
     )
 
     testbed.deposit_rewards({testbed.reward_asset: 2000}, duration=100)
@@ -132,7 +132,7 @@ def test_farming_farm_state():
         updated_at=datetime.datetime.fromtimestamp(last_block),
         admin=testbed.admin_account.address,
         updater=testbed.admin_account.address,
-        version=100,
+        version=101,
     )
 
     testbed.stake(1000)
@@ -154,7 +154,7 @@ def test_farming_farm_state():
         updated_at=datetime.datetime.fromtimestamp(last_block),
         admin=testbed.admin_account.address,
         updater=testbed.admin_account.address,
-        version=100,
+        version=101,
     )
 
     user_state = testbed.escrow.fetch_user_state()
@@ -202,7 +202,7 @@ def test_farming_happy_path():
         updated_at=Any(datetime.datetime),
         admin=testbed.admin_account.address,
         updater=testbed.admin_account.address,
-        version=100,
+        version=101,
     )
 
     # Wait some time and unstake all.
@@ -235,7 +235,7 @@ def test_farming_happy_path():
         updated_at=Any(datetime.datetime),
         admin=testbed.admin_account.address,
         updater=testbed.admin_account.address,
-        version=100,
+        version=101,
     )
 
     # Claim rewards.
@@ -267,7 +267,7 @@ def test_farming_happy_path():
         updated_at=Any(datetime.datetime),
         admin=testbed.admin_account.address,
         updater=testbed.admin_account.address,
-        version=100,
+        version=101,
     )
 
     assert testbed.reward_asset.get_holding(testbed.farm.app_address) == 1781
