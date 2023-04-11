@@ -1,4 +1,4 @@
-__version__ = "0.6.0"
+__version__ = "0.6.1"
 
 from .add_liquidity import LiquidityAddition  # noqa
 from .asset import Asset, fetch_asset_by_index  # noqa
