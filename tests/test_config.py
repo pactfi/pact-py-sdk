@@ -10,7 +10,7 @@ def test_client_config():
         api_url="https://api.pact.fi",
         gas_station_id=1027956681,
         factory_constant_product_id=1072843805,
-        factory_nft_constant_product_id=0,
+        factory_nft_constant_product_id=1076423760,
     )
     assert pactsdk.get_gas_station().app_id == 1027956681
 
@@ -19,7 +19,7 @@ def test_client_config():
         api_url="https://api.pact.fi",
         gas_station_id=1027956681,
         factory_constant_product_id=1072843805,
-        factory_nft_constant_product_id=0,
+        factory_nft_constant_product_id=1076423760,
     )
 
     pact = pactsdk.PactClient(algod, network="testnet")
@@ -43,7 +43,7 @@ def test_client_config():
         api_url="overwritten_url",
         gas_station_id=1027956681,
         factory_constant_product_id=1072843805,
-        factory_nft_constant_product_id=0,
+        factory_nft_constant_product_id=1076423760,
     )
 
     pact = pactsdk.PactClient(algod, network="dev", factory_constant_product_id=123)
