@@ -27,7 +27,7 @@ def test_client_config():
         api_url="https://api.testnet.pact.fi",
         gas_station_id=156575978,
         factory_constant_product_id=166540424,
-        factory_nft_constant_product_id=166540708,
+        factory_nft_constant_product_id=190269485,
     )
 
     pact = pactsdk.PactClient(algod, network="dev")
