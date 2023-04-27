@@ -25,6 +25,11 @@ from pactsdk.farming.farming_client import PactFarmingClient
 from .asset import Asset, fetch_asset_by_index
 from .config import Config, Network, get_config
 from .factories import ConstantProductFactory, get_pool_factory
+from .folks_lending_pool import (
+    FolksLendingPool,
+    FolksLendingPoolAdapter,
+    fetch_folks_lending_pool,
+)
 from .gas_station import get_gas_station, set_gas_station
 from .pool import (
     ListPoolsParams,
@@ -132,6 +137,23 @@ class PactClient:
             The pool for the application id.
         """
         return fetch_pool_by_id(algod=self.algod, app_id=app_id)
+
+    def fetch_folks_lending_pool(self, app_id: int) -> FolksLendingPool:
+        return fetch_folks_lending_pool(self.algod, app_id)
+
+    def get_folks_lending_pool_adapter(
+        self,
+        pact_pool: Pool,
+        primary_lending_pool: FolksLendingPool,
+        secondary_lending_pool: FolksLendingPool,
+    ) -> FolksLendingPoolAdapter:
+        return FolksLendingPoolAdapter(
+            algod=self.algod,
+            app_id=self.config.folks_lending_pool_adapter_id,
+            pact_pool=pact_pool,
+            primary_lending_pool=primary_lending_pool,
+            secondary_lending_pool=secondary_lending_pool,
+        )
 
     def get_constant_product_pool_factory(self) -> ConstantProductFactory:
         """Gets the constant product pool factory according to the client's configuration."""

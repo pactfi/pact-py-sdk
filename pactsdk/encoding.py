@@ -16,10 +16,12 @@ def serialize_uint64(values: Sequence[int]) -> str:
 
 def deserialize_uint64(data: str) -> list[int]:
     decoded = base64.b64decode(data)
-    return [
-        int.from_bytes(decoded[offset : offset + 8], byteorder="big", signed=False)
-        for offset in range(0, len(decoded), 8)
-    ]
+    return [extract_uint64(decoded, offset) for offset in range(0, len(decoded), 8)]
+
+
+def extract_uint64(byte_str: bytes, index: int) -> int:
+    """Extract a uint64 from a byte string"""
+    return int.from_bytes(byte_str[index : index + 8], byteorder="big")
 
 
 def decode_string_from_global_state(encoded: str) -> str:
