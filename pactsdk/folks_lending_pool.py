@@ -1,6 +1,7 @@
 import base64
 import dataclasses
 import datetime
+import math
 
 import algosdk
 from algosdk.v2client.algod import AlgodClient
@@ -75,9 +76,12 @@ class FolksLendingPool:
         rate = self.calc_deposit_interest_rate(datetime.datetime.now())
         return amount * ONE_14_DP // rate
 
-    def convert_withdraw(self, amount: int) -> int:
+    def convert_withdraw(self, amount: int, ceil=False) -> int:
         rate = self.calc_deposit_interest_rate(datetime.datetime.now())
-        return amount * rate // ONE_14_DP
+        converted = amount * rate / ONE_14_DP
+        if ceil:
+            return math.ceil(converted)
+        return math.floor(converted)
 
 
 def fetch_folks_lending_pool(algod: AlgodClient, app_id: int) -> FolksLendingPool:
@@ -131,6 +135,21 @@ class LendingLiquidityAddition:
             ),
         )
         self.liquidity_addition.effect.tx_fee = PRE_ADD_LIQ_FEE + ADD_LIQ_FEE
+
+
+@dataclasses.dataclass
+class LendingSwap:
+    f_swap: Swap
+
+    asset_deposited: Asset
+    asset_received: Asset
+
+    amount_deposited: int
+    amount_received: int
+
+    minimum_amount_received: int
+
+    tx_fee: int
 
 
 @dataclasses.dataclass
@@ -199,23 +218,21 @@ class FolksLendingPoolAdapter:
         liquidity_addition: LiquidityAddition,
         suggested_params: algosdk.transaction.SuggestedParams,
     ) -> list[algosdk.transaction.Transaction]:
-        deposit_primary_tx = self.primary_lending_pool.original_asset.build_transfer_tx(
+        tx1 = self.primary_lending_pool.original_asset.build_transfer_tx(
             sender=address,
             receiver=self.escrow_address,
             amount=liquidity_addition.primary_asset_amount,
             suggested_params=suggested_params,
         )
 
-        deposit_secondary_tx = (
-            self.secondary_lending_pool.original_asset.build_transfer_tx(
-                sender=address,
-                receiver=self.escrow_address,
-                amount=liquidity_addition.secondary_asset_amount,
-                suggested_params=suggested_params,
-            )
+        tx2 = self.secondary_lending_pool.original_asset.build_transfer_tx(
+            sender=address,
+            receiver=self.escrow_address,
+            amount=liquidity_addition.secondary_asset_amount,
+            suggested_params=suggested_params,
         )
 
-        pre_add_liq_tx = algosdk.transaction.ApplicationNoOpTxn(
+        tx3 = algosdk.transaction.ApplicationNoOpTxn(
             sender=address,
             sp=sp_fee(suggested_params, PRE_ADD_LIQ_FEE),
             index=self.app_id,
@@ -238,7 +255,7 @@ class FolksLendingPoolAdapter:
             ],
         )
 
-        add_liq_tx = algosdk.transaction.ApplicationNoOpTxn(
+        tx4 = algosdk.transaction.ApplicationNoOpTxn(
             sender=address,
             sp=sp_fee(suggested_params, ADD_LIQ_FEE),
             index=self.app_id,
@@ -258,12 +275,7 @@ class FolksLendingPoolAdapter:
             ],
         )
 
-        return [
-            deposit_primary_tx,
-            deposit_secondary_tx,
-            pre_add_liq_tx,
-            add_liq_tx,
-        ]
+        return [tx1, tx2, tx3, tx4]
 
     def prepare_remove_liquidity_tx_group(
         self, address: str, amount: int
@@ -332,7 +344,7 @@ class FolksLendingPoolAdapter:
 
     def prepare_swap(
         self, asset: Asset, amount: int, slippage_pct: float, swap_for_exact=False
-    ) -> Swap:
+    ) -> LendingSwap:
         f_asset = self.original_asset_to_f_asset(asset)
 
         if asset == self.primary_lending_pool.original_asset:
@@ -342,40 +354,66 @@ class FolksLendingPoolAdapter:
             deposited_lending_pool = self.secondary_lending_pool
             received_lending_pool = self.primary_lending_pool
 
-        f_amount = deposited_lending_pool.convert_deposit(amount)
+        if swap_for_exact:
+            f_amount = received_lending_pool.convert_deposit(amount)
+        else:
+            f_amount = deposited_lending_pool.convert_deposit(amount)
 
-        swap = self.pact_pool.prepare_swap(
+        f_swap = self.pact_pool.prepare_swap(
             f_asset, f_amount, slippage_pct, swap_for_exact
         )
-        swap.asset_deposited = self.f_asset_to_original_asset(swap.asset_deposited)
-        swap.asset_received = self.f_asset_to_original_asset(swap.asset_received)
 
-        swap.effect.amount_deposited = amount
-        swap.effect.amount_received = received_lending_pool.convert_withdraw(
-            swap.effect.amount_received
+        asset_deposited = self.f_asset_to_original_asset(f_swap.asset_deposited)
+        asset_received = self.f_asset_to_original_asset(f_swap.asset_received)
+
+        if swap_for_exact:
+            amount_deposited = deposited_lending_pool.convert_withdraw(
+                f_swap.effect.amount_deposited, ceil=True
+            )
+            amount_received = amount
+        else:
+            amount_deposited = amount
+            amount_received = received_lending_pool.convert_withdraw(
+                f_swap.effect.amount_received
+            )
+
+        minimum_amount_received = received_lending_pool.convert_withdraw(
+            f_swap.effect.minimum_amount_received
         )
 
-        return swap
+        tx_fee = SWAP_FEE + 1000  # + deposit(1000)
 
-    def prepare_swap_tx_group(self, swap: Swap, address: str) -> TransactionGroup:
+        return LendingSwap(
+            f_swap=f_swap,
+            asset_deposited=asset_deposited,
+            asset_received=asset_received,
+            amount_deposited=amount_deposited,
+            amount_received=amount_received,
+            minimum_amount_received=minimum_amount_received,
+            tx_fee=tx_fee,
+        )
+
+    def prepare_swap_tx_group(
+        self, swap: LendingSwap, address: str
+    ) -> TransactionGroup:
         suggested_params = self.algod.suggested_params()
         txs = self.build_swap_txs(swap, address, suggested_params)
         return TransactionGroup(txs)
 
     def build_swap_txs(
         self,
-        swap: Swap,
+        swap: LendingSwap,
         address: str,
         suggested_params: algosdk.transaction.SuggestedParams,
     ) -> list[algosdk.transaction.Transaction]:
-        deposit_tx = swap.asset_deposited.build_transfer_tx(
+        tx1 = swap.asset_deposited.build_transfer_tx(
             sender=address,
             receiver=self.escrow_address,
-            amount=swap.amount,
+            amount=swap.amount_deposited,
             suggested_params=suggested_params,
         )
 
-        swap_tx = algosdk.transaction.ApplicationNoOpTxn(
+        tx2 = algosdk.transaction.ApplicationNoOpTxn(
             sender=address,
             sp=sp_fee(suggested_params, SWAP_FEE),
             index=self.app_id,
@@ -383,7 +421,7 @@ class FolksLendingPoolAdapter:
                 SWAP_SIG,
                 *[ABI_BYTE.encode(v) for v in [0, 1, 2, 3]],  # assets
                 *[ABI_BYTE.encode(v) for v in [1, 2, 3, 4]],  # apps
-                swap.effect.minimum_amount_received,
+                swap.minimum_amount_received,
             ],
             foreign_assets=[
                 self.primary_lending_pool.original_asset.index,
@@ -399,7 +437,7 @@ class FolksLendingPoolAdapter:
             ],
         )
 
-        return [deposit_tx, swap_tx]
+        return [tx1, tx2]
 
     def prepare_opt_in_to_asset_tx_group(
         self, address: str, asset_ids: list[int]
@@ -418,14 +456,14 @@ class FolksLendingPoolAdapter:
 
         asset_ids = [asset_id for asset_id in asset_ids if asset_id > 0]
 
-        payment_tx = algosdk.transaction.PaymentTxn(
+        tx1 = algosdk.transaction.PaymentTxn(
             sender=address,
             receiver=self.escrow_address,
             amt=len(asset_ids) * 100_000,
             sp=suggested_params,
         )
 
-        opt_in_tx = algosdk.transaction.ApplicationNoOpTxn(
+        tx2 = algosdk.transaction.ApplicationNoOpTxn(
             sender=address,
             sp=sp_fee(suggested_params, 1000 + 1000 * len(asset_ids)),
             index=self.app_id,
@@ -438,4 +476,4 @@ class FolksLendingPoolAdapter:
             foreign_assets=asset_ids,
         )
 
-        return [payment_tx, opt_in_tx]
+        return [tx1, tx2]

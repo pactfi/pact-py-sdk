@@ -63,8 +63,7 @@ liquidity_addition = lending_pool_adapter.prepare_add_liquidity(100_000, 100_000
 tx_group = lending_pool_adapter.prepare_add_liquidity_tx_group(
     address, liquidity_addition
 )
-signed_txs = tx_group.sign(pk)
-algod.send_transactions(signed_txs)
+algod.send_transactions(tx_group.sign(pk))
 print(tx_group.group_id)
 print()
 
@@ -74,14 +73,12 @@ swap = lending_pool_adapter.prepare_swap(
     primary_folks_pool.original_asset, amount=100_000, slippage_pct=100
 )
 tx_group = lending_pool_adapter.prepare_swap_tx_group(swap, address)
-signed_txs = tx_group.sign(pk)
-algod.send_transactions(signed_txs)
+algod.send_transactions(tx_group.sign(pk))
 print(tx_group.group_id)
 print()
 
 # Remove liquidity.
 print("Removing liquidity...")
 tx_group = lending_pool_adapter.prepare_remove_liquidity_tx_group(address, 20_000)
-signed_txs = tx_group.sign(pk)
-algod.send_transactions(signed_txs)
+algod.send_transactions(tx_group.sign(pk))
 print(tx_group.group_id)
