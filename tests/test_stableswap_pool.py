@@ -14,8 +14,8 @@ def test_stableswap_pool_e2e_scenario():
     account = new_account()
     pact = PactClient(algod)
 
-    coin_a_index = create_asset(account, "COIN_A", 6, 10**10)
-    coin_b_index = create_asset(account, "COIN_B", 6, 10**10)
+    coin_a_index = create_asset(account, name="COIN_A", decimals=6, total=10**10)
+    coin_b_index = create_asset(account, name="COIN_B", decimals=6, total=10**10)
 
     coin_a = pact.fetch_asset(coin_a_index)
     coin_b = pact.fetch_asset(coin_b_index)

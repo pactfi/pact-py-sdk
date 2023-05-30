@@ -38,18 +38,17 @@ algod = AlgodClient(
 def sign_and_send(
     tx_to_send: Union[transaction.Transaction, pactsdk.TransactionGroup],
     account: Account,
-):
+) -> str:
     signed_tx = tx_to_send.sign(account.private_key)
     if type(tx_to_send) == pactsdk.TransactionGroup:
-        txid = algod.send_transactions(signed_tx)
-    else:
-        txid = algod.send_transaction(signed_tx)
-    return txid
+        return algod.send_transactions(signed_tx)
+    return algod.send_transaction(signed_tx)
 
 
 def create_asset(
     account: Account,
     name: Optional[str] = "COIN",
+    unit_name: Optional[str] = None,
     decimals=6,
     total=100_000_000,
 ) -> int:
@@ -61,7 +60,7 @@ def create_asset(
         total=total,
         decimals=decimals,
         default_frozen=0,
-        unit_name=name,
+        unit_name=unit_name or name,
         asset_name=name,
     )
 

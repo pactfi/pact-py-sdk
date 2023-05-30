@@ -2,6 +2,7 @@ import base64
 import dataclasses
 import datetime
 import math
+from typing import Optional
 
 import algosdk
 from algosdk.v2client.algod import AlgodClient
@@ -63,9 +64,14 @@ class FolksLendingPool:
     updated_at: datetime.datetime
     original_asset: Asset
     f_asset: Asset
+    escrow_address: str = dataclasses.field(init=False)
+    last_timestamp: Optional[int] = None
 
-    def calc_deposit_interest_rate(self, timestamp: datetime.datetime) -> int:
-        dt = int((timestamp - self.updated_at).total_seconds())
+    def __post_init__(self):
+        self.escrow_address = algosdk.logic.get_application_address(self.app_id)
+
+    def calc_deposit_interest_rate(self, timestamp: int) -> int:
+        dt = timestamp - int(self.updated_at.timestamp())
         return (
             self.deposit_interest_index
             * (ONE_16_DP + (self.deposit_interest_rate * dt // SECONDS_IN_YEAR))
@@ -73,15 +79,18 @@ class FolksLendingPool:
         )
 
     def convert_deposit(self, amount: int) -> int:
-        rate = self.calc_deposit_interest_rate(datetime.datetime.now())
+        rate = self.calc_deposit_interest_rate(self.get_last_timestamp())
         return amount * ONE_14_DP // rate
 
     def convert_withdraw(self, amount: int, ceil=False) -> int:
-        rate = self.calc_deposit_interest_rate(datetime.datetime.now())
+        rate = self.calc_deposit_interest_rate(self.get_last_timestamp())
         converted = amount * rate / ONE_14_DP
         if ceil:
             return math.ceil(converted)
         return math.floor(converted)
+
+    def get_last_timestamp(self) -> int:
+        return self.last_timestamp or int(datetime.datetime.now().timestamp())
 
 
 def fetch_folks_lending_pool(algod: AlgodClient, app_id: int) -> FolksLendingPool:
@@ -111,7 +120,9 @@ def fetch_folks_lending_pool(algod: AlgodClient, app_id: int) -> FolksLendingPoo
         manager_app_id=manager_app_id,
         deposit_interest_rate=deposit_interest_rate,
         deposit_interest_index=deposit_interest_index,
-        updated_at=datetime.datetime.fromtimestamp(updated_at),
+        updated_at=datetime.datetime.fromtimestamp(
+            updated_at, tz=datetime.timezone.utc
+        ),
         original_asset=original_asset,
         f_asset=f_asset,
     )
@@ -208,14 +219,14 @@ class FolksLendingPoolAdapter:
     ) -> TransactionGroup:
         suggested_params = self.algod.suggested_params()
         txs = self.build_add_liquidity_txs(
-            address, liquidity_addition.liquidity_addition, suggested_params
+            address, liquidity_addition, suggested_params
         )
         return TransactionGroup(txs)
 
     def build_add_liquidity_txs(
         self,
         address: str,
-        liquidity_addition: LiquidityAddition,
+        liquidity_addition: LendingLiquidityAddition,
         suggested_params: algosdk.transaction.SuggestedParams,
     ) -> list[algosdk.transaction.Transaction]:
         tx1 = self.primary_lending_pool.original_asset.build_transfer_tx(
@@ -459,7 +470,7 @@ class FolksLendingPoolAdapter:
         tx1 = algosdk.transaction.PaymentTxn(
             sender=address,
             receiver=self.escrow_address,
-            amt=len(asset_ids) * 100_000,
+            amt=100_000 + len(asset_ids) * 100_000,
             sp=suggested_params,
         )
 

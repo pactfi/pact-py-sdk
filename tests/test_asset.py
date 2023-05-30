@@ -20,7 +20,7 @@ def test_fetch_algo():
 def test_fetch_asa():
     pact = pactsdk.PactClient(algod)
     account = new_account()
-    asset_index = create_asset(account, "JAMNIK", 10)
+    asset_index = create_asset(account, name="JAMNIK", decimals=10)
     asset = pact.fetch_asset(asset_index)
 
     assert asset.decimals == 10
@@ -53,7 +53,7 @@ def test_fetch_not_existing_asset():
 def test_opt_in_for_an_asset():
     pact = pactsdk.PactClient(algod)
     creator = new_account()
-    assetIndex = create_asset(creator, "test", 10)
+    assetIndex = create_asset(creator, name="test", decimals=10)
     asset = pact.fetch_asset(assetIndex)
 
     user = new_account()
