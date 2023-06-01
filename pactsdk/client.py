@@ -139,6 +139,15 @@ class PactClient:
         return fetch_pool_by_id(algod=self.algod, app_id=app_id)
 
     def fetch_folks_lending_pool(self, app_id: int) -> FolksLendingPool:
+        """Fetches Folks Finance lending pool that can be used in FolksLendingPoolAdapter which allows higher APR than a normal pool.
+        See :py:mod:`pactsdk.folks_lending_pool` for details.
+
+        Args:
+            app_id: The application id of the Folks Finance pool. You can find the ids here - https://docs.folks.finance/developer/contracts
+
+        Returns:
+            The Folks Finance lending pool for the given application id.
+        """
         return fetch_folks_lending_pool(self.algod, app_id)
 
     def get_folks_lending_pool_adapter(
@@ -147,6 +156,17 @@ class PactClient:
         primary_lending_pool: FolksLendingPool,
         secondary_lending_pool: FolksLendingPool,
     ) -> FolksLendingPoolAdapter:
+        """Creates the adapter object that allows composing Folks Finance lending pools with Pact pool, resulting in a higher APR.
+        See :py:mod:`pactsdk.folks_lending_pool` for details.
+
+        Args:
+            pact_pool: The Pact pool between two fAssets tokens.
+            primary_lending_pool: The Folks Finance pool for the primary fAsset.
+            secondary_lending_pool: The Folks Finance pool for the secondary fAsset.
+
+        Returns:
+            The adapter object.
+        """
         return FolksLendingPoolAdapter(
             algod=self.algod,
             app_id=self.config.folks_lending_pool_adapter_id,

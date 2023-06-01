@@ -1,3 +1,35 @@
+"""
+This module allows for composing Pact swaps and adding/removing liquidity with Folks Finance lending pools, resulting in a higher APR for liquidity providers that accommodates both, the trading APR and the lending APR.
+
+The user is not interacting with Folks Finance pools or Pact pools directly. Instead, the user is calling a global adapter contract that makes inner transactions to the other applications.
+
+The Pact pool is between two fAssets e.g. fALGO and fUSDC but the user doesn't have to be opted into those fAssets. The user interacts only with ALGO and USDC. Converting between the original assets and fAssets is hidden in the adapter contract.
+
+To add liquidity:
+ - The user deposits ALGO and USDC in the adapter contract.
+ - The user calls “pre_add_liquidity” method on the adapter.
+ - The adapter converts ALGO to fALGO and USDC to fUSDC in corresponding Folks Finance pools.
+ - The user calls “add_liquidity” method on the adapter.
+ - The adapter deposits fALGO and fUSDC in Pact pool and receives liquidity tokens in return.
+ - The adapter transfers the liquidity tokens to the user.
+
+To remove liquidity:
+ - The user deposits liquidity tokens in the adapter contract.
+ - The user calls “remove_liquidity” method on the adapter.
+ - The adapter removes liquidity from the Pact pool and receives fALGO and fUSDC in return.
+ - The user calls “post_remove_liquidity” method on the adapter.
+ - The adapter converts fALGO to ALGO and fUSDC to USDC in corresponding Folks Finance pools.
+ - The adapter transfers ALGO and USDC tokens to the user.
+
+For swap:
+ - The user deposits one of the assets in the adapter e.g. USDC.
+ - The user calls “swap” method on the adapter.
+ - The adapter converts USDC to fUSDC in a corresponding Folks Finance pool.
+ - The adapter swaps fUSDC to fALGO in a Pact pool.
+ - The adapter converts fALGO to ALGO in a corresponding Folks Finance pool.
+ - The adapter transfers ALGO to the user.
+"""
+
 import base64
 import dataclasses
 import datetime
@@ -65,12 +97,14 @@ class FolksLendingPool:
     original_asset: Asset
     f_asset: Asset
     escrow_address: str = dataclasses.field(init=False)
-    last_timestamp: Optional[int] = None
+
+    last_timestamp_override: Optional[int] = None
+    """The conversion calculations are dependant of precise timestamps. The Folks contract uses the last block timestamp for this value. The SDK, by default, uses current system time. This field allows to override the default behavior. This is needed in unit tests and normal users should leave this field as None."""
 
     def __post_init__(self):
         self.escrow_address = algosdk.logic.get_application_address(self.app_id)
 
-    def calc_deposit_interest_rate(self, timestamp: int) -> int:
+    def _calc_deposit_interest_rate(self, timestamp: int) -> int:
         dt = timestamp - int(self.updated_at.timestamp())
         return (
             self.deposit_interest_index
@@ -79,22 +113,24 @@ class FolksLendingPool:
         )
 
     def convert_deposit(self, amount: int) -> int:
-        rate = self.calc_deposit_interest_rate(self.get_last_timestamp())
+        """Calculates the amount fAsset received when depositing original asset."""
+        rate = self._calc_deposit_interest_rate(self.get_last_timestamp())
         return amount * ONE_14_DP // rate
 
     def convert_withdraw(self, amount: int, ceil=False) -> int:
-        rate = self.calc_deposit_interest_rate(self.get_last_timestamp())
+        """Calculates the amount original asset received when depositing fAsset."""
+        rate = self._calc_deposit_interest_rate(self.get_last_timestamp())
         converted = amount * rate / ONE_14_DP
         if ceil:
             return math.ceil(converted)
         return math.floor(converted)
 
     def get_last_timestamp(self) -> int:
-        return self.last_timestamp or int(datetime.datetime.now().timestamp())
+        return self.last_timestamp_override or int(datetime.datetime.now().timestamp())
 
 
 def fetch_folks_lending_pool(algod: AlgodClient, app_id: int) -> FolksLendingPool:
-    """Fetches lending pool's global state and extract the three important integers"""
+    """Fetches Folks lending pool application info from the algod, parses the global state and builds FolksLendingPool object."""
     app_info = algod.application_info(app_id)
     raw_state = app_info["params"]["global-state"]
     state = parse_app_state(raw_state)
@@ -130,10 +166,18 @@ def fetch_folks_lending_pool(algod: AlgodClient, app_id: int) -> FolksLendingPoo
 
 @dataclasses.dataclass
 class LendingLiquidityAddition:
+    """A wrapper around LiquidityAddition object that converts assets to fAssets before creating LiquidityAddition object."""
+
     lending_pool_adapter: "FolksLendingPoolAdapter"
+
     primary_asset_amount: int
+    """Amount of original primary asset deposited."""
+
     secondary_asset_amount: int
+    """Amount of original secondary asset deposited."""
+
     liquidity_addition: LiquidityAddition = dataclasses.field(init=False)
+    """Information about actual add liquidity operation on the Pact pool."""
 
     def __post_init__(self):
         self.liquidity_addition = LiquidityAddition(
@@ -150,21 +194,35 @@ class LendingLiquidityAddition:
 
 @dataclasses.dataclass
 class LendingSwap:
+    """A wrapper around Swap object that adds some lending specific information."""
+
     f_swap: Swap
+    """Information about the actual swap on the Pact pool."""
 
     asset_deposited: Asset
     asset_received: Asset
 
     amount_deposited: int
+    """Amount of original asset deposited by the user."""
+
     amount_received: int
+    """Amount of original asset received by the user."""
 
     minimum_amount_received: int
+    """Minimal amount of original asset received by the user after the slippage."""
 
     tx_fee: int
 
 
 @dataclasses.dataclass
 class FolksLendingPoolAdapter:
+    """The representation of the adapter contract.
+
+    It allows adding/removing liquidity and making swaps using a combination Pact pool and Folks Finance lending pools.
+
+    This class tries to mimic the interface of a :py:class:`pactsdk.pool.Pool` for making the above operations.
+    """
+
     algod: AlgodClient
     app_id: int
     pact_pool: Pool

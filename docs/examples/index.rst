@@ -8,3 +8,4 @@ Examples
    zap
    build_pool
    list_pools
+   folks_lending_pool

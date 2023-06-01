@@ -191,8 +191,8 @@ def make_fresh_lending_pool_testbed() -> LendingPoolAdapterTestBed:
     sign_and_send(opt_in_tx, user)
 
     last_round = get_last_round(algod)
-    primary_lending_pool.last_timestamp = last_round
-    secondary_lending_pool.last_timestamp = last_round
+    primary_lending_pool.last_timestamp_override = last_round
+    secondary_lending_pool.last_timestamp_override = last_round
 
     return LendingPoolAdapterTestBed(
         account=user,
