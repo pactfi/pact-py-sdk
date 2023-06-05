@@ -74,9 +74,7 @@ def test_lending_pool_add_and_remove_liquidity():
     tx_group = testbed.lending_pool_adapter.prepare_add_liquidity_tx_group(
         testbed.account.address, lending_liquidity_addition
     )
-
     sign_and_send(tx_group, testbed.account)
-
     testbed.lending_pool_adapter.pact_pool.update_state()
 
     # Check tokens deposited in Folks contracts.
@@ -121,12 +119,31 @@ def test_lending_pool_add_and_remove_liquidity():
         testbed.account.address, 20_000
     )
     sign_and_send(tx_group, testbed.account)
-
     testbed.lending_pool_adapter.pact_pool.update_state()
     assert (
         testbed.lending_pool_adapter.pact_pool.state.total_liquidity
         == pool_liqudity_addition.effect.minted_liquidity_tokens - 20_000
     )
+
+    # Second add liquidity.
+    old_lp = testbed.lending_pool_adapter.pact_pool.liquidity_asset.get_holding(
+        testbed.account.address
+    )
+    lending_liquidity_addition = testbed.lending_pool_adapter.prepare_add_liquidity(
+        100_000, 50_000
+    )
+    tx_group = testbed.lending_pool_adapter.prepare_add_liquidity_tx_group(
+        testbed.account.address, lending_liquidity_addition
+    )
+    sign_and_send(tx_group, testbed.account)
+    new_lp = testbed.lending_pool_adapter.pact_pool.liquidity_asset.get_holding(
+        testbed.account.address
+    )
+    assert old_lp and new_lp
+    minted_tokens = (
+        lending_liquidity_addition.liquidity_addition.effect.minted_liquidity_tokens
+    )
+    assert new_lp - old_lp == minted_tokens
 
 
 def test_lending_pool_swap_primary_exact():
