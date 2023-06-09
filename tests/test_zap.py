@@ -59,7 +59,7 @@ def test_pools_and_assets_validation():
     account = new_account()
     pact = pactsdk.PactClient(algod)
     testbed2 = make_fresh_testbed("CONSTANT_PRODUCT")
-    coin_x_index = create_asset(account, "COIN_X", 6)
+    coin_x_index = create_asset(account, name="COIN_X", decimals=6)
     coin_x = pact.fetch_asset(coin_x_index)
     with pytest.raises(
         AssertionError, match="Provided asset was not found in the pool."

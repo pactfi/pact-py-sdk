@@ -17,8 +17,8 @@ def test_stableswap_asa_to_asa():
     account = new_account()
     pact = pactsdk.PactClient(algod)
 
-    coin_a_index = create_asset(account, "COIN_A", 2)
-    coin_b_index = create_asset(account, "COIN_B", 2)
+    coin_a_index = create_asset(account, name="COIN_A", decimals=2)
+    coin_b_index = create_asset(account, name="COIN_B", decimals=2)
 
     app_id = deploy_stableswap_contract(account, coin_a_index, coin_b_index)
     pool = pact.fetch_pool_by_id(app_id=app_id)

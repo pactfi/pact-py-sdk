@@ -11,8 +11,8 @@ def test_constant_product_swap_asa_to_asa(version):
     account = new_account()
     pact = pactsdk.PactClient(algod)
 
-    coin_a_index = create_asset(account, "COIN_A", 3)
-    coin_b_index = create_asset(account, "COIN_B", 2)
+    coin_a_index = create_asset(account, name="COIN_A", decimals=3)
+    coin_b_index = create_asset(account, name="COIN_B", decimals=2)
 
     app_id = deploy_exchange(
         account, "CONSTANT_PRODUCT", coin_a_index, coin_b_index, version=version

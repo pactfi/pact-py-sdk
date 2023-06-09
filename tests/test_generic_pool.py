@@ -246,8 +246,8 @@ def test_adding_big_liquidity_to_an_empty_pool_using_split():
     account = new_account()
     pact = PactClient(algod)
 
-    coin_a_index = create_asset(account, "coinA", 0, 2**50 - 1)
-    coin_b_index = create_asset(account, "coinB", 0, 2**50 - 1)
+    coin_a_index = create_asset(account, name="coinA", decimals=0, total=2**50 - 1)
+    coin_b_index = create_asset(account, name="coinB", decimals=0, total=2**50 - 1)
 
     app_id = deploy_exchange(account, "CONSTANT_PRODUCT", coin_a_index, coin_b_index)
     pool = pact.fetch_pool_by_id(app_id)

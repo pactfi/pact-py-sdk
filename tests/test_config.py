@@ -11,6 +11,7 @@ def test_client_config():
         gas_station_id=1027956681,
         factory_constant_product_id=1072843805,
         factory_nft_constant_product_id=1076423760,
+        folks_lending_pool_adapter_id=0,
     )
     assert pactsdk.get_gas_station().app_id == 1027956681
 
@@ -20,6 +21,7 @@ def test_client_config():
         gas_station_id=1027956681,
         factory_constant_product_id=1072843805,
         factory_nft_constant_product_id=1076423760,
+        folks_lending_pool_adapter_id=0,
     )
 
     pact = pactsdk.PactClient(algod, network="testnet")
@@ -28,6 +30,7 @@ def test_client_config():
         gas_station_id=156575978,
         factory_constant_product_id=166540424,
         factory_nft_constant_product_id=190269485,
+        folks_lending_pool_adapter_id=227360452,
     )
 
     pact = pactsdk.PactClient(algod, network="dev")
@@ -36,6 +39,7 @@ def test_client_config():
         gas_station_id=0,
         factory_constant_product_id=0,
         factory_nft_constant_product_id=0,
+        folks_lending_pool_adapter_id=0,
     )
 
     pact = pactsdk.PactClient(algod, api_url="overwritten_url")
@@ -44,6 +48,7 @@ def test_client_config():
         gas_station_id=1027956681,
         factory_constant_product_id=1072843805,
         factory_nft_constant_product_id=1076423760,
+        folks_lending_pool_adapter_id=0,
     )
 
     pact = pactsdk.PactClient(algod, network="dev", factory_constant_product_id=123)
@@ -52,4 +57,5 @@ def test_client_config():
         gas_station_id=0,
         factory_constant_product_id=123,
         factory_nft_constant_product_id=0,
+        folks_lending_pool_adapter_id=0,
     )

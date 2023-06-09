@@ -14,4 +14,5 @@ pactsdk
    stableswap_calculator
    exceptions
    factories
+   folks_lending_pool
    config

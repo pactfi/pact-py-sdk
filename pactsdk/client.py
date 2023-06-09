@@ -25,6 +25,11 @@ from pactsdk.farming.farming_client import PactFarmingClient
 from .asset import Asset, fetch_asset_by_index
 from .config import Config, Network, get_config
 from .factories import ConstantProductFactory, get_pool_factory
+from .folks_lending_pool import (
+    FolksLendingPool,
+    FolksLendingPoolAdapter,
+    fetch_folks_lending_pool,
+)
 from .gas_station import get_gas_station, set_gas_station
 from .pool import (
     ListPoolsParams,
@@ -132,6 +137,43 @@ class PactClient:
             The pool for the application id.
         """
         return fetch_pool_by_id(algod=self.algod, app_id=app_id)
+
+    def fetch_folks_lending_pool(self, app_id: int) -> FolksLendingPool:
+        """Fetches Folks Finance lending pool that can be used in FolksLendingPoolAdapter which allows higher APR than a normal pool.
+        See :py:mod:`pactsdk.folks_lending_pool` for details.
+
+        Args:
+            app_id: The application id of the Folks Finance pool. You can find the ids here - https://docs.folks.finance/developer/contracts
+
+        Returns:
+            The Folks Finance lending pool for the given application id.
+        """
+        return fetch_folks_lending_pool(self.algod, app_id)
+
+    def get_folks_lending_pool_adapter(
+        self,
+        pact_pool: Pool,
+        primary_lending_pool: FolksLendingPool,
+        secondary_lending_pool: FolksLendingPool,
+    ) -> FolksLendingPoolAdapter:
+        """Creates the adapter object that allows composing Folks Finance lending pools with Pact pool, resulting in a higher APR.
+        See :py:mod:`pactsdk.folks_lending_pool` for details.
+
+        Args:
+            pact_pool: The Pact pool between two fAssets tokens.
+            primary_lending_pool: The Folks Finance pool for the primary fAsset.
+            secondary_lending_pool: The Folks Finance pool for the secondary fAsset.
+
+        Returns:
+            The adapter object.
+        """
+        return FolksLendingPoolAdapter(
+            algod=self.algod,
+            app_id=self.config.folks_lending_pool_adapter_id,
+            pact_pool=pact_pool,
+            primary_lending_pool=primary_lending_pool,
+            secondary_lending_pool=secondary_lending_pool,
+        )
 
     def get_constant_product_pool_factory(self) -> ConstantProductFactory:
         """Gets the constant product pool factory according to the client's configuration."""

@@ -108,6 +108,14 @@ pactsdk.factory module
    :undoc-members:
    :show-inheritance:
 
+pactsdk.folks\_lending\_pool module
+-----------------------------------
+
+.. automodule:: pactsdk.folks_lending_pool
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pactsdk.config module
 ---------------------------------
 
