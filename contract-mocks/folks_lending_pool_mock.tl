@@ -214,16 +214,16 @@ func make_empty_manager_call():
 end
 
 func convert_deposit(amount: int) int:
-    int rate = calc_deposit_interest_rate()
+    int rate = calc_deposit_interest_index()
     return btoi((itob(amount) b* itob(ONE_14_DP)) b/ itob(rate))
 end
 
 func convert_withdraw(amount: int) int:
-    int rate = calc_deposit_interest_rate()
+    int rate = calc_deposit_interest_index()
     return btoi((itob(amount) b* itob(rate)) b/ itob(ONE_14_DP))
 end
 
-func calc_deposit_interest_rate() int:
+func calc_deposit_interest_index() int:
     InterestInfo interest_info = app_global_get("i")
     # Using Round instead of LatestTimestamp for easier testing.
     bytes dt = itob(Global.Round - interest_info.updated_at)

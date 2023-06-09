@@ -104,7 +104,7 @@ class FolksLendingPool:
     def __post_init__(self):
         self.escrow_address = algosdk.logic.get_application_address(self.app_id)
 
-    def _calc_deposit_interest_rate(self, timestamp: int) -> int:
+    def _calc_deposit_interest_index(self, timestamp: int) -> int:
         dt = timestamp - int(self.updated_at.timestamp())
         return (
             self.deposit_interest_index
@@ -114,13 +114,13 @@ class FolksLendingPool:
 
     def convert_deposit(self, amount: int) -> int:
         """Calculates the amount fAsset received when depositing original asset."""
-        rate = self._calc_deposit_interest_rate(self.get_last_timestamp())
-        return amount * ONE_14_DP // rate
+        interest_index = self._calc_deposit_interest_index(self.get_last_timestamp())
+        return amount * ONE_14_DP // interest_index
 
     def convert_withdraw(self, amount: int, ceil=False) -> int:
         """Calculates the amount original asset received when depositing fAsset."""
-        rate = self._calc_deposit_interest_rate(self.get_last_timestamp())
-        converted = amount * rate / ONE_14_DP
+        interest_index = self._calc_deposit_interest_index(self.get_last_timestamp())
+        converted = amount * interest_index / ONE_14_DP
         if ceil:
             return math.ceil(converted)
         return math.floor(converted)

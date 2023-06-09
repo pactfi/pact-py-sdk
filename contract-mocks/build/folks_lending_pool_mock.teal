@@ -528,8 +528,8 @@ retsub
 // func convert_deposit(amount: int) int:
 __func__convert_deposit:
 store 15 // amount
-// int rate = calc_deposit_interest_rate() [slot 16]
-callsub __func__calc_deposit_interest_rate
+// int rate = calc_deposit_interest_index() [slot 16]
+callsub __func__calc_deposit_interest_index
 store 16 // rate
 // return btoi((itob(amount) b* itob(ONE_14_DP)) b/ itob(rate))
 load 15 // amount
@@ -546,8 +546,8 @@ retsub
 // func convert_withdraw(amount: int) int:
 __func__convert_withdraw:
 store 17 // amount
-// int rate = calc_deposit_interest_rate() [slot 18]
-callsub __func__calc_deposit_interest_rate
+// int rate = calc_deposit_interest_index() [slot 18]
+callsub __func__calc_deposit_interest_index
 store 18 // rate
 // return btoi((itob(amount) b* itob(rate)) b/ itob(ONE_14_DP))
 load 17 // amount
@@ -561,8 +561,8 @@ b/
 btoi
 retsub
 
-// func calc_deposit_interest_rate() int:
-__func__calc_deposit_interest_rate:
+// func calc_deposit_interest_index() int:
+__func__calc_deposit_interest_index:
 // InterestInfo interest_info = app_global_get("i") [slot 19]
 pushbytes "i"
 app_global_get
