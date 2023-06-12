@@ -521,7 +521,7 @@ class FolksLendingPoolAdapter:
         asset_ids: list[int],
         suggested_params: algosdk.transaction.SuggestedParams,
     ):
-        assert 0 < len(asset_ids) < 8
+        assert 0 < len(asset_ids) <= 8
 
         asset_ids = [asset_id for asset_id in asset_ids if asset_id > 0]
 
