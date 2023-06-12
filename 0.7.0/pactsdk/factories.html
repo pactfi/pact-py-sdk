@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>factories &mdash; pactsdk  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="folks_lending_pool" href="folks_lending_pool.html" />
+    <link rel="prev" title="exceptions" href="exceptions.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> pactsdk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">pactsdk</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="client.html">client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="asset.html">asset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pool.html">pool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="swap.html">swap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zap.html">zap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pool_state.html">pool_state</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transaction_group.html">transaction_group</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html">api</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pool_calculator.html">pool_calculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="constant_product_calculator.html">constant_product_calculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stableswap_calculator.html">stableswap_calculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html">exceptions</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">factories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="folks_lending_pool.html">folks_lending_pool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config.html">config</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pactsdk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">pactsdk</a></li>
+      <li class="breadcrumb-item active">factories</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/pactsdk/factories.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="factories">
+<h1>factories<a class="headerlink" href="#factories" title="Permalink to this headline"></a></h1>
+<span class="target" id="module-pactsdk.factories.base_factory"></span><dl class="py function">
+<dt class="sig sig-object py" id="pactsdk.factories.base_factory.get_contract_deploy_cost">
+<span class="sig-prename descclassname"><span class="pre">pactsdk.factories.base_factory.</span></span><span class="sig-name descname"><span class="pre">get_contract_deploy_cost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extra_pages</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_byte_slices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_uint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_algo</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.factories.base_factory.get_contract_deploy_cost" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pactsdk.factories.base_factory.PoolParams">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pactsdk.factories.base_factory.</span></span><span class="sig-name descname"><span class="pre">PoolParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">primary_asset_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secondary_asset_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fee_bps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.factories.base_factory.PoolParams" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.factories.base_factory.PoolParams.primary_asset_id">
+<span class="sig-name descname"><span class="pre">primary_asset_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.factories.base_factory.PoolParams.primary_asset_id" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.factories.base_factory.PoolParams.secondary_asset_id">
+<span class="sig-name descname"><span class="pre">secondary_asset_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.factories.base_factory.PoolParams.secondary_asset_id" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.factories.base_factory.PoolParams.fee_bps">
+<span class="sig-name descname"><span class="pre">fee_bps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.factories.base_factory.PoolParams.fee_bps" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.factories.base_factory.PoolParams.version">
+<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.factories.base_factory.PoolParams.version" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.factories.base_factory.PoolParams.abi">
+<span class="sig-name descname"><span class="pre">abi</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;algosdk.abi.array_static_type.ArrayStaticType</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#pactsdk.factories.base_factory.PoolParams.abi" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.factories.base_factory.PoolParams.as_tuple">
+<span class="sig-name descname"><span class="pre">as_tuple</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.factories.base_factory.PoolParams.as_tuple" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.factories.base_factory.PoolParams.to_box_name">
+<span class="sig-name descname"><span class="pre">to_box_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.factories.base_factory.PoolParams.to_box_name" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.factories.base_factory.PoolParams.from_box_name">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_box_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.factories.base_factory.PoolParams.from_box_name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pactsdk.factories.base_factory.PoolBuildParams">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pactsdk.factories.base_factory.</span></span><span class="sig-name descname"><span class="pre">PoolBuildParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">primary_asset_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secondary_asset_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fee_bps</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.factories.base_factory.PoolBuildParams" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.factories.base_factory.PoolBuildParams.primary_asset_id">
+<span class="sig-name descname"><span class="pre">primary_asset_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.factories.base_factory.PoolBuildParams.primary_asset_id" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.factories.base_factory.PoolBuildParams.secondary_asset_id">
+<span class="sig-name descname"><span class="pre">secondary_asset_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.factories.base_factory.PoolBuildParams.secondary_asset_id" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.factories.base_factory.PoolBuildParams.fee_bps">
+<span class="sig-name descname"><span class="pre">fee_bps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.factories.base_factory.PoolBuildParams.fee_bps" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pactsdk.factories.base_factory.FactoryState">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pactsdk.factories.base_factory.</span></span><span class="sig-name descname"><span class="pre">FactoryState</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pool_version</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allowed_fee_bps</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.factories.base_factory.FactoryState" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.factories.base_factory.FactoryState.pool_version">
+<span class="sig-name descname"><span class="pre">pool_version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.factories.base_factory.FactoryState.pool_version" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.factories.base_factory.FactoryState.allowed_fee_bps">
+<span class="sig-name descname"><span class="pre">allowed_fee_bps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pactsdk.factories.base_factory.FactoryState.allowed_fee_bps" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pactsdk.factories.base_factory.parse_global_factory_state">
+<span class="sig-prename descclassname"><span class="pre">pactsdk.factories.base_factory.</span></span><span class="sig-name descname"><span class="pre">parse_global_factory_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.factories.base_factory.parse_global_factory_state" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>raw_state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>) – The contract’s global state retrieved from algosdk.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#pactsdk.factories.base_factory.FactoryState" title="pactsdk.factories.base_factory.FactoryState"><code class="xref py py-class docutils literal notranslate"><span class="pre">FactoryState</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pactsdk.factories.base_factory.list_pools">
+<span class="sig-prename descclassname"><span class="pre">pactsdk.factories.base_factory.</span></span><span class="sig-name descname"><span class="pre">list_pools</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algod</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factory_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.factories.base_factory.list_pools" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="#pactsdk.factories.base_factory.PoolParams" title="pactsdk.factories.base_factory.PoolParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">PoolParams</span></code></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pactsdk.factories.base_factory.fetch_pool_id">
+<span class="sig-prename descclassname"><span class="pre">pactsdk.factories.base_factory.</span></span><span class="sig-name descname"><span class="pre">fetch_pool_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algod</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factory_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pool_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.factories.base_factory.fetch_pool_id" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pactsdk.factories.base_factory.PoolFactory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pactsdk.factories.base_factory.</span></span><span class="sig-name descname"><span class="pre">PoolFactory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algod</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.factories.base_factory.PoolFactory" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Abstract class for pool factories.</p>
+<p>The pool factory allows decentralization of pools creation and discoverability.
+Each pool type has a separate factory contract that deploys the pool. Every pool created by the pool factory can be trusted as a valid Pact pool.</p>
+<p>The factory ensures pools uniqueness meaning you can’t create two pools with the same parameters using a single factory contract.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.factories.base_factory.PoolFactory.algod">
+<span class="sig-name descname"><span class="pre">algod</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">algosdk.v2client.algod.AlgodClient</span></em><a class="headerlink" href="#pactsdk.factories.base_factory.PoolFactory.algod" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.factories.base_factory.PoolFactory.app_id">
+<span class="sig-name descname"><span class="pre">app_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.factories.base_factory.PoolFactory.app_id" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.factories.base_factory.PoolFactory.state">
+<span class="sig-name descname"><span class="pre">state</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pactsdk.factories.base_factory.FactoryState" title="pactsdk.factories.base_factory.FactoryState"><span class="pre">pactsdk.factories.base_factory.FactoryState</span></a></em><a class="headerlink" href="#pactsdk.factories.base_factory.PoolFactory.state" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.factories.base_factory.PoolFactory.list_pools">
+<span class="sig-name descname"><span class="pre">list_pools</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.factories.base_factory.PoolFactory.list_pools" title="Permalink to this definition"></a></dt>
+<dd><p>Lists all pools created by this factory. It works by reading the boxes created by this factory. The boxes serve as a hash map of unlimited size. The box name stores pool parameters and the box content stores pool id.</p>
+<p>This method returns only pool parameters without the application id. You have to call <cite>fetch_pool</cite> to fetch the actual pool e.g.</p>
+<p>pool_params = factory.list_pools()
+pool = factory.fetch_pool(pool_params[0])</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="#pactsdk.factories.base_factory.PoolParams" title="pactsdk.factories.base_factory.PoolParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">PoolParams</span></code></a>]</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of pool parameters.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.factories.base_factory.PoolFactory.fetch_pool_id">
+<span class="sig-name descname"><span class="pre">fetch_pool_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pool_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.factories.base_factory.PoolFactory.fetch_pool_id" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.factories.base_factory.PoolFactory.fetch_pool">
+<span class="sig-name descname"><span class="pre">fetch_pool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pool_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.factories.base_factory.PoolFactory.fetch_pool" title="Permalink to this definition"></a></dt>
+<dd><p>Fetches the pool for the given params.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>pool_params</strong> (<a class="reference internal" href="#pactsdk.factories.base_factory.PoolParams" title="pactsdk.factories.base_factory.PoolParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">PoolParams</span></code></a>) – Parameters of the pool with are looking for.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="pool.html#pactsdk.pool.Pool" title="pactsdk.pool.Pool"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pool</span></code></a>]</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A pool if pool with given parameters exists, None otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.factories.base_factory.PoolFactory.build">
+<span class="sig-name descname"><span class="pre">build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pool_build_params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.factories.base_factory.PoolFactory.build" title="Permalink to this definition"></a></dt>
+<dd><p>Deploys a new pool to the network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sender</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The address that is going to send the transactions.</p></li>
+<li><p><strong>pool_build_params</strong> (<a class="reference internal" href="#pactsdk.factories.base_factory.PoolBuildParams" title="pactsdk.factories.base_factory.PoolBuildParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">PoolBuildParams</span></code></a>) – Parameters of the pool that is going to be created.</p></li>
+<li><p><strong>signer</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<a class="reference internal" href="transaction_group.html#pactsdk.transaction_group.TransactionGroup" title="pactsdk.transaction_group.TransactionGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransactionGroup</span></code></a>], <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">SignedTransaction</span></code>]]) – A callback that allows signing the transaction.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="pool.html#pactsdk.pool.Pool" title="pactsdk.pool.Pool"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pool</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The created pool instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.factories.base_factory.PoolFactory.build_or_get">
+<span class="sig-name descname"><span class="pre">build_or_get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pool_build_params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.factories.base_factory.PoolFactory.build_or_get" title="Permalink to this definition"></a></dt>
+<dd><p>Deploys a new pool to the network if the pool with the specified params does not exist yet. Otherwise, it returns the existing pool.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sender</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The address that is going to send the transactions.</p></li>
+<li><p><strong>pool_build_params</strong> (<a class="reference internal" href="#pactsdk.factories.base_factory.PoolBuildParams" title="pactsdk.factories.base_factory.PoolBuildParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">PoolBuildParams</span></code></a>) – Parameters of the pool that is going to be created.</p></li>
+<li><p><strong>signer</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<a class="reference internal" href="transaction_group.html#pactsdk.transaction_group.TransactionGroup" title="pactsdk.transaction_group.TransactionGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransactionGroup</span></code></a>], <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">SignedTransaction</span></code>]]) – A callback that allows signing the transaction.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<a class="reference internal" href="pool.html#pactsdk.pool.Pool" title="pactsdk.pool.Pool"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pool</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>]</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The two items tuple. The first item is the created or existing pool. The second item is True if a new pool is created or False if an existing pool is returned.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.factories.base_factory.PoolFactory.build_tx_group">
+<span class="sig-name descname"><span class="pre">build_tx_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pool_build_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.factories.base_factory.PoolFactory.build_tx_group" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-pactsdk.factories.constant_product"></span><dl class="py function">
+<dt class="sig sig-object py" id="pactsdk.factories.constant_product.build_constant_product_tx_group">
+<span class="sig-prename descclassname"><span class="pre">pactsdk.factories.constant_product.</span></span><span class="sig-name descname"><span class="pre">build_constant_product_tx_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">factory_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pool_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.factories.constant_product.build_constant_product_tx_group" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="transaction_group.html#pactsdk.transaction_group.TransactionGroup" title="pactsdk.transaction_group.TransactionGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransactionGroup</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pactsdk.factories.constant_product.ConstantProductFactory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pactsdk.factories.constant_product.</span></span><span class="sig-name descname"><span class="pre">ConstantProductFactory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algod</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.factories.constant_product.ConstantProductFactory" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pactsdk.factories.base_factory.PoolFactory" title="pactsdk.factories.base_factory.PoolFactory"><code class="xref py py-class docutils literal notranslate"><span class="pre">pactsdk.factories.base_factory.PoolFactory</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.factories.constant_product.ConstantProductFactory.build_tx_group">
+<span class="sig-name descname"><span class="pre">build_tx_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pool_build_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.factories.constant_product.ConstantProductFactory.build_tx_group" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-pactsdk.factories.get_pool_factory"></span><dl class="py function">
+<dt class="sig sig-object py" id="pactsdk.factories.get_pool_factory.get_pool_factory">
+<span class="sig-prename descclassname"><span class="pre">pactsdk.factories.get_pool_factory.</span></span><span class="sig-name descname"><span class="pre">get_pool_factory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algod</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pool_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.factories.get_pool_factory.get_pool_factory" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pactsdk.factories.base_factory.PoolFactory" title="pactsdk.factories.base_factory.PoolFactory"><code class="xref py py-class docutils literal notranslate"><span class="pre">PoolFactory</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="exceptions.html" class="btn btn-neutral float-left" title="exceptions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="folks_lending_pool.html" class="btn btn-neutral float-right" title="folks_lending_pool" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Pact.fi.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

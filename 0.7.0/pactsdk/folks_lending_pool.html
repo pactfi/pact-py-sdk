@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>folks_lending_pool &mdash; pactsdk  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="config" href="config.html" />
+    <link rel="prev" title="factories" href="factories.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> pactsdk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">pactsdk</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="client.html">client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="asset.html">asset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pool.html">pool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="swap.html">swap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zap.html">zap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pool_state.html">pool_state</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transaction_group.html">transaction_group</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html">api</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pool_calculator.html">pool_calculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="constant_product_calculator.html">constant_product_calculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stableswap_calculator.html">stableswap_calculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html">exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="factories.html">factories</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">folks_lending_pool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config.html">config</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pactsdk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">pactsdk</a></li>
+      <li class="breadcrumb-item active">folks_lending_pool</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/pactsdk/folks_lending_pool.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pactsdk.folks_lending_pool">
+<span id="folks-lending-pool"></span><h1>folks_lending_pool<a class="headerlink" href="#module-pactsdk.folks_lending_pool" title="Permalink to this headline"></a></h1>
+<p>This module allows for composing Pact swaps and adding/removing liquidity with Folks Finance lending pools, resulting in a higher APR for liquidity providers that accommodates both, the trading APR and the lending APR.</p>
+<p>The user is not interacting with Folks Finance pools or Pact pools directly. Instead, the user is calling a global adapter contract that makes inner transactions to the other applications.</p>
+<p>The Pact pool is between two fAssets e.g. fALGO and fUSDC but the user doesn’t have to be opted into those fAssets. The user interacts only with ALGO and USDC. Converting between the original assets and fAssets is hidden in the adapter contract.</p>
+<dl class="simple">
+<dt>To add liquidity:</dt><dd><ul class="simple">
+<li><p>The user deposits ALGO and USDC in the adapter contract.</p></li>
+<li><p>The user calls “pre_add_liquidity” method on the adapter.</p></li>
+<li><p>The adapter converts ALGO to fALGO and USDC to fUSDC in corresponding Folks Finance pools.</p></li>
+<li><p>The user calls “add_liquidity” method on the adapter.</p></li>
+<li><p>The adapter deposits fALGO and fUSDC in Pact pool and receives liquidity tokens in return.</p></li>
+<li><p>The adapter transfers the liquidity tokens to the user.</p></li>
+</ul>
+</dd>
+<dt>To remove liquidity:</dt><dd><ul class="simple">
+<li><p>The user deposits liquidity tokens in the adapter contract.</p></li>
+<li><p>The user calls “remove_liquidity” method on the adapter.</p></li>
+<li><p>The adapter removes liquidity from the Pact pool and receives fALGO and fUSDC in return.</p></li>
+<li><p>The user calls “post_remove_liquidity” method on the adapter.</p></li>
+<li><p>The adapter converts fALGO to ALGO and fUSDC to USDC in corresponding Folks Finance pools.</p></li>
+<li><p>The adapter transfers ALGO and USDC tokens to the user.</p></li>
+</ul>
+</dd>
+<dt>For swap:</dt><dd><ul class="simple">
+<li><p>The user deposits one of the assets in the adapter e.g. USDC.</p></li>
+<li><p>The user calls “swap” method on the adapter.</p></li>
+<li><p>The adapter converts USDC to fUSDC in a corresponding Folks Finance pool.</p></li>
+<li><p>The adapter swaps fUSDC to fALGO in a Pact pool.</p></li>
+<li><p>The adapter converts fALGO to ALGO in a corresponding Folks Finance pool.</p></li>
+<li><p>The adapter transfers ALGO to the user.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPool">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pactsdk.folks_lending_pool.</span></span><span class="sig-name descname"><span class="pre">FolksLendingPool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algod</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">manager_app_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deposit_interest_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deposit_interest_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">updated_at</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">original_asset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_asset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_timestamp_override</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPool" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPool.algod">
+<span class="sig-name descname"><span class="pre">algod</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">algosdk.v2client.algod.AlgodClient</span></em><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPool.algod" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPool.app_id">
+<span class="sig-name descname"><span class="pre">app_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPool.app_id" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPool.manager_app_id">
+<span class="sig-name descname"><span class="pre">manager_app_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPool.manager_app_id" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPool.deposit_interest_rate">
+<span class="sig-name descname"><span class="pre">deposit_interest_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPool.deposit_interest_rate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPool.deposit_interest_index">
+<span class="sig-name descname"><span class="pre">deposit_interest_index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPool.deposit_interest_index" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPool.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">datetime.datetime</span></em><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPool.updated_at" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPool.original_asset">
+<span class="sig-name descname"><span class="pre">original_asset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="asset.html#pactsdk.asset.Asset" title="pactsdk.asset.Asset"><span class="pre">pactsdk.asset.Asset</span></a></em><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPool.original_asset" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPool.f_asset">
+<span class="sig-name descname"><span class="pre">f_asset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="asset.html#pactsdk.asset.Asset" title="pactsdk.asset.Asset"><span class="pre">pactsdk.asset.Asset</span></a></em><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPool.f_asset" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPool.escrow_address">
+<span class="sig-name descname"><span class="pre">escrow_address</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPool.escrow_address" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPool.last_timestamp_override">
+<span class="sig-name descname"><span class="pre">last_timestamp_override</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPool.last_timestamp_override" title="Permalink to this definition"></a></dt>
+<dd><p>The conversion calculations are dependant of precise timestamps. The Folks contract uses the last block timestamp for this value. The SDK, by default, uses current system time. This field allows to override the default behavior. This is needed in unit tests and normal users should leave this field as None.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPool.convert_deposit">
+<span class="sig-name descname"><span class="pre">convert_deposit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amount</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPool.convert_deposit" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the amount fAsset received when depositing original asset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPool.convert_withdraw">
+<span class="sig-name descname"><span class="pre">convert_withdraw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amount</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ceil</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPool.convert_withdraw" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the amount original asset received when depositing fAsset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPool.get_last_timestamp">
+<span class="sig-name descname"><span class="pre">get_last_timestamp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPool.get_last_timestamp" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.fetch_folks_lending_pool">
+<span class="sig-prename descclassname"><span class="pre">pactsdk.folks_lending_pool.</span></span><span class="sig-name descname"><span class="pre">fetch_folks_lending_pool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algod</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.folks_lending_pool.fetch_folks_lending_pool" title="Permalink to this definition"></a></dt>
+<dd><p>Fetches Folks lending pool application info from the algod, parses the global state and builds FolksLendingPool object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pactsdk.folks_lending_pool.FolksLendingPool" title="pactsdk.folks_lending_pool.FolksLendingPool"><code class="xref py py-class docutils literal notranslate"><span class="pre">FolksLendingPool</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.LendingLiquidityAddition">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pactsdk.folks_lending_pool.</span></span><span class="sig-name descname"><span class="pre">LendingLiquidityAddition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lending_pool_adapter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primary_asset_amount</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secondary_asset_amount</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.folks_lending_pool.LendingLiquidityAddition" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A wrapper around LiquidityAddition object that converts assets to fAssets before creating LiquidityAddition object.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.LendingLiquidityAddition.lending_pool_adapter">
+<span class="sig-name descname"><span class="pre">lending_pool_adapter</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pactsdk.folks_lending_pool.FolksLendingPoolAdapter" title="pactsdk.folks_lending_pool.FolksLendingPoolAdapter"><span class="pre">pactsdk.folks_lending_pool.FolksLendingPoolAdapter</span></a></em><a class="headerlink" href="#pactsdk.folks_lending_pool.LendingLiquidityAddition.lending_pool_adapter" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.LendingLiquidityAddition.primary_asset_amount">
+<span class="sig-name descname"><span class="pre">primary_asset_amount</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.folks_lending_pool.LendingLiquidityAddition.primary_asset_amount" title="Permalink to this definition"></a></dt>
+<dd><p>Amount of original primary asset deposited.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.LendingLiquidityAddition.secondary_asset_amount">
+<span class="sig-name descname"><span class="pre">secondary_asset_amount</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.folks_lending_pool.LendingLiquidityAddition.secondary_asset_amount" title="Permalink to this definition"></a></dt>
+<dd><p>Amount of original secondary asset deposited.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.LendingLiquidityAddition.liquidity_addition">
+<span class="sig-name descname"><span class="pre">liquidity_addition</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pactsdk.add_liquidity.LiquidityAddition</span></em><a class="headerlink" href="#pactsdk.folks_lending_pool.LendingLiquidityAddition.liquidity_addition" title="Permalink to this definition"></a></dt>
+<dd><p>Information about actual add liquidity operation on the Pact pool.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.LendingSwap">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pactsdk.folks_lending_pool.</span></span><span class="sig-name descname"><span class="pre">LendingSwap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f_swap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asset_deposited</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asset_received</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amount_deposited</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amount_received</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_amount_received</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tx_fee</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.folks_lending_pool.LendingSwap" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A wrapper around Swap object that adds some lending specific information.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.LendingSwap.f_swap">
+<span class="sig-name descname"><span class="pre">f_swap</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="swap.html#pactsdk.swap.Swap" title="pactsdk.swap.Swap"><span class="pre">pactsdk.swap.Swap</span></a></em><a class="headerlink" href="#pactsdk.folks_lending_pool.LendingSwap.f_swap" title="Permalink to this definition"></a></dt>
+<dd><p>Information about the actual swap on the Pact pool.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.LendingSwap.asset_deposited">
+<span class="sig-name descname"><span class="pre">asset_deposited</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="asset.html#pactsdk.asset.Asset" title="pactsdk.asset.Asset"><span class="pre">pactsdk.asset.Asset</span></a></em><a class="headerlink" href="#pactsdk.folks_lending_pool.LendingSwap.asset_deposited" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.LendingSwap.asset_received">
+<span class="sig-name descname"><span class="pre">asset_received</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="asset.html#pactsdk.asset.Asset" title="pactsdk.asset.Asset"><span class="pre">pactsdk.asset.Asset</span></a></em><a class="headerlink" href="#pactsdk.folks_lending_pool.LendingSwap.asset_received" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.LendingSwap.amount_deposited">
+<span class="sig-name descname"><span class="pre">amount_deposited</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.folks_lending_pool.LendingSwap.amount_deposited" title="Permalink to this definition"></a></dt>
+<dd><p>Amount of original asset deposited by the user.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.LendingSwap.amount_received">
+<span class="sig-name descname"><span class="pre">amount_received</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.folks_lending_pool.LendingSwap.amount_received" title="Permalink to this definition"></a></dt>
+<dd><p>Amount of original asset received by the user.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.LendingSwap.minimum_amount_received">
+<span class="sig-name descname"><span class="pre">minimum_amount_received</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.folks_lending_pool.LendingSwap.minimum_amount_received" title="Permalink to this definition"></a></dt>
+<dd><p>Minimal amount of original asset received by the user after the slippage.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.LendingSwap.tx_fee">
+<span class="sig-name descname"><span class="pre">tx_fee</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.folks_lending_pool.LendingSwap.tx_fee" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPoolAdapter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pactsdk.folks_lending_pool.</span></span><span class="sig-name descname"><span class="pre">FolksLendingPoolAdapter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algod</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pact_pool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primary_lending_pool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secondary_lending_pool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPoolAdapter" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The representation of the adapter contract.</p>
+<p>It allows adding/removing liquidity and making swaps using a combination Pact pool and Folks Finance lending pools.</p>
+<p>This class tries to mimic the interface of a <a class="reference internal" href="pool.html#pactsdk.pool.Pool" title="pactsdk.pool.Pool"><code class="xref py py-class docutils literal notranslate"><span class="pre">pactsdk.pool.Pool</span></code></a> for making the above operations.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPoolAdapter.algod">
+<span class="sig-name descname"><span class="pre">algod</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">algosdk.v2client.algod.AlgodClient</span></em><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPoolAdapter.algod" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPoolAdapter.app_id">
+<span class="sig-name descname"><span class="pre">app_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPoolAdapter.app_id" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPoolAdapter.pact_pool">
+<span class="sig-name descname"><span class="pre">pact_pool</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pool.html#pactsdk.pool.Pool" title="pactsdk.pool.Pool"><span class="pre">pactsdk.pool.Pool</span></a></em><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPoolAdapter.pact_pool" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPoolAdapter.primary_lending_pool">
+<span class="sig-name descname"><span class="pre">primary_lending_pool</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pactsdk.folks_lending_pool.FolksLendingPool" title="pactsdk.folks_lending_pool.FolksLendingPool"><span class="pre">pactsdk.folks_lending_pool.FolksLendingPool</span></a></em><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPoolAdapter.primary_lending_pool" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPoolAdapter.secondary_lending_pool">
+<span class="sig-name descname"><span class="pre">secondary_lending_pool</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pactsdk.folks_lending_pool.FolksLendingPool" title="pactsdk.folks_lending_pool.FolksLendingPool"><span class="pre">pactsdk.folks_lending_pool.FolksLendingPool</span></a></em><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPoolAdapter.secondary_lending_pool" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPoolAdapter.escrow_address">
+<span class="sig-name descname"><span class="pre">escrow_address</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPoolAdapter.escrow_address" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPoolAdapter.original_asset_to_f_asset">
+<span class="sig-name descname"><span class="pre">original_asset_to_f_asset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_asset</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPoolAdapter.original_asset_to_f_asset" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="asset.html#pactsdk.asset.Asset" title="pactsdk.asset.Asset"><code class="xref py py-class docutils literal notranslate"><span class="pre">Asset</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPoolAdapter.f_asset_to_original_asset">
+<span class="sig-name descname"><span class="pre">f_asset_to_original_asset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f_asset</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPoolAdapter.f_asset_to_original_asset" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="asset.html#pactsdk.asset.Asset" title="pactsdk.asset.Asset"><code class="xref py py-class docutils literal notranslate"><span class="pre">Asset</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPoolAdapter.prepare_add_liquidity">
+<span class="sig-name descname"><span class="pre">prepare_add_liquidity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">primary_asset_amount</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secondary_asset_amount</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPoolAdapter.prepare_add_liquidity" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pactsdk.folks_lending_pool.LendingLiquidityAddition" title="pactsdk.folks_lending_pool.LendingLiquidityAddition"><code class="xref py py-class docutils literal notranslate"><span class="pre">LendingLiquidityAddition</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPoolAdapter.prepare_add_liquidity_tx_group">
+<span class="sig-name descname"><span class="pre">prepare_add_liquidity_tx_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">liquidity_addition</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPoolAdapter.prepare_add_liquidity_tx_group" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="transaction_group.html#pactsdk.transaction_group.TransactionGroup" title="pactsdk.transaction_group.TransactionGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransactionGroup</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPoolAdapter.build_add_liquidity_txs">
+<span class="sig-name descname"><span class="pre">build_add_liquidity_txs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">liquidity_addition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suggested_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPoolAdapter.build_add_liquidity_txs" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Transaction</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPoolAdapter.prepare_remove_liquidity_tx_group">
+<span class="sig-name descname"><span class="pre">prepare_remove_liquidity_tx_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amount</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPoolAdapter.prepare_remove_liquidity_tx_group" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="transaction_group.html#pactsdk.transaction_group.TransactionGroup" title="pactsdk.transaction_group.TransactionGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransactionGroup</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPoolAdapter.build_remove_liquidity_txs">
+<span class="sig-name descname"><span class="pre">build_remove_liquidity_txs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amount</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suggested_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPoolAdapter.build_remove_liquidity_txs" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Transaction</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPoolAdapter.prepare_swap">
+<span class="sig-name descname"><span class="pre">prepare_swap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">asset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amount</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slippage_pct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swap_for_exact</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPoolAdapter.prepare_swap" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pactsdk.folks_lending_pool.LendingSwap" title="pactsdk.folks_lending_pool.LendingSwap"><code class="xref py py-class docutils literal notranslate"><span class="pre">LendingSwap</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPoolAdapter.prepare_swap_tx_group">
+<span class="sig-name descname"><span class="pre">prepare_swap_tx_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">swap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPoolAdapter.prepare_swap_tx_group" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="transaction_group.html#pactsdk.transaction_group.TransactionGroup" title="pactsdk.transaction_group.TransactionGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransactionGroup</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPoolAdapter.build_swap_txs">
+<span class="sig-name descname"><span class="pre">build_swap_txs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">swap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suggested_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPoolAdapter.build_swap_txs" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Transaction</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPoolAdapter.prepare_opt_in_to_asset_tx_group">
+<span class="sig-name descname"><span class="pre">prepare_opt_in_to_asset_tx_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asset_ids</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPoolAdapter.prepare_opt_in_to_asset_tx_group" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="transaction_group.html#pactsdk.transaction_group.TransactionGroup" title="pactsdk.transaction_group.TransactionGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransactionGroup</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pactsdk.folks_lending_pool.FolksLendingPoolAdapter.build_opt_in_to_asset_tx_group">
+<span class="sig-name descname"><span class="pre">build_opt_in_to_asset_tx_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asset_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suggested_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.folks_lending_pool.FolksLendingPoolAdapter.build_opt_in_to_asset_tx_group" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="factories.html" class="btn btn-neutral float-left" title="factories" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="config.html" class="btn btn-neutral float-right" title="config" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Pact.fi.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
