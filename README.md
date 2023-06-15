@@ -149,7 +149,7 @@ print(swap.effect)
 
 # Let's submit the swap.
 swap_tx_group = swap.prepare_tx_group(address)
-signed_tx_group = swap_tx_group.sign_txn(private_key)
+signed_tx_group = swap_tx_group.sign(private_key)
 algod.send_transactions(signed_tx_group)
 ```
 
