@@ -59,7 +59,7 @@ if created:
 
 # Add liquidity.
 print("Adding liquidity...")
-liquidity_addition = lending_pool_adapter.prepare_add_liquidity(100_000, 100_000)
+liquidity_addition = lending_pool_adapter.prepare_add_liquidity(100_000, 100_000, 0.5)
 tx_group = lending_pool_adapter.prepare_add_liquidity_tx_group(
     address, liquidity_addition
 )

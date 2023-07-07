@@ -83,6 +83,7 @@ def add_liquidity(
     pool: pactsdk.Pool,
     primary_asset_amount=10_000,
     secondary_asset_amount=10_000,
+    slippage_pct=0.0,
 ):
     opt_in_tx = pool.liquidity_asset.prepare_opt_in_tx(account.address)
     sign_and_send(opt_in_tx, account)
@@ -90,6 +91,7 @@ def add_liquidity(
     liquidity_addition = pool.prepare_add_liquidity(
         primary_asset_amount=primary_asset_amount,
         secondary_asset_amount=secondary_asset_amount,
+        slippage_pct=slippage_pct,
     )
     add_liq_tx_group = liquidity_addition.prepare_tx_group(account.address)
     sign_and_send(add_liq_tx_group, account)

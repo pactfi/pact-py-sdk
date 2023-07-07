@@ -168,4 +168,5 @@ class Zap:
             pool=pool,
             primary_asset_amount=self.params.primary_add_liq,
             secondary_asset_amount=self.params.secondary_add_liq,
+            slippage_pct=self.slippage_pct,
         )

@@ -24,6 +24,7 @@ print(f"OptIn transaction {sent_optin_txid}")
 liquidity_addition = pool.prepare_add_liquidity(
     primary_asset_amount=1_000_000,
     secondary_asset_amount=500_000,
+    slippage_pct=0.5,
 )
 add_liq_tx_group = liquidity_addition.prepare_tx_group(address=address)
 signed_tx_group = add_liq_tx_group.sign(private_key)

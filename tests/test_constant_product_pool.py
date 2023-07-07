@@ -1,5 +1,8 @@
 from dataclasses import asdict
 
+import pytest
+from algosdk.error import AlgodHTTPError
+
 import pactsdk
 
 from .pool_utils import TestBed
@@ -37,6 +40,7 @@ def __base_e2e_scenario(testbed: TestBed):
     liquidity_addition = testbed.pool.prepare_add_liquidity(
         primary_asset_amount=100_000,
         secondary_asset_amount=100_000,
+        slippage_pct=0,
     )
     add_liq_tx_group = liquidity_addition.prepare_tx_group(
         address=testbed.account.address,
@@ -99,6 +103,66 @@ def __base_e2e_scenario(testbed: TestBed):
     assert testbed.pool.state.total_secondary > 100_000
     assert testbed.pool.state.primary_asset_price > 1
     assert testbed.pool.state.secondary_asset_price < 1
+
+
+def test_slippage_trigger_error_e2e_scenario(testbed: TestBed):
+    assert testbed.pool.state == pactsdk.PoolState(
+        total_liquidity=0,
+        total_primary=0,
+        total_secondary=0,
+        primary_asset_price=0,
+        secondary_asset_price=0,
+    )
+
+    # Opt in for liquidity asset.
+    liq_opt_in_tx = testbed.pool.liquidity_asset.prepare_opt_in_tx(
+        testbed.account.address
+    )
+    sign_and_send(liq_opt_in_tx, testbed.account)
+
+    # Add liquidity.
+    liquidity_addition = testbed.pool.prepare_add_liquidity(
+        primary_asset_amount=100_000,
+        secondary_asset_amount=100_000,
+        slippage_pct=0,
+    )
+    add_liq_tx_group = liquidity_addition.prepare_tx_group(
+        address=testbed.account.address,
+    )
+    assert add_liq_tx_group.group_id
+    assert len(add_liq_tx_group.transactions) == 3
+    sign_and_send(add_liq_tx_group, testbed.account)
+    testbed.pool.update_state()
+
+    # Second add liquidity that should fail when executed after swap.
+    second_liquidity_addition = testbed.pool.prepare_add_liquidity(
+        primary_asset_amount=50_000,
+        secondary_asset_amount=50_000,
+        slippage_pct=0,
+    )
+
+    # Swap algo.
+    algo_swap = testbed.pool.prepare_swap(
+        asset=testbed.algo,
+        amount=20_000,
+        slippage_pct=2,
+    )
+    algo_swap_tx_group = algo_swap.prepare_tx_group(testbed.account.address)
+    assert len(algo_swap_tx_group.transactions) == 2
+    sign_and_send(algo_swap_tx_group, testbed.account)
+    testbed.pool.update_state()
+    assert testbed.pool.state.total_primary > 100_000
+    assert testbed.pool.state.total_secondary < 100_000
+
+    # Execute add liquidity after changing ratio in pool.
+    failing_add_liq_tx_group = second_liquidity_addition.prepare_tx_group(
+        address=testbed.account.address,
+    )
+    assert len(failing_add_liq_tx_group.transactions) == 3
+    with pytest.raises(
+        AlgodHTTPError, match="logic eval error: - would result negative."
+    ):
+        sign_and_send(failing_add_liq_tx_group, testbed.account)
 
 
 def test_constant_product_pool_parsing_state(testbed: TestBed):

@@ -69,7 +69,7 @@ def test_lending_pool_add_and_remove_liquidity():
 
     # Add liquidity
     lending_liquidity_addition = testbed.lending_pool_adapter.prepare_add_liquidity(
-        100_000, 50_000
+        100_000, 50_000, 0
     )
     tx_group = testbed.lending_pool_adapter.prepare_add_liquidity_tx_group(
         testbed.account.address, lending_liquidity_addition
@@ -130,7 +130,7 @@ def test_lending_pool_add_and_remove_liquidity():
         testbed.account.address
     )
     lending_liquidity_addition = testbed.lending_pool_adapter.prepare_add_liquidity(
-        100_000, 50_000
+        100_000, 50_000, 0
     )
     tx_group = testbed.lending_pool_adapter.prepare_add_liquidity_tx_group(
         testbed.account.address, lending_liquidity_addition

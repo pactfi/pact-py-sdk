@@ -41,6 +41,7 @@ def test_stableswap_pool_e2e_scenario():
     liquidity_addition = pool.prepare_add_liquidity(
         primary_asset_amount=100_000_000,
         secondary_asset_amount=100_000_000,
+        slippage_pct=0,
     )
     add_liq_tx_group = liquidity_addition.prepare_tx_group(address=account.address)
     assert add_liq_tx_group.group_id
