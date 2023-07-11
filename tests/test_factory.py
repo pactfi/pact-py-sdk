@@ -74,7 +74,7 @@ def test_factory_deploy_constant_product_pool(pact: pactsdk.PactClient, admin: A
     opt_in_tx = pool.liquidity_asset.prepare_opt_in_tx(admin.address)
     algod.send_transaction(opt_in_tx.sign(admin.private_key))
 
-    liquidity_addition = pool.prepare_add_liquidity(1000, 2000)
+    liquidity_addition = pool.prepare_add_liquidity(1000, 2000, 0)
     tx_group = pool.prepare_add_liquidity_tx_group(admin.address, liquidity_addition)
     algod.send_transactions(tx_group.sign(admin.private_key))
 
@@ -126,7 +126,7 @@ def test_factory_deploy_nft_constant_product_pool(
     opt_in_tx = pool.liquidity_asset.prepare_opt_in_tx(admin.address)
     algod.send_transaction(opt_in_tx.sign(admin.private_key))
 
-    liquidity_addition = pool.prepare_add_liquidity(10_000, 500)
+    liquidity_addition = pool.prepare_add_liquidity(10_000, 500, 0)
     tx_group = pool.prepare_add_liquidity_tx_group(admin.address, liquidity_addition)
     algod.send_transactions(tx_group.sign(admin.private_key))
 

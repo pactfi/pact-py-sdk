@@ -67,6 +67,7 @@ def test_add_liquidity_with_empty_pool_add_equal_liquidity(pool_type: PoolType):
     liquidity_addition = testbed.pool.prepare_add_liquidity(
         primary_asset_amount=primary_asset_amount,
         secondary_asset_amount=secondary_asset_amount,
+        slippage_pct=0,
     )
 
     assert_add_liquidity(liquidity_addition, testbed.account)
@@ -83,6 +84,7 @@ def test_add_liquidity_empty_pool_add_not_equal_liquidity(pool_type: PoolType):
     liquidity_addition = testbed.pool.prepare_add_liquidity(
         primary_asset_amount=primary_asset_amount,
         secondary_asset_amount=secondary_asset_amount,
+        slippage_pct=0,
     )
 
     assert_add_liquidity(liquidity_addition, testbed.account)
@@ -99,6 +101,7 @@ def test_add_liquiidty_not_an_empty_pool_add_equal_liquidity(pool_type: PoolType
     liquidity_addition = testbed.pool.prepare_add_liquidity(
         primary_asset_amount=primary_asset_amount,
         secondary_asset_amount=secondary_asset_amount,
+        slippage_pct=0,
     )
 
     assert_add_liquidity(liquidity_addition, testbed.account)
@@ -115,6 +118,7 @@ def test_add_liquidity_not_an_empty_pool_add_not_equal_liquidity(pool_type: Pool
     liquidity_addition = testbed.pool.prepare_add_liquidity(
         primary_asset_amount=primary_asset_amount,
         secondary_asset_amount=secondary_asset_amount,
+        slippage_pct=0,
     )
 
     assert_add_liquidity(liquidity_addition, testbed.account)
@@ -130,6 +134,7 @@ def test_add_liquidity_stableswap_add_only_primary_asset():
     liquidity_addition = testbed.pool.prepare_add_liquidity(
         primary_asset_amount=primary_asset_amount,
         secondary_asset_amount=secondary_asset_amount,
+        slippage_pct=0,
     )
 
     assert_add_liquidity(liquidity_addition, testbed.account)
@@ -147,6 +152,7 @@ def test_add_liquidity_stableswap_add_only_secondary_asset():
     liquidity_addition = testbed.pool.prepare_add_liquidity(
         primary_asset_amount=primary_asset_amount,
         secondary_asset_amount=secondary_asset_amount,
+        slippage_pct=0,
     )
 
     assert_add_liquidity(liquidity_addition, testbed.account)
@@ -165,6 +171,7 @@ def test_add_liquidity_stableswap_add_with_a_positive_bonus():
     liquidity_addition = testbed.pool.prepare_add_liquidity(
         primary_asset_amount=primary_asset_amount,
         secondary_asset_amount=secondary_asset_amount,
+        slippage_pct=0,
     )
 
     assert_add_liquidity(liquidity_addition, testbed.account)
@@ -188,4 +195,5 @@ def test_add_liquidity_stableswap_pool_liquidity_too_low_to_cover_fee():
         testbed.pool.prepare_add_liquidity(
             primary_asset_amount=primary_asset_amount,
             secondary_asset_amount=secondary_asset_amount,
+            slippage_pct=0,
         )

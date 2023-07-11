@@ -111,9 +111,11 @@ class LendingPoolAdapterTestBed:
     original_asset: pactsdk.Asset
     lending_pool_adapter: pactsdk.FolksLendingPoolAdapter
 
-    def add_liquidity(self, primary_asset_amount: int, secondary_asset_amount: int):
+    def add_liquidity(
+        self, primary_asset_amount: int, secondary_asset_amount: int, slippage_pct=0.0
+    ):
         lending_liquidity_addition = self.lending_pool_adapter.prepare_add_liquidity(
-            primary_asset_amount, secondary_asset_amount
+            primary_asset_amount, secondary_asset_amount, slippage_pct
         )
         tx_group = self.lending_pool_adapter.prepare_add_liquidity_tx_group(
             self.account.address, lending_liquidity_addition

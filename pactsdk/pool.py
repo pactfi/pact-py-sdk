@@ -254,6 +254,7 @@ class Pool:
         self,
         primary_asset_amount: int,
         secondary_asset_amount: int,
+        slippage_pct: float,
     ) -> LiquidityAddition:
         """
         Creates a new LiquidityAddition instance.
@@ -268,6 +269,7 @@ class Pool:
             pool=self,
             primary_asset_amount=primary_asset_amount,
             secondary_asset_amount=secondary_asset_amount,
+            slippage_pct=slippage_pct,
         )
 
     def prepare_add_liquidity_tx_group(
@@ -305,8 +307,6 @@ class Pool:
         - deposit of asset B
         - "ADDLIQ" application call to add liquidity with the above deposits
 
-        For constant product pools only - if the pool is empty and the product of both assets is larger or equal 2**64 than an additional set of 3 transactions is built.
-
         The initial liquidity must satisfy the expression `sqrt(a * b) - 1000 > 0`.
 
         Args:
@@ -325,49 +325,26 @@ class Pool:
         primary_asset_amount = liquidity_addition.primary_asset_amount
         secondary_asset_amount = liquidity_addition.secondary_asset_amount
 
-        initial_liq_txs: list[transaction.Transaction] = []
         if self.calculator.is_empty:
             assert (
                 math.isqrt(primary_asset_amount * secondary_asset_amount) - 1000 > 0
             ), "Initial liquidity must satisfy the expression `sqrt(a * b) - 1000 > 0`"
 
-            if self.pool_type == "CONSTANT_PRODUCT":
-                # Adding initial liquidity has a limitation that the product of 2 assets must be lower than 2**64. Let's check if we can fit below the limit.
-                max_product = 2**64
-                product = primary_asset_amount * secondary_asset_amount
-                if product >= max_product:
-                    # Need to split the liquidity into two chunks.
-                    divisor = int((product / max_product) ** 0.5 + 1)
-                    primary_small_amount = primary_asset_amount // divisor
-                    secondary_small_amount = secondary_asset_amount // divisor
-
-                    primary_asset_amount -= primary_small_amount
-                    secondary_asset_amount -= secondary_small_amount
-
-                    initial_liq_txs = self.build_raw_add_liquidity_txs(
-                        address=address,
-                        primary_asset_amount=primary_small_amount,
-                        secondary_asset_amount=secondary_small_amount,
-                        suggested_params=suggested_params,
-                        fee=liquidity_addition.effect.tx_fee,
-                        note=b"Pact initial add liquidity",
-                    )
-
-        txs = self.build_raw_add_liquidity_txs(
+        return self.build_raw_add_liquidity_txs(
             address=address,
             primary_asset_amount=primary_asset_amount,
             secondary_asset_amount=secondary_asset_amount,
+            minimum_minted_liquidity_tokens=liquidity_addition.effect.minimum_minted_liquidity_tokens,
             suggested_params=suggested_params,
             fee=liquidity_addition.effect.tx_fee,
         )
-
-        return [*initial_liq_txs, *txs]
 
     def build_raw_add_liquidity_txs(
         self,
         address: str,
         primary_asset_amount: int,
         secondary_asset_amount: int,
+        minimum_minted_liquidity_tokens: int,
         suggested_params: transaction.SuggestedParams,
         fee: int,
         note=b"",
@@ -389,7 +366,7 @@ class Pool:
         tx3 = self._make_application_noop_tx(
             address=address,
             fee=fee,
-            args=["ADDLIQ", 0],
+            args=["ADDLIQ", minimum_minted_liquidity_tokens],
             extraAsset=self.liquidity_asset,
             suggested_params=suggested_params,
             note=note,

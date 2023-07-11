@@ -176,6 +176,9 @@ class LendingLiquidityAddition:
     secondary_asset_amount: int
     """Amount of original secondary asset deposited."""
 
+    slippage_pct: float
+    """The maximum amount of slippage allowed in performing the add liquidity."""
+
     liquidity_addition: LiquidityAddition = dataclasses.field(init=False)
     """Information about actual add liquidity operation on the Pact pool."""
 
@@ -188,6 +191,7 @@ class LendingLiquidityAddition:
             secondary_asset_amount=self.lending_pool_adapter.secondary_lending_pool.convert_deposit(
                 self.secondary_asset_amount
             ),
+            slippage_pct=self.slippage_pct,
         )
         self.liquidity_addition.effect.tx_fee = PRE_ADD_LIQ_FEE + ADD_LIQ_FEE
 
@@ -263,11 +267,13 @@ class FolksLendingPoolAdapter:
         self,
         primary_asset_amount: int,
         secondary_asset_amount: int,
+        slippage_pct: float,
     ) -> LendingLiquidityAddition:
         return LendingLiquidityAddition(
             lending_pool_adapter=self,
             primary_asset_amount=primary_asset_amount,
             secondary_asset_amount=secondary_asset_amount,
+            slippage_pct=slippage_pct,
         )
 
     def prepare_add_liquidity_tx_group(
