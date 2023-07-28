@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>api &mdash; pactsdk  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pool_calculator" href="pool_calculator.html" />
+    <link rel="prev" title="transaction_group" href="transaction_group.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> pactsdk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">pactsdk</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="client.html">client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="asset.html">asset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pool.html">pool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="swap.html">swap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zap.html">zap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pool_state.html">pool_state</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transaction_group.html">transaction_group</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">api</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pool_calculator.html">pool_calculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="constant_product_calculator.html">constant_product_calculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stableswap_calculator.html">stableswap_calculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html">exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="factories.html">factories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="folks_lending_pool.html">folks_lending_pool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config.html">config</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pactsdk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">pactsdk</a></li>
+      <li class="breadcrumb-item active">api</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/pactsdk/api.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pactsdk.api">
+<span id="api"></span><h1>api<a class="headerlink" href="#module-pactsdk.api" title="Permalink to this headline"></a></h1>
+<p>Module for interacting with Pact API.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pactsdk.api.ListPoolsParams">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pactsdk.api.</span></span><span class="sig-name descname"><span class="pre">ListPoolsParams</span></span><a class="headerlink" href="#pactsdk.api.ListPoolsParams" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code></p>
+<p>Parameters for calling the <code class="xref py py-func docutils literal notranslate"><span class="pre">pactsdk.pool.list_pools()</span></code> function.</p>
+<p>All keys are optional and can be omitted.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ListPoolsParams.offset">
+<span class="sig-name descname"><span class="pre">offset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.api.ListPoolsParams.offset" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ListPoolsParams.limit">
+<span class="sig-name descname"><span class="pre">limit</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.api.ListPoolsParams.limit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ListPoolsParams.is_verified">
+<span class="sig-name descname"><span class="pre">is_verified</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pactsdk.api.ListPoolsParams.is_verified" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ListPoolsParams.creator">
+<span class="sig-name descname"><span class="pre">creator</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pactsdk.api.ListPoolsParams.creator" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ListPoolsParams.primary_asset__on_chain_id">
+<span class="sig-name descname"><span class="pre">primary_asset__on_chain_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.api.ListPoolsParams.primary_asset__on_chain_id" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ListPoolsParams.secondary_asset__on_chain_id">
+<span class="sig-name descname"><span class="pre">secondary_asset__on_chain_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.api.ListPoolsParams.secondary_asset__on_chain_id" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ListPoolsParams.primary_asset__unit_name">
+<span class="sig-name descname"><span class="pre">primary_asset__unit_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pactsdk.api.ListPoolsParams.primary_asset__unit_name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ListPoolsParams.secondary_asset__unit_name">
+<span class="sig-name descname"><span class="pre">secondary_asset__unit_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pactsdk.api.ListPoolsParams.secondary_asset__unit_name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ListPoolsParams.primary_asset__name">
+<span class="sig-name descname"><span class="pre">primary_asset__name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pactsdk.api.ListPoolsParams.primary_asset__name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ListPoolsParams.secondary_asset__name">
+<span class="sig-name descname"><span class="pre">secondary_asset__name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pactsdk.api.ListPoolsParams.secondary_asset__name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pactsdk.api.ApiAsset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pactsdk.api.</span></span><span class="sig-name descname"><span class="pre">ApiAsset</span></span><a class="headerlink" href="#pactsdk.api.ApiAsset" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code></p>
+<p>Details about the liquidity pool assets returned from the asset pool.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiAsset.on_chain_id">
+<span class="sig-name descname"><span class="pre">on_chain_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pactsdk.api.ApiAsset.on_chain_id" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiAsset.decimals">
+<span class="sig-name descname"><span class="pre">decimals</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.api.ApiAsset.decimals" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiAsset.id">
+<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.api.ApiAsset.id" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiAsset.is_liquidity_token">
+<span class="sig-name descname"><span class="pre">is_liquidity_token</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pactsdk.api.ApiAsset.is_liquidity_token" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiAsset.is_verified">
+<span class="sig-name descname"><span class="pre">is_verified</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pactsdk.api.ApiAsset.is_verified" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiAsset.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pactsdk.api.ApiAsset.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiAsset.total_amount">
+<span class="sig-name descname"><span class="pre">total_amount</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pactsdk.api.ApiAsset.total_amount" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiAsset.tvl_usd">
+<span class="sig-name descname"><span class="pre">tvl_usd</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pactsdk.api.ApiAsset.tvl_usd" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiAsset.unit_name">
+<span class="sig-name descname"><span class="pre">unit_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pactsdk.api.ApiAsset.unit_name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiAsset.volume_7d">
+<span class="sig-name descname"><span class="pre">volume_7d</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pactsdk.api.ApiAsset.volume_7d" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiAsset.volume_24h">
+<span class="sig-name descname"><span class="pre">volume_24h</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pactsdk.api.ApiAsset.volume_24h" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pactsdk.api.ApiPool">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pactsdk.api.</span></span><span class="sig-name descname"><span class="pre">ApiPool</span></span><a class="headerlink" href="#pactsdk.api.ApiPool" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code></p>
+<p>The individual pool information returned from <code class="xref py py-func docutils literal notranslate"><span class="pre">pactsdk.pool.list_pools()</span></code>, this contains the basic pool information.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiPool.address">
+<span class="sig-name descname"><span class="pre">address</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pactsdk.api.ApiPool.address" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiPool.on_chain_id">
+<span class="sig-name descname"><span class="pre">on_chain_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pactsdk.api.ApiPool.on_chain_id" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiPool.confirmed_round">
+<span class="sig-name descname"><span class="pre">confirmed_round</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.api.ApiPool.confirmed_round" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiPool.creator">
+<span class="sig-name descname"><span class="pre">creator</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pactsdk.api.ApiPool.creator" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiPool.fee_amount_7d">
+<span class="sig-name descname"><span class="pre">fee_amount_7d</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pactsdk.api.ApiPool.fee_amount_7d" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiPool.fee_amount_24h">
+<span class="sig-name descname"><span class="pre">fee_amount_24h</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pactsdk.api.ApiPool.fee_amount_24h" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiPool.fee_usd_7d">
+<span class="sig-name descname"><span class="pre">fee_usd_7d</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pactsdk.api.ApiPool.fee_usd_7d" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiPool.fee_usd_24h">
+<span class="sig-name descname"><span class="pre">fee_usd_24h</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pactsdk.api.ApiPool.fee_usd_24h" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiPool.tvl_usd">
+<span class="sig-name descname"><span class="pre">tvl_usd</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pactsdk.api.ApiPool.tvl_usd" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiPool.volume_7d">
+<span class="sig-name descname"><span class="pre">volume_7d</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pactsdk.api.ApiPool.volume_7d" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiPool.volume_24h">
+<span class="sig-name descname"><span class="pre">volume_24h</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pactsdk.api.ApiPool.volume_24h" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiPool.apr_7d">
+<span class="sig-name descname"><span class="pre">apr_7d</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pactsdk.api.ApiPool.apr_7d" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiPool.id">
+<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.api.ApiPool.id" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiPool.is_verified">
+<span class="sig-name descname"><span class="pre">is_verified</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pactsdk.api.ApiPool.is_verified" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiPool.pool_asset">
+<span class="sig-name descname"><span class="pre">pool_asset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pactsdk.api.ApiAsset" title="pactsdk.api.ApiAsset"><span class="pre">pactsdk.api.ApiAsset</span></a></em><a class="headerlink" href="#pactsdk.api.ApiPool.pool_asset" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiPool.primary_asset">
+<span class="sig-name descname"><span class="pre">primary_asset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pactsdk.api.ApiAsset" title="pactsdk.api.ApiAsset"><span class="pre">pactsdk.api.ApiAsset</span></a></em><a class="headerlink" href="#pactsdk.api.ApiPool.primary_asset" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiPool.secondary_asset">
+<span class="sig-name descname"><span class="pre">secondary_asset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pactsdk.api.ApiAsset" title="pactsdk.api.ApiAsset"><span class="pre">pactsdk.api.ApiAsset</span></a></em><a class="headerlink" href="#pactsdk.api.ApiPool.secondary_asset" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pactsdk.api.ApiListPoolsResponse">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pactsdk.api.</span></span><span class="sig-name descname"><span class="pre">ApiListPoolsResponse</span></span><a class="headerlink" href="#pactsdk.api.ApiListPoolsResponse" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code></p>
+<p>Response from <code class="xref py py-func docutils literal notranslate"><span class="pre">pactsdk.pool.list_pools()</span></code> function containing pagination information and results.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiListPoolsResponse.count">
+<span class="sig-name descname"><span class="pre">count</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.api.ApiListPoolsResponse.count" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiListPoolsResponse.offset">
+<span class="sig-name descname"><span class="pre">offset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.api.ApiListPoolsResponse.offset" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiListPoolsResponse.limit">
+<span class="sig-name descname"><span class="pre">limit</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pactsdk.api.ApiListPoolsResponse.limit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pactsdk.api.ApiListPoolsResponse.results">
+<span class="sig-name descname"><span class="pre">results</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pactsdk.api.ApiPool" title="pactsdk.api.ApiPool"><span class="pre">pactsdk.api.ApiPool</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pactsdk.api.ApiListPoolsResponse.results" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pactsdk.api.list_pools">
+<span class="sig-prename descclassname"><span class="pre">pactsdk.api.</span></span><span class="sig-name descname"><span class="pre">list_pools</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pact_api_url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pactsdk.api.list_pools" title="Permalink to this definition"></a></dt>
+<dd><p>Finds all the pools that match the pool options passed in.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pact_api_url</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The API URL to query the list of pools.</p></li>
+<li><p><strong>params</strong> (<a class="reference internal" href="#pactsdk.api.ListPoolsParams" title="pactsdk.api.ListPoolsParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">ListPoolsParams</span></code></a>) – Dict of params for querying the pools.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#pactsdk.api.ApiListPoolsResponse" title="pactsdk.api.ApiListPoolsResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">ApiListPoolsResponse</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Pool data for all pools in the Pact that meets the pool options.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="transaction_group.html" class="btn btn-neutral float-left" title="transaction_group" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pool_calculator.html" class="btn btn-neutral float-right" title="pool_calculator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Pact.fi.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
