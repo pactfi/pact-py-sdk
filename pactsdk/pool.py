@@ -128,11 +128,11 @@ def get_app_ids_from_assets(
         List of asset ids.
     """
     params: ListPoolsParams = {
-        "primary_asset__algoid": primary_asset_index,
-        "secondary_asset__algoid": secondary_asset_index,
+        "primary_asset__on_chain_id": primary_asset_index,
+        "secondary_asset__on_chain_id": secondary_asset_index,
     }
     data = list_pools(pact_api_url, params)
-    return [int(pool["appid"]) for pool in data["results"]]
+    return [int(pool["on_chain_id"]) for pool in data["results"]]
 
 
 @dataclass

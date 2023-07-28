@@ -16,8 +16,8 @@ class ListPoolsParams(TypedDict, total=False):
     limit: int
     is_verified: str
     creator: str
-    primary_asset__algoid: int
-    secondary_asset__algoid: int
+    primary_asset__on_chain_id: int
+    secondary_asset__on_chain_id: int
     primary_asset__unit_name: str
     secondary_asset__unit_name: str
     primary_asset__name: str
@@ -27,7 +27,7 @@ class ListPoolsParams(TypedDict, total=False):
 class ApiAsset(TypedDict):
     """Details about the liquidity pool assets returned from the asset pool."""
 
-    algoid: str
+    on_chain_id: str
     decimals: int
     id: int
     is_liquidity_token: bool
@@ -44,7 +44,7 @@ class ApiPool(TypedDict):
     """The individual pool information returned from :py:func:`pactsdk.pool.list_pools`, this contains the basic pool information."""
 
     address: str
-    appid: str
+    on_chain_id: str
     confirmed_round: int
     creator: str
     fee_amount_7d: str

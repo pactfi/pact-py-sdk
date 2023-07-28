@@ -15,9 +15,9 @@ def test_listing_pools():
     mocked_api_data: dict = {
         "results": [
             {
-                "appid": "2",
-                "primary_asset": {"algoid": "0"},
-                "secondary_asset": {"algoid": "1"},
+                "on_chain_id": "2",
+                "primary_asset": {"on_chain_id": "0"},
+                "secondary_asset": {"on_chain_id": "1"},
             },
         ],
     }
@@ -37,20 +37,20 @@ def test_fetching_pools_by_assets(testbed: TestBed):
     mocked_api_data: dict = {
         "results": [
             {
-                "appid": str(testbed.pool.app_id),
+                "on_chain_id": str(testbed.pool.app_id),
                 "primary_asset": {
-                    "algoid": str(testbed.pool.primary_asset.index),
+                    "on_chain_id": str(testbed.pool.primary_asset.index),
                 },
                 "secondary_asset": {
-                    "algoid": str(testbed.pool.secondary_asset.index),
+                    "on_chain_id": str(testbed.pool.secondary_asset.index),
                 },
             },
         ],
     }
 
     qs_params = {
-        "primary_asset__algoid": str(testbed.pool.primary_asset.index),
-        "secondary_asset__algoid": str(testbed.pool.secondary_asset.index),
+        "primary_asset__on_chain_id": str(testbed.pool.primary_asset.index),
+        "secondary_asset__on_chain_id": str(testbed.pool.secondary_asset.index),
     }
 
     responses.add(
@@ -84,20 +84,20 @@ def test_fetching_pools_by_assets_with_reversed_assets(testbed: TestBed):
     mocked_api_data: dict = {
         "results": [
             {
-                "appid": str(testbed.pool.app_id),
+                "on_chain_id": str(testbed.pool.app_id),
                 "primary_asset": {
-                    "algoid": str(testbed.pool.primary_asset.index),
+                    "on_chain_id": str(testbed.pool.primary_asset.index),
                 },
                 "secondary_asset": {
-                    "algoid": str(testbed.pool.secondary_asset.index),
+                    "on_chain_id": str(testbed.pool.secondary_asset.index),
                 },
             },
         ],
     }
 
     qs_params = {
-        "primary_asset__algoid": str(testbed.pool.primary_asset.index),
-        "secondary_asset__algoid": str(testbed.pool.secondary_asset.index),
+        "primary_asset__on_chain_id": str(testbed.pool.primary_asset.index),
+        "secondary_asset__on_chain_id": str(testbed.pool.secondary_asset.index),
     }
 
     responses.add(
@@ -131,29 +131,29 @@ def test_fetching_pools_by_assets_multiple_results(testbed: TestBed):
     mocked_api_data: dict = {
         "results": [
             {
-                "appid": str(testbed.pool.app_id),
+                "on_chain_id": str(testbed.pool.app_id),
                 "primary_asset": {
-                    "algoid": str(testbed.pool.primary_asset.index),
+                    "on_chain_id": str(testbed.pool.primary_asset.index),
                 },
                 "secondary_asset": {
-                    "algoid": str(testbed.pool.secondary_asset.index),
+                    "on_chain_id": str(testbed.pool.secondary_asset.index),
                 },
             },
             {
-                "appid": str(second_app_id),
+                "on_chain_id": str(second_app_id),
                 "primary_asset": {
-                    "algoid": str(testbed.pool.primary_asset.index),
+                    "on_chain_id": str(testbed.pool.primary_asset.index),
                 },
                 "secondary_asset": {
-                    "algoid": str(testbed.pool.secondary_asset.index),
+                    "on_chain_id": str(testbed.pool.secondary_asset.index),
                 },
             },
         ],
     }
 
     qs_params = {
-        "primary_asset__algoid": str(testbed.pool.primary_asset.index),
-        "secondary_asset__algoid": str(testbed.pool.secondary_asset.index),
+        "primary_asset__on_chain_id": str(testbed.pool.primary_asset.index),
+        "secondary_asset__on_chain_id": str(testbed.pool.secondary_asset.index),
     }
 
     responses.add(
@@ -189,8 +189,8 @@ def test_fetching_pools_by_assets_not_existing_pool(testbed: TestBed):
     mocked_api_data: dict = {"results": []}  # no pool returned
 
     qs_params = {
-        "primary_asset__algoid": str(testbed.pool.primary_asset.index),
-        "secondary_asset__algoid": str(testbed.pool.secondary_asset.index),
+        "primary_asset__on_chain_id": str(testbed.pool.primary_asset.index),
+        "secondary_asset__on_chain_id": str(testbed.pool.secondary_asset.index),
     }
 
     responses.add(
